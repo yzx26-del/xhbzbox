@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>声轨档案 · 音乐史CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ─────────────────────────────────── TOKENS */
+:root{
+  --bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--bg4:#e8e8e8;
+  --line:#e0e0e0;--line2:#c8c8c8;
+  --t1:#0a0a0a;--t2:#444;--t3:#888;--t4:#bbb;
+  --inv:#0a0a0a;--inv-t:#fff;
+  --ok:#1a7a3c;--warn:#b7860b;--danger:#c0392b;--info:#1a5fa0;
+  --sw:220px;--th:48px;
+  --serif:'Noto Serif SC',serif;--sans:'Noto Sans SC',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);font-size:13px;line-height:1.5}
+
+/* ─────────────────────────────────── TOPBAR */
+.topbar{height:var(--th);position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:12px}
+.logo{font-family:var(--serif);font-size:16px;font-weight:700;letter-spacing:.02em;white-space:nowrap;display:flex;align-items:baseline;gap:8px}
+.logo-sub{font-family:var(--mono);font-size:9px;color:var(--t4);letter-spacing:.12em;text-transform:uppercase}
+.vl{width:1px;height:20px;background:var(--line);flex-shrink:0}
+.sw-wrap{flex:1;max-width:400px;position:relative}
+.sw-wrap input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:6px 12px 6px 32px;color:var(--t1);font-size:12px;font-family:var(--sans);outline:none;transition:border-color .15s}
+.sw-wrap input:focus{border-color:var(--t1)}
+.sw-wrap input::placeholder{color:var(--t4)}
+.sw-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t4);font-size:15px}
+.tr{display:flex;gap:6px;margin-left:auto;align-items:center}
+.ib{display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 10px;gap:5px;background:transparent;border:1px solid var(--line);border-radius:3px;cursor:pointer;font-size:12px;font-family:var(--sans);color:var(--t2);transition:all .12s;white-space:nowrap}
+.ib:hover{border-color:var(--t1);color:var(--t1)}
+.ib.solid{background:var(--t1);color:#fff;border-color:var(--t1)}
+.ib.solid:hover{background:#333}
+.ib.danger{background:#fdf0f0;color:var(--danger);border-color:#f0c8c8}
+.ib i{font-size:14px}
+.ib-sq{width:30px;padding:0}
+
+/* ─────────────────────────────────── SHELL */
+.shell{display:flex;margin-top:var(--th);min-height:calc(100vh - var(--th))}
+
+/* ─────────────────────────────────── SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;position:fixed;top:var(--th);bottom:0;left:0;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.ns{padding:14px 0 8px;border-bottom:1px solid var(--line)}
+.nl{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);padding:0 16px 6px}
+.ni{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;color:var(--t2);font-size:12px;transition:all .12s;position:relative}
+.ni:hover{color:var(--t1);background:var(--bg2)}
+.ni.on{color:var(--t1);font-weight:500;background:var(--bg2)}
+.ni.on::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--t1);border-radius:0 2px 2px 0}
+.ni i{font-size:15px;flex-shrink:0}
+.nb{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:600;background:var(--bg3);color:var(--t3);padding:1px 5px;border-radius:2px}
+.nb.red{background:#fdf0f0;color:var(--danger)}
+.sidebar-foot{padding:12px 16px;border-top:1px solid var(--line);margin-top:auto}
+.ucard{display:flex;align-items:center;gap:8px;padding:4px;border-radius:3px;cursor:pointer}
+.ucard:hover{background:var(--bg2)}
+.ava{width:28px;height:28px;border-radius:50%;background:var(--t1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.uinfo p{font-size:12px;font-weight:500}
+.uinfo span{font-size:10px;color:var(--t4)}
+
+/* ─────────────────────────────────── MAIN */
+.main{margin-left:var(--sw);flex:1;overflow-y:auto;overflow-x:hidden}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--line)}
+.page{display:none;padding:28px 32px;max-width:1200px}
+.page.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.on>*{animation:up .2s ease both}
+.page.on>*:nth-child(1){animation-delay:.02s}
+.page.on>*:nth-child(2){animation-delay:.05s}
+.page.on>*:nth-child(3){animation-delay:.08s}
+.page.on>*:nth-child(4){animation-delay:.11s}
+
+/* ─────────────────────────────────── PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
+.ptitle{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:3px}
+.psub{font-size:12px;color:var(--t3)}
+.ph-r{display:flex;gap:6px;flex-shrink:0;align-items:flex-start}
+
+/* ─────────────────────────────────── STATS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:24px}
+.sc{background:var(--bg);padding:16px 18px}
+.sc-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--t4);margin-bottom:8px}
+.sc-val{font-family:var(--mono);font-size:28px;font-weight:600;line-height:1}
+.sc-sub{font-size:11px;color:var(--t3);margin-top:4px}
+.ok{color:var(--ok)}.warn-c{color:var(--warn)}.red{color:var(--danger)}.info-c{color:var(--info)}
+
+/* ─────────────────────────────────── SECTION */
+.sec{margin-bottom:24px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.sh-t{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.sh-t i{color:var(--t3);font-size:15px}
+.sh-a{font-size:11px;color:var(--t3);cursor:pointer;font-family:var(--mono)}
+.sh-a:hover{color:var(--t1)}
+
+/* ─────────────────────────────────── TABLE */
+.tw{border:1px solid var(--line);border-radius:4px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--bg2);border-bottom:1px solid var(--line)}
+th{padding:8px 14px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--t2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s;cursor:pointer}
+tbody tr:hover{background:var(--bg2)}
+.td1{color:var(--t1)!important;font-weight:500}
+.tdm{font-family:var(--mono);font-size:11px}
+
+/* ─────────────────────────────────── BADGE */
+.badge{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 6px;border-radius:2px;white-space:nowrap}
+.b-def{background:var(--bg3);color:var(--t3)}
+.b-inv{background:var(--t1);color:#fff}
+.b-ok{background:#edf7f1;color:var(--ok)}
+.b-warn{background:#fdf8ec;color:var(--warn)}
+.b-danger{background:#fdf0f0;color:var(--danger)}
+.b-info{background:#eef4fd;color:var(--info)}
+
+/* ─────────────────────────────────── TAG */
+.tag{display:inline-flex;background:var(--bg2);border:1px solid var(--line);color:var(--t3);font-size:11px;padding:2px 8px;border-radius:2px;cursor:pointer;transition:all .12s;font-family:var(--mono)}
+.tag:hover,.tag.on{background:var(--t1);color:#fff;border-color:var(--t1)}
+
+/* ─────────────────────────────────── GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+/* ─────────────────────────────────── PROJECT CARDS */
+.pcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.pc{background:var(--bg);padding:16px;cursor:pointer;transition:background .12s;position:relative}
+.pc:hover{background:var(--bg2)}
+.pc-mark{position:absolute;top:0;left:0;bottom:0;width:2px}
+.pm-film{background:var(--t1)}.pm-game{background:var(--t3)}.pm-album{background:var(--t4)}.pm-tv{background:#888}.pm-doc{background:#ccc}
+.pc-type{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.pc-name{font-family:var(--serif);font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px}
+.pc-meta{font-size:11px;color:var(--t4);margin-bottom:12px}
+.pc-stats{display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--line)}
+.pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
+
+/* ─────────────────────────────────── TIMELINE */
+.mwrap{overflow-x:auto}
+.mwrap::-webkit-scrollbar{height:4px}
+.mwrap::-webkit-scrollbar-thumb{background:var(--line)}
+.mtable{min-width:1000px;border-collapse:collapse;width:100%;font-size:11px}
+.mtable th{background:var(--bg2);padding:7px 12px;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--line);white-space:nowrap}
+.mtable td{border:1px solid var(--line);padding:8px 12px;vertical-align:top;color:var(--t2)}
+.mtable td:first-child{font-family:var(--mono);font-size:10px;color:var(--t1);background:var(--bg2);white-space:nowrap}
+.mtable tbody tr:hover td{background:var(--bg2)}
+.mchip{display:inline-block;background:var(--bg3);color:var(--t3);padding:1px 5px;border-radius:2px;font-family:var(--mono);font-size:9px;margin:1px;border:1px solid var(--line)}
+
+/* ─────────────────────────────────── GAME MATRIX */
+.gmtable{border-collapse:collapse;width:100%;font-size:11px;min-width:900px}
+.gmtable th{background:var(--bg2);padding:7px 10px;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--line)}
+.gmtable td{border:1px solid var(--line);padding:8px 10px;color:var(--t2);vertical-align:top}
+.gmtable td:first-child{font-weight:600;color:var(--t1);background:var(--bg2)}
+.gmtable tbody tr:hover td{background:var(--bg2)}
+.gchip{display:inline-block;padding:2px 6px;border-radius:2px;font-family:var(--mono);font-size:9px;margin:1px;border:1px solid}
+.gc-e{background:#f0f7f0;color:var(--ok);border-color:#c8e8d0}
+.gc-c{background:#fdf0f0;color:var(--danger);border-color:#f0c8c8}
+.gc-l{background:#fdf8ec;color:var(--warn);border-color:#f0e4b8}
+.gc-a{background:#eef4fd;color:var(--info);border-color:#c0d8f4}
+
+/* ─────────────────────────────────── EDITOR */
+.editor-box{border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.etb{display:flex;align-items:center;gap:2px;padding:6px 10px;background:var(--bg2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tbb{padding:3px 7px;border-radius:2px;background:none;border:1px solid transparent;cursor:pointer;font-size:11px;color:var(--t3);font-family:var(--sans);transition:all .12s}
+.tbb:hover{background:var(--bg3);color:var(--t1);border-color:var(--line)}
+.tsep{width:1px;height:14px;background:var(--line);margin:0 4px}
+.ebody{width:100%;min-height:240px;padding:18px;font-size:13px;line-height:1.9;color:var(--t1);font-family:var(--sans);outline:none;border:none;background:transparent;resize:none}
+.efoot{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--bg2);border-top:1px solid var(--line);font-family:var(--mono);font-size:9px;color:var(--t4)}
+
+/* ─────────────────────────────────── KANBAN */
+.kboard{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kcol{background:var(--bg2);border-radius:4px;border:1px solid var(--line);padding:12px}
+.kct{font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.kcard{background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:10px;margin-bottom:6px;cursor:pointer;transition:border-color .12s}
+.kcard:hover{border-color:var(--t1)}
+.kcard-t{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:6px;line-height:1.4}
+.kcard-m{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+
+/* ─────────────────────────────────── HEATMAP */
+.hgrid{display:grid;grid-template-columns:auto repeat(5,1fr);gap:2px}
+.hh{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t4);padding:4px 6px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.hrl{font-family:var(--mono);font-size:9px;color:var(--t4);padding:4px 8px;display:flex;align-items:center;white-space:nowrap}
+.hc{border-radius:2px;padding:6px 4px;text-align:center;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:600;border:1px solid;transition:opacity .15s}
+.hc:hover{opacity:.75}
+.h0{background:var(--bg2);color:var(--t4);border-color:var(--line)}
+.h1{background:#f0f0f0;color:#888;border-color:#e0e0e0}
+.h2{background:#d8d8d8;color:#555;border-color:#c0c0c0}
+.h3{background:#b0b0b0;color:#222;border-color:#909090}
+.h4{background:#0a0a0a;color:#fff;border-color:#0a0a0a}
+
+/* ─────────────────────────────────── PROGRESS */
+.pbar{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;background:var(--t1);transition:width .3s}
+
+/* ─────────────────────────────────── FLOW */
+.flow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;margin-bottom:20px}
+.fstep{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);padding:3px 7px;border-radius:2px}
+.fstep.done{color:var(--t1);background:var(--bg3)}
+.fstep.now{color:#fff;background:var(--t1)}
+.farrow{color:var(--t4);font-size:10px}
+
+/* ─────────────────────────────────── NOTICE */
+.notice{display:flex;align-items:flex-start;gap:10px;background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:3px;padding:11px 14px;font-size:12px;color:var(--t2);margin-bottom:16px}
+.notice.d{border-left-color:var(--danger)}
+.notice i{font-size:15px;flex-shrink:0;margin-top:1px;color:var(--warn)}
+.notice.d i{color:var(--danger)}
+
+/* ─────────────────────────────────── MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg);border:1px solid var(--line2);border-radius:6px;width:540px;max-height:86vh;overflow-y:auto;padding:28px;position:relative}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--line)}
+.modal-title{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:20px}
+.modal-close{position:absolute;top:14px;right:14px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:5px}
+.fi{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:8px 11px;color:var(--t1);font-size:12px;font-family:var(--sans);outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--t1)}
+.fi::placeholder{color:var(--t4)}
+select.fi{cursor:pointer}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.typsel{display:flex;gap:6px;flex-wrap:wrap}
+.to{padding:5px 12px;border-radius:3px;border:1px solid var(--line);cursor:pointer;font-size:11px;color:var(--t3);transition:all .12s;font-family:var(--mono)}
+.to.sel{border-color:var(--t1);background:var(--t1);color:#fff}
+.mfoot{display:flex;justify-content:flex-end;gap:6px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+
+/* ─────────────────────────────────── TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--t1);color:#fff;padding:10px 16px;border-radius:4px;font-size:12px;font-family:var(--mono);opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ─────────────────────────────────── LOADING */
+.loading{display:flex;align-items:center;gap:8px;color:var(--t4);font-family:var(--mono);font-size:11px;padding:24px}
+.spinner{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--t1);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─────────────────────────────────── EMPTY STATE */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;color:var(--t4);gap:10px;text-align:center}
+.empty i{font-size:32px}
+.empty p{font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ══ CONFIG BANNER (fills until user sets keys) ══ -->
+<div id="config-banner" style="display:none;position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px">
+  <div style="font-family:var(--serif);font-size:22px;font-weight:700">声轨档案 · 连接 Supabase</div>
+  <div style="font-size:13px;color:var(--t3);max-width:480px;text-align:center;line-height:1.8">
+    在 <strong>supabase.com</strong> 创建项目后，进入<br>
+    <code style="background:var(--bg2);padding:2px 6px;border-radius:3px">Project Settings → API</code>
+    复制以下两个值：
+  </div>
+  <div style="width:480px;display:flex;flex-direction:column;gap:10px">
+    <div class="fg"><label class="fl">Supabase URL</label><input class="fi" id="cfg-url" placeholder="https://xxxxxxxxxxxx.supabase.co" style="font-family:var(--mono);font-size:12px"></div>
+    <div class="fg"><label class="fl">anon / public key</label><input class="fi" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..." style="font-family:var(--mono);font-size:12px"></div>
+  </div>
+  <button class="ib solid" style="width:480px;justify-content:center;height:36px;font-size:13px" onclick="saveConfig()">
+    <i class="ti ti-plug-connected"></i>连接并进入
+  </button>
+  <div style="font-size:11px;color:var(--t4)">配置保存在浏览器本地，不会上传到任何地方</div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="logo">声轨档案<span class="logo-sub">Music CMS</span></div>
+  <div class="vl"></div>
+  <div class="sw-wrap"><i class="ti ti-search"></i><input type="text" id="gs" placeholder="搜索项目、资料、笔记…"></div>
+  <div class="tr">
+    <button class="ib ib-sq" title="重新配置" onclick="resetConfig()"><i class="ti ti-settings"></i></button>
+    <div class="vl"></div>
+    <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建项目</button>
+  </div>
+</header>
+
+<div class="shell">
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="ns">
+    <div class="nl">工作台</div>
+    <div class="ni on" onclick="go('dashboard',this)"><i class="ti ti-layout-dashboard"></i>总览</div>
+    <div class="ni" onclick="go('projects',this)"><i class="ti ti-folder"></i>项目母本<span class="nb" id="nb-projects">—</span></div>
+    <div class="ni" onclick="go('timeline',this)"><i class="ti ti-timeline"></i>时间轴矩阵</div>
+    <div class="ni" onclick="go('gamematrix',this)"><i class="ti ti-grid-dots"></i>空间状态矩阵</div>
+  </div>
+  <div class="ns">
+    <div class="nl">知识网络</div>
+    <div class="ni" onclick="go('knowledge',this)"><i class="ti ti-brain"></i>知识实体<span class="nb" id="nb-entities">—</span></div>
+    <div class="ni" onclick="go('motif',this)"><i class="ti ti-music"></i>母题对比</div>
+  </div>
+  <div class="ns">
+    <div class="nl">内容创作</div>
+    <div class="ni" onclick="go('articles',this)"><i class="ti ti-article"></i>稿件管理<span class="nb" id="nb-articles">—</span></div>
+    <div class="ni" onclick="go('editor',this)"><i class="ti ti-pencil"></i>写作台</div>
+    <div class="ni" onclick="go('assets',this)"><i class="ti ti-files"></i>资料库<span class="nb" id="nb-assets">—</span></div>
+  </div>
+  <div class="ns">
+    <div class="nl">分析运营</div>
+    <div class="ni" onclick="go('topics',this)"><i class="ti ti-chart-bar"></i>选题看板</div>
+    <div class="ni" onclick="go('copyright',this)"><i class="ti ti-license"></i>版权管理<span class="nb red" id="nb-risk">—</span></div>
+  </div>
+  <div class="sidebar-foot">
+    <div class="ucard"><div class="ava">音</div><div class="uinfo"><p>音乐史博主</p><span id="conn-status">连接中…</span></div></div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+<!-- ─── 总览 ─── -->
+<div class="page on" id="pg-dashboard">
+  <div class="ph">
+    <div><div class="ptitle">工作总览</div><div class="psub" id="dash-date">加载中…</div></div>
+    <div class="ph-r"><button class="ib" onclick="loadAll()"><i class="ti ti-refresh"></i>刷新</button></div>
+  </div>
+  <div class="srow">
+    <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val" id="st-projects">—</div><div class="sc-sub" id="st-projects-sub"></div></div>
+    <div class="sc"><div class="sc-label">知识实体</div><div class="sc-val" id="st-entities">—</div><div class="sc-sub" id="st-entities-sub"></div></div>
+    <div class="sc"><div class="sc-label">已发布稿件</div><div class="sc-val ok" id="st-published">—</div><div class="sc-sub" id="st-articles-sub"></div></div>
+    <div class="sc"><div class="sc-label">版权风险</div><div class="sc-val red" id="st-risk">—</div><div class="sc-sub">风险素材 · 待处理</div></div>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="sec">
+        <div class="sh"><div class="sh-t"><i class="ti ti-folder"></i>近期项目</div><span class="sh-a" onclick="go('projects',null)">全部 →</span></div>
+        <div class="tw" id="dash-projects"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec">
+        <div class="sh"><div class="sh-t"><i class="ti ti-article"></i>稿件流水线</div><span class="sh-a" onclick="go('articles',null)">全部 →</span></div>
+        <div class="tw" id="dash-articles"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><div class="sh-t"><i class="ti ti-alert-triangle"></i>版权提醒</div></div>
+        <div id="dash-risk"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 项目母本 ─── -->
+<div class="page" id="pg-projects">
+  <div class="ph">
+    <div><div class="ptitle">项目母本库</div><div class="psub">以媒介作品为中心的资料聚合节点</div></div>
+    <div class="ph-r">
+      <div style="display:flex;gap:5px;flex-wrap:wrap" id="proj-filter">
+        <span class="tag on" data-type="">全部</span>
+        <span class="tag" data-type="film">电影</span>
+        <span class="tag" data-type="game">游戏</span>
+        <span class="tag" data-type="album">专辑</span>
+        <span class="tag" data-type="tv">电视剧</span>
+      </div>
+      <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建</button>
+    </div>
+  </div>
+  <div id="projects-grid"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- ─── 时间轴矩阵 ─── -->
+<div class="page" id="pg-timeline">
+  <div class="ph">
+    <div><div class="ptitle">时间轴矩阵</div><div class="psub" id="tl-psub">电影项目 · 场景—音乐—资料四联标记</div></div>
+    <div class="ph-r">
+      <select class="fi" id="tl-project-select" style="width:200px;height:30px;padding:0 10px;font-size:12px" onchange="loadTimeline()"></select>
+      <button class="ib solid" onclick="openModal('timeline')"><i class="ti ti-plus"></i>添加标记</button>
+    </div>
+  </div>
+  <div class="tw mwrap">
+    <table class="mtable">
+      <thead><tr><th>时间点</th><th>节拍</th><th>场景描述</th><th>画面</th><th>配乐内容</th><th>技法标注</th><th>分析笔记</th><th></th></tr></thead>
+      <tbody id="tl-body"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>加载中…</div></td></tr></tbody>
+    </table>
+  </div>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:12px">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--t4)" id="tl-progress-text">—</span>
+    <div class="pbar" style="flex:1"><div class="pfill" id="tl-progress-bar" style="width:0"></div></div>
+  </div>
+</div>
+
+<!-- ─── 空间状态矩阵 ─── -->
+<div class="page" id="pg-gamematrix">
+  <div class="ph">
+    <div><div class="ptitle">空间状态矩阵</div><div class="psub">游戏项目 · 区域 × 玩家状态 的曲目映射</div></div>
+    <div class="ph-r">
+      <select class="fi" id="gm-project-select" style="width:200px;height:30px;padding:0 10px;font-size:12px" onchange="loadGameMatrix()"></select>
+      <button class="ib solid" onclick="openModal('gamematrix')"><i class="ti ti-plus"></i>添加区域</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <span class="gchip gc-e">■ 探索</span>
+    <span class="gchip gc-c">■ 战斗</span>
+    <span class="gchip gc-l">■ 叠加层</span>
+    <span class="gchip gc-a">■ 环境氛围</span>
+  </div>
+  <div class="tw" style="overflow-x:auto">
+    <table class="gmtable">
+      <thead><tr><th>区域 / 关卡</th><th>探索</th><th>战斗（普通）</th><th>战斗（Boss）</th><th>低血量 &lt;30%</th><th>夜间</th><th>任务完成</th></tr></thead>
+      <tbody id="gm-body"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>加载中…</div></td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── 知识实体 ─── -->
+<div class="page" id="pg-knowledge">
+  <div class="ph">
+    <div><div class="ptitle">知识实体库</div><div class="psub">作曲家 · 技法概念 · 历史时期 · 乐器 · 跨项目共享基础设施</div></div>
+    <div class="ph-r"><button class="ib solid" onclick="openModal('entity')"><i class="ti ti-plus"></i>新建实体</button></div>
+  </div>
+  <div style="display:flex;gap:5px;margin-bottom:18px" id="entity-filter">
+    <span class="tag on" data-etype="">全部</span>
+    <span class="tag" data-etype="composer">作曲家</span>
+    <span class="tag" data-etype="technique">音乐技法</span>
+    <span class="tag" data-etype="period">历史时期</span>
+    <span class="tag" data-etype="instrument">乐器</span>
+    <span class="tag" data-etype="motif">母题</span>
+  </div>
+  <div class="tw" id="entities-table"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- ─── 稿件管理 ─── -->
+<div class="page" id="pg-articles">
+  <div class="ph">
+    <div><div class="ptitle">稿件管理</div><div class="psub">完整生命周期追踪 · Kanban视图</div></div>
+    <div class="ph-r"><button class="ib solid" onclick="openModal('article')"><i class="ti ti-plus"></i>新建稿件</button></div>
+  </div>
+  <div class="flow">
+    <div class="fstep done"><i class="ti ti-check" style="font-size:10px"></i>选题</div><span class="farrow">→</span>
+    <div class="fstep done"><i class="ti ti-check" style="font-size:10px"></i>资料收集</div><span class="farrow">→</span>
+    <div class="fstep now">撰写中</div><span class="farrow">→</span>
+    <div class="fstep">事实核查</div><span class="farrow">→</span>
+    <div class="fstep">排版</div><span class="farrow">→</span>
+    <div class="fstep">已发布</div><span class="farrow">→</span>
+    <div class="fstep">归档</div>
+  </div>
+  <div class="kboard" id="articles-board"><div class="loading" style="grid-column:1/-1"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- ─── 写作台 ─── -->
+<div class="page" id="pg-editor">
+  <div class="ph">
+    <div><div class="ptitle">写作台</div><div class="psub" id="editor-psub">新建或选择稿件开始写作</div></div>
+    <div class="ph-r">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--t4);align-self:center" id="editor-saved">—</span>
+      <select class="fi" id="editor-article-select" style="width:260px;height:30px;padding:0 10px;font-size:12px" onchange="loadArticleContent()"></select>
+      <button class="ib" onclick="openModal('import')"><i class="ti ti-sparkles"></i>智能导入</button>
+      <button class="ib solid" onclick="saveArticleContent()"><i class="ti ti-device-floppy"></i>保存</button>
+    </div>
+  </div>
+  <div class="g2" style="align-items:start">
+    <div>
+      <div class="editor-box">
+        <div class="etb">
+          <button class="tbb" onclick="fmtDoc('bold')"><strong>B</strong></button>
+          <button class="tbb" onclick="fmtDoc('italic')"><em>I</em></button>
+          <div class="tsep"></div>
+          <button class="tbb" onclick="insertMd('## ')">H2</button>
+          <button class="tbb" onclick="insertMd('### ')">H3</button>
+          <button class="tbb" onclick="insertMd('> ')">引用</button>
+          <button class="tbb" onclick="insertMd('`', '`')">代码</button>
+          <div class="tsep"></div>
+          <button class="tbb" onclick="insertMd('【📎 引用音频：')">音频</button>
+          <button class="tbb" onclick="insertMd('【📎 引用视频：')">视频</button>
+          <button class="tbb" onclick="insertMd('【📎 引用乐谱：')">乐谱</button>
+        </div>
+        <textarea class="ebody" id="editor-body" rows="18" placeholder="在此开始写作…&#10;&#10;支持 Markdown 格式" oninput="onEditorInput()"></textarea>
+        <div class="efoot">
+          <span id="editor-wc">0 字</span>
+          <span>Markdown</span>
+          <span id="editor-status-label">—</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-settings"></i>稿件属性</div></div>
+      <div class="tw">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--line)">
+          <div class="fl" style="margin-bottom:5px">状态</div>
+          <select class="fi" id="editor-status" style="height:30px;padding:0 10px;font-size:12px">
+            <option value="topic">选题</option>
+            <option value="collecting">资料收集中</option>
+            <option value="writing">撰写中</option>
+            <option value="review">事实核查</option>
+            <option value="layout">排版</option>
+            <option value="published">已发布</option>
+            <option value="archived">归档</option>
+          </select>
+        </div>
+        <div style="padding:12px 14px">
+          <div class="fl" style="margin-bottom:5px">关联项目</div>
+          <select class="fi" id="editor-project" style="height:30px;padding:0 10px;font-size:12px">
+            <option value="">— 选择关联项目 —</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-devices"></i>平台衍生版本</div></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t4);padding:12px;background:var(--bg2);border:1px solid var(--line);border-radius:3px">
+          保存稿件后，可在此创建公众号版、知乎版、B站专栏版、视频脚本版等衍生版本（P1功能，即将上线）
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 资料库 ─── -->
+<div class="page" id="pg-assets">
+  <div class="ph">
+    <div><div class="ptitle">资料库</div><div class="psub">所有资料必须挂靠至项目母本或知识实体</div></div>
+    <div class="ph-r">
+      <button class="ib" onclick="openModal('asset')"><i class="ti ti-plus"></i>登记资料</button>
+      <button class="ib solid" onclick="openModal('upload')"><i class="ti ti-upload"></i>上传文件</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:5px;margin-bottom:16px" id="asset-filter">
+    <span class="tag on" data-atype="">全部</span>
+    <span class="tag" data-atype="audio">音频</span>
+    <span class="tag" data-atype="video">视频</span>
+    <span class="tag" data-atype="document">文档</span>
+    <span class="tag" data-atype="score">乐谱</span>
+    <span class="tag" data-atype="link">链接</span>
+  </div>
+  <div class="tw" id="assets-table"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- ─── 选题看板 ─── -->
+<div class="page" id="pg-topics">
+  <div class="ph">
+    <div><div class="ptitle">选题缺口看板</div><div class="psub">数据驱动的内容规划 · 高资料低稿件 = 优先选题</div></div>
+    <div class="ph-r"><button class="ib" onclick="loadTopics()"><i class="ti ti-refresh"></i>刷新</button></div>
+  </div>
+  <div id="topics-content"><div class="loading"><div class="spinner"></div>分析中…</div></div>
+</div>
+
+<!-- ─── 版权管理 ─── -->
+<div class="page" id="pg-copyright">
+  <div class="ph">
+    <div><div class="ptitle">版权与合规管理</div><div class="psub">资料版权状态追踪 · 授权到期提醒 · 风险控制</div></div>
+  </div>
+  <div class="srow">
+    <div class="sc"><div class="sc-label">安全使用</div><div class="sc-val ok" id="cp-safe">—</div><div class="sc-sub">公有领域 / CC / 自有</div></div>
+    <div class="sc"><div class="sc-label">需标注来源</div><div class="sc-val info-c" id="cp-credit">—</div><div class="sc-sub">合理使用 · 必须署名</div></div>
+    <div class="sc"><div class="sc-label">需申请授权</div><div class="sc-val warn-c" id="cp-pending">—</div><div class="sc-sub">待回复 / 授权中</div></div>
+    <div class="sc"><div class="sc-label">风险素材</div><div class="sc-val red" id="cp-risk">—</div><div class="sc-sub">⚠ 需立即处理</div></div>
+  </div>
+  <div class="tw" id="copyright-table"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- ─── 母题对比 ─── -->
+<div class="page" id="pg-motif">
+  <div class="ph">
+    <div><div class="ptitle">母题对比</div><div class="psub">同一主题在不同版本/项目中的并列分析（功能开发中）</div></div>
+  </div>
+  <div style="padding:48px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:12px;border:1px dashed var(--line);border-radius:4px">
+    母题对比播放器 · 即将上线<br>
+    <span style="font-size:10px;margin-top:8px;display:block">已在数据库建立 motifs / motif_clips 表，等待前端音频播放器接入</span>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- 新建项目 -->
+<div class="overlay" id="modal-project" onclick="closeModal('project',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('project')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">新建项目母本</div>
+    <div class="fg"><label class="fl">媒介类型</label>
+      <div class="typsel" id="proj-type-sel">
+        <div class="to sel" data-val="film">🎬 电影</div>
+        <div class="to" data-val="game">🎮 游戏</div>
+        <div class="to" data-val="tv">📺 电视剧</div>
+        <div class="to" data-val="album">🎵 专辑</div>
+        <div class="to" data-val="documentary">📻 纪录片</div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">作品名称（中文）</label><input class="fi" id="p-name" placeholder="如：星际穿越"></div>
+    <div class="fg"><label class="fl">英文名</label><input class="fi" id="p-name-en" placeholder="Interstellar"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">作曲家</label><input class="fi" id="p-composer" placeholder="汉斯·季默"></div>
+      <div class="fg"><label class="fl">导演 / 开发商</label><input class="fi" id="p-director" placeholder="克里斯托弗·诺兰"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">年份</label><input class="fi" id="p-year" type="number" placeholder="2014"></div>
+      <div class="fg"><label class="fl">发行方</label><input class="fi" id="p-publisher" placeholder="Warner Bros."></div>
+    </div>
+    <div class="fg"><label class="fl">标签（逗号分隔）</label><input class="fi" id="p-tags" placeholder="科幻,管风琴,Leitmotif"></div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('project')">取消</button>
+      <button class="ib solid" onclick="createProject()"><i class="ti ti-check"></i>创建项目</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新建知识实体 -->
+<div class="overlay" id="modal-entity" onclick="closeModal('entity',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('entity')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">新建知识实体</div>
+    <div class="fg"><label class="fl">实体类型</label>
+      <div class="typsel" id="entity-type-sel">
+        <div class="to sel" data-val="composer">作曲家</div>
+        <div class="to" data-val="technique">音乐技法</div>
+        <div class="to" data-val="period">历史时期</div>
+        <div class="to" data-val="instrument">乐器</div>
+        <div class="to" data-val="motif">母题</div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">名称</label><input class="fi" id="e-name" placeholder="如：汉斯·季默 / Leitmotif"></div>
+    <div class="fg"><label class="fl">描述</label><textarea class="fi" id="e-desc" rows="3" placeholder="简短介绍…"></textarea></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">生年（可选）</label><input class="fi" id="e-birth" type="number" placeholder="1957"></div>
+      <div class="fg"><label class="fl">卒年（可选）</label><input class="fi" id="e-death" type="number" placeholder="留空表示在世"></div>
+    </div>
+    <div class="fg"><label class="fl">标签（逗号分隔）</label><input class="fi" id="e-tags" placeholder="电影,当代,混合器"></div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('entity')">取消</button>
+      <button class="ib solid" onclick="createEntity()"><i class="ti ti-check"></i>创建实体</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新建稿件 -->
+<div class="overlay" id="modal-article" onclick="closeModal('article',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('article')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">新建稿件</div>
+    <div class="fg"><label class="fl">稿件标题</label><input class="fi" id="a-title" placeholder="如：《星际穿越》管风琴语言解析"></div>
+    <div class="fg"><label class="fl">初始状态</label>
+      <select class="fi" id="a-status" style="height:34px;padding:0 10px">
+        <option value="topic">选题</option>
+        <option value="collecting">资料收集中</option>
+        <option value="writing" selected>撰写中</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">标签（逗号分隔）</label><input class="fi" id="a-tags" placeholder="电影,汉斯·季默,技法分析"></div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('article')">取消</button>
+      <button class="ib solid" onclick="createArticle()"><i class="ti ti-check"></i>创建稿件</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新建时间轴条目 -->
+<div class="overlay" id="modal-timeline" onclick="closeModal('timeline',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('timeline')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">添加时间轴标记</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">时间码</label><input class="fi" id="tl-timecode" placeholder="00:47:15"></div>
+      <div class="fg"><label class="fl">叙事节拍</label>
+        <select class="fi" id="tl-beat" style="height:34px;padding:0 10px">
+          <option>铺垫</option><option>高潮</option><option>转折</option><option>过渡</option><option>尾声</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">场景描述</label><input class="fi" id="tl-scene" placeholder="发射升空，告别女儿"></div>
+    <div class="fg"><label class="fl">画面内容</label><input class="fi" id="tl-visuals" placeholder="火箭尾焰、女儿哭泣"></div>
+    <div class="fg"><label class="fl">配乐内容</label><input class="fi" id="tl-music" placeholder="管风琴全奏 + 弦乐泛音"></div>
+    <div class="fg"><label class="fl">技法标注（逗号分隔）</label><input class="fi" id="tl-tech" placeholder="管风琴,对位法,Leitmotif"></div>
+    <div class="fg"><label class="fl">分析笔记</label><textarea class="fi" id="tl-notes" rows="3" placeholder="低频对应"大地/引力"主题…"></textarea></div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('timeline')">取消</button>
+      <button class="ib solid" onclick="createTimelineEntry()"><i class="ti ti-check"></i>添加标记</button>
+    </div>
+  </div>
+</div>
+
+<!-- 登记资料 -->
+<div class="overlay" id="modal-asset" onclick="closeModal('asset',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('asset')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">登记资料</div>
+    <div class="fg"><label class="fl">资料名称</label><input class="fi" id="as-name" placeholder="季默专访—谈星际穿越创作理念"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">类型</label>
+        <select class="fi" id="as-type" style="height:34px;padding:0 10px">
+          <option value="audio">音频</option><option value="video">视频</option>
+          <option value="image">图片</option><option value="document">文档</option>
+          <option value="score">乐谱</option><option value="link">链接</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">版权状态</label>
+        <select class="fi" id="as-copyright" style="height:34px;padding:0 10px">
+          <option value="safe">安全使用</option><option value="credit">需标注来源</option>
+          <option value="pending">需申请授权</option><option value="risk">风险素材</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">外部链接（可选）</label><input class="fi" id="as-url" placeholder="https://…"></div>
+    <div class="fg"><label class="fl">挂靠项目</label>
+      <select class="fi" id="as-project" style="height:34px;padding:0 10px">
+        <option value="">— 选择项目 —</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">时间码/触发条件（可选）</label><input class="fi" id="as-timecode" placeholder="00:04:30 或 进入Boss房触发"></div>
+    <div class="fg"><label class="fl">版权说明（可选）</label><input class="fi" id="as-cnote" placeholder="官方CC协议 / 合理使用 / 解包文件"></div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('asset')">取消</button>
+      <button class="ib solid" onclick="createAsset()"><i class="ti ti-check"></i>登记资料</button>
+    </div>
+  </div>
+</div>
+
+<!-- 上传文件 -->
+<div class="overlay" id="modal-upload" onclick="closeModal('upload',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('upload')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">上传文件到 Supabase Storage</div>
+    <div class="fg"><label class="fl">选择文件</label>
+      <input type="file" id="upload-file" class="fi" accept="audio/*,video/*,image/*,application/pdf,.md,.txt">
+    </div>
+    <div class="fg"><label class="fl">挂靠项目</label>
+      <select class="fi" id="upload-project" style="height:34px;padding:0 10px">
+        <option value="">— 选择项目 —</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">版权状态</label>
+      <select class="fi" id="upload-copyright" style="height:34px;padding:0 10px">
+        <option value="safe">安全使用</option><option value="credit">需标注来源</option>
+        <option value="pending">需申请授权</option><option value="risk">风险素材</option>
+      </select>
+    </div>
+    <div id="upload-progress" style="display:none;margin-top:8px">
+      <div class="pbar"><div class="pfill" id="upload-pbar" style="width:0"></div></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:4px" id="upload-status">上传中…</div>
+    </div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('upload')">取消</button>
+      <button class="ib solid" onclick="uploadFile()"><i class="ti ti-upload"></i>开始上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏矩阵新建 -->
+<div class="overlay" id="modal-gamematrix" onclick="closeModal('gamematrix',event)">
+  <div class="modal">
+    <button class="ib ib-sq modal-close" onclick="closeModal('gamematrix')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">添加区域 / 关卡</div>
+    <div class="fg"><label class="fl">区域名称</label><input class="fi" id="gm-area" placeholder="宁姆格福 Limgrave"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">探索音乐</label><input class="fi" id="gm-explore" placeholder="Limgrave Theme"></div>
+      <div class="fg"><label class="fl">战斗（普通）</label><input class="fi" id="gm-combat" placeholder="Battle Normal"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Boss战</label><input class="fi" id="gm-boss" placeholder="Margit Boss"></div>
+      <div class="fg"><label class="fl">低血量叠加层</label><input class="fi" id="gm-low" placeholder="弦乐颤音叠加"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">夜间</label><input class="fi" id="gm-night" placeholder="夜晚环境音"></div>
+      <div class="fg"><label class="fl">任务完成</label><input class="fi" id="gm-clear" placeholder="Rest Theme"></div>
+    </div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('gamematrix')">取消</button>
+      <button class="ib solid" onclick="createGameMatrixEntry()"><i class="ti ti-check"></i>添加区域</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// CONFIG & SUPABASE INIT
+// ════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://gsohsckwqabejntaqgtb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzb2hzY2t3cWFiZWpudGFxZ3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzEzNTcsImV4cCI6MjA5NDMwNzM1N30.ysZsEAi6Jh-1LqXnQzjFEX_qtUayYpGW7ESR8iOw-xw';
+
+let db = null;
+let projectsCache = [];
+let articlesCache = [];
+
+function getConfig() { return { url: SUPABASE_URL, key: SUPABASE_KEY }; }
+function saveConfig() {}
+function resetConfig() {}
+
+function initDB(url, key) {
+  try {
+    const { createClient } = supabase;
+    db = createClient(url, key);
+    document.getElementById('conn-status').textContent = '已连接 Supabase';
+    loadAll();
+  } catch (e) {
+    toast('连接失败：' + e.message);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// STARTUP
+// ════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('dash-date').textContent =
+    `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 你的音乐史研究工作台`;
+
+  document.getElementById('config-banner').style.display = 'none';
+  initDB(SUPABASE_URL, SUPABASE_KEY);
+
+  // Tag filters
+  document.getElementById('proj-filter').addEventListener('click', e => {
+    const t = e.target.closest('[data-type]');
+    if (!t) return;
+    document.querySelectorAll('#proj-filter .tag').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    renderProjects(projectsCache.filter(p => !t.dataset.type || p.type === t.dataset.type));
+  });
+  document.getElementById('entity-filter').addEventListener('click', e => {
+    const t = e.target.closest('[data-etype]');
+    if (!t) return;
+    document.querySelectorAll('#entity-filter .tag').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    loadEntities(t.dataset.etype);
+  });
+  document.getElementById('asset-filter').addEventListener('click', e => {
+    const t = e.target.closest('[data-atype]');
+    if (!t) return;
+    document.querySelectorAll('#asset-filter .tag').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    loadAssets(t.dataset.atype);
+  });
+  document.getElementById('proj-type-sel').addEventListener('click', e => {
+    const t = e.target.closest('[data-val]');
+    if (!t) return;
+    document.querySelectorAll('#proj-type-sel .to').forEach(x => x.classList.remove('sel'));
+    t.classList.add('sel');
+  });
+  document.getElementById('entity-type-sel').addEventListener('click', e => {
+    const t = e.target.closest('[data-val]');
+    if (!t) return;
+    document.querySelectorAll('#entity-type-sel .to').forEach(x => x.classList.remove('sel'));
+    t.classList.add('sel');
+  });
+});
+
+// ════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════
+function go(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  const pg = document.getElementById('pg-' + id);
+  if (pg) pg.classList.add('on');
+  if (el) el.classList.add('on');
+  else document.querySelectorAll('.ni').forEach(n => {
+    if ((n.getAttribute('onclick') || '').includes("'"+id+"'")) n.classList.add('on');
+  });
+  // Lazy load
+  const loaders = {
+    projects: () => loadProjects(),
+    timeline: () => { loadProjectSelects(); loadTimeline(); },
+    gamematrix: () => { loadProjectSelects(); loadGameMatrix(); },
+    knowledge: () => loadEntities(''),
+    articles: () => loadArticles(),
+    editor: () => loadEditorSelects(),
+    assets: () => loadAssets(''),
+    topics: () => loadTopics(),
+    copyright: () => loadCopyright(),
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+// ════════════════════════════════════════════════════════
+// LOAD ALL (dashboard)
+// ════════════════════════════════════════════════════════
+async function loadAll() {
+  if (!db) return;
+  await Promise.all([loadDashProjects(), loadDashArticles(), loadDashStats(), loadDashRisk()]);
+}
+
+async function loadDashStats() {
+  const [pr, en, ar, ri] = await Promise.all([
+    db.from('projects').select('type', { count: 'exact' }),
+    db.from('knowledge_entities').select('type', { count: 'exact' }),
+    db.from('articles').select('status', { count: 'exact' }),
+    db.from('assets').select('copyright_status').eq('copyright_status','risk'),
+  ]);
+  const projects = pr.data || [];
+  const arts = ar.data || [];
+  document.getElementById('st-projects').textContent = pr.count || 0;
+  document.getElementById('st-entities').textContent = en.count || 0;
+  document.getElementById('st-published').textContent = arts.filter(a => a.status === 'published').length;
+  document.getElementById('st-risk').textContent = (ri.data || []).length;
+  document.getElementById('nb-projects').textContent = pr.count || 0;
+  document.getElementById('nb-entities').textContent = en.count || 0;
+  document.getElementById('nb-articles').textContent = ar.count || 0;
+  document.getElementById('nb-assets').textContent = '…';
+  document.getElementById('nb-risk').textContent = (ri.data || []).length;
+
+  const film = projects.filter(p => p.type==='film').length;
+  const game = projects.filter(p => p.type==='game').length;
+  const album = projects.filter(p => p.type==='album').length;
+  document.getElementById('st-projects-sub').textContent = `电影 ${film} · 游戏 ${game} · 专辑 ${album}`;
+
+  const comp = (en.data||[]).filter(e=>e.type==='composer').length;
+  const tech = (en.data||[]).filter(e=>e.type==='technique').length;
+  document.getElementById('st-entities-sub').textContent = `作曲家 ${comp} · 技法 ${tech}`;
+  document.getElementById('st-articles-sub').textContent = `共 ${ar.count||0} 篇稿件`;
+}
+
+async function loadDashProjects() {
+  const { data } = await db.from('projects').select('*').order('created_at', { ascending: false }).limit(4);
+  const el = document.getElementById('dash-projects');
+  if (!data?.length) { el.innerHTML = '<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目，点击右上角新建</p></div>'; return; }
+  el.innerHTML = data.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''" onclick="go('timeline',null)">
+      <div style="width:32px;height:32px;border-radius:3px;background:var(--bg3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${typeIcon(p.type)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;color:var(--t1)">${esc(p.name)}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${esc(p.composer||'')} · ${p.year||''} · ${typeName(p.type)}</div>
+      </div>
+      <span style="font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:2px;background:var(--bg3);color:var(--t3)">${typeName(p.type)}</span>
+    </div>`).join('');
+}
+
+async function loadDashArticles() {
+  const { data } = await db.from('articles').select('*').order('updated_at', { ascending: false }).limit(5);
+  const el = document.getElementById('dash-articles');
+  if (!data?.length) { el.innerHTML = '<div class="empty"><i class="ti ti-file-off"></i><p>暂无稿件</p></div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>稿件</th><th>状态</th><th>字数</th></tr></thead><tbody>
+    ${data.map(a => `<tr onclick="go('editor',null)">
+      <td class="td1">${esc(a.title)}</td>
+      <td>${statusBadge(a.status)}</td>
+      <td class="tdm">${a.word_count > 0 ? a.word_count.toLocaleString() : '—'}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function loadDashRisk() {
+  const { data } = await db.from('assets').select('*').eq('copyright_status','risk').limit(3);
+  const el = document.getElementById('dash-risk');
+  if (!data?.length) { el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--ok);padding:10px 0"><i class="ti ti-check" style="margin-right:4px"></i>暂无版权风险素材</div>'; return; }
+  el.innerHTML = `<div class="notice d"><i class="ti ti-alert-triangle"></i><div><strong>${data.length}条素材</strong>标记为风险，建议发布前处理。<span style="cursor:pointer;text-decoration:underline;margin-left:6px" onclick="go('copyright',null)">立即查看</span></div></div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// PROJECTS
+// ════════════════════════════════════════════════════════
+async function loadProjects() {
+  if (!db) return;
+  const { data } = await db.from('projects').select('*').order('created_at', { ascending: false });
+  projectsCache = data || [];
+  renderProjects(projectsCache);
+}
+
+function renderProjects(list) {
+  const el = document.getElementById('projects-grid');
+  if (!list.length) { el.innerHTML = '<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>'; return; }
+  el.innerHTML = `<div class="pcgrid">${list.map(p => `
+    <div class="pc" id="pc-${p.id}">
+      <div class="pc-mark pm-${p.type}"></div>
+      <div style="position:absolute;top:8px;right:8px;display:flex;gap:4px;" class="pc-actions">
+        <button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c0392b;font-size:13px" title="删除项目"><i class="ti ti-trash"></i></button>
+      </div>
+      <div style="cursor:pointer" onclick="selectProject('${p.id}','${p.type}')">
+        <div class="pc-type">${typeIcon(p.type)} ${typeName(p.type)}</div>
+        <div class="pc-name">${esc(p.name)}${p.name_en ? ' <span style="font-weight:400;font-size:12px;color:var(--t4)">'+esc(p.name_en)+'</span>' : ''}</div>
+        <div class="pc-meta">${esc(p.composer||'')}${p.year ? ' · '+p.year : ''}${p.publisher ? ' · '+esc(p.publisher) : ''}</div>
+        <div class="pc-stats"><span class="pc-stat"><i class="ti ti-tag"></i>${(p.tags||[]).join('·') || '—'}</span></div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+
+}
+
+function selectProject(id, type) {
+  if (type === 'game') go('gamematrix', null);
+  else go('timeline', null);
+}
+
+async function deleteProject(id, name) {
+  if (!confirm(`确认删除「${name}」？\n\n该项目下的时间轴标记、矩阵数据将一并删除，此操作不可撤销。`)) return;
+  const { error } = await db.from('projects').delete().eq('id', id);
+  if (error) { toast('删除失败：' + error.message); return; }
+  toast(`「${name}」已删除`);
+  loadProjects();
+  loadDashStats();
+}
+
+async function createProject() {
+  const typeEl = document.querySelector('#proj-type-sel .sel');
+  const type = typeEl?.dataset.val || 'film';
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { toast('请填写作品名称'); return; }
+  const tags = document.getElementById('p-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const { error } = await db.from('projects').insert({
+    name, name_en: val('p-name-en'), type,
+    composer: val('p-composer'), director: val('p-director'),
+    year: parseInt(val('p-year')) || null,
+    publisher: val('p-publisher'), tags
+  });
+  if (error) { toast('创建失败：' + error.message); return; }
+  toast('项目已创建');
+  closeModal('project');
+  loadProjects();
+  loadDashStats();
+  clearInputs(['p-name','p-name-en','p-composer','p-director','p-year','p-publisher','p-tags']);
+}
+
+// ════════════════════════════════════════════════════════
+// TIMELINE
+// ════════════════════════════════════════════════════════
+async function loadProjectSelects() {
+  if (!db) return;
+  if (!projectsCache.length) {
+    const { data } = await db.from('projects').select('id,name,type').order('name');
+    projectsCache = data || [];
+  }
+  const filmProjects = projectsCache.filter(p => p.type !== 'game');
+  const gameProjects = projectsCache.filter(p => p.type === 'game');
+  const allProjects = projectsCache;
+
+  setSelectOptions('tl-project-select', filmProjects.length ? filmProjects : allProjects);
+  setSelectOptions('gm-project-select', gameProjects.length ? gameProjects : allProjects);
+  setSelectOptions('editor-project', allProjects, true);
+  setSelectOptions('as-project', allProjects, true);
+  setSelectOptions('upload-project', allProjects, true);
+}
+
+function setSelectOptions(id, list, blank = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = (blank ? '<option value="">— 选择项目 —</option>' : '') +
+    list.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+}
+
+async function loadTimeline() {
+  const sel = document.getElementById('tl-project-select');
+  const pid = sel?.value;
+  if (!pid || !db) return;
+  const { data } = await db.from('timeline_entries').select('*').eq('project_id', pid).order('timecode');
+  const tbody = document.getElementById('tl-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><i class="ti ti-timeline-event-x"></i><p>暂无标记，点击右上角添加</p></div></td></tr>'; return; }
+  tbody.innerHTML = data.map(e => `<tr>
+    <td>${esc(e.timecode)}</td>
+    <td>${beatBadge(e.beat)}</td>
+    <td>${esc(e.scene_desc||'')}</td>
+    <td>${esc(e.visuals||'')}</td>
+    <td>${esc(e.music_desc||'')}</td>
+    <td>${(e.techniques||[]).map(t=>`<span class="mchip">${esc(t)}</span>`).join('')}</td>
+    <td style="color:var(--t3)">${esc(e.notes||'')}</td>
+    <td><button onclick="deleteTimelineEntry('${e.id}')" class="ib danger" style="height:24px;width:24px;padding:0;font-size:12px"><i class="ti ti-trash"></i></button></td>
+  </tr>`).join('');
+  document.getElementById('tl-progress-text').textContent = `已标记 ${data.length} 个节点`;
+}
+
+async function createTimelineEntry() {
+  const pid = document.getElementById('tl-project-select')?.value;
+  if (!pid) { toast('请先在顶部选择项目'); return; }
+  const timecode = val('tl-timecode');
+  if (!timecode) { toast('请填写时间码'); return; }
+  const tech = val('tl-tech').split(',').map(s=>s.trim()).filter(Boolean);
+  const { error } = await db.from('timeline_entries').insert({
+    project_id: pid, timecode, beat: val('tl-beat'),
+    scene_desc: val('tl-scene'), visuals: val('tl-visuals'),
+    music_desc: val('tl-music'), techniques: tech, notes: val('tl-notes')
+  });
+  if (error) { toast('添加失败：' + error.message); return; }
+  toast('标记已添加');
+  closeModal('timeline');
+  loadTimeline();
+  clearInputs(['tl-timecode','tl-scene','tl-visuals','tl-music','tl-tech','tl-notes']);
+}
+
+// ════════════════════════════════════════════════════════
+// GAME MATRIX
+// ════════════════════════════════════════════════════════
+async function loadGameMatrix() {
+  const pid = document.getElementById('gm-project-select')?.value;
+  if (!pid || !db) return;
+  const { data } = await db.from('game_matrix_entries').select('*').eq('project_id', pid).order('created_at');
+  const tbody = document.getElementById('gm-body');
+  if (!data?.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><i class="ti ti-grid-dots"></i><p>暂无区域，点击右上角添加</p></div></td></tr>'; return; }
+  tbody.innerHTML = data.map(e => `<tr>
+    <td>${esc(e.area)}</td>
+    <td>${e.state_explore ? `<span class="gchip gc-e">${esc(e.state_explore)}</span>` : '—'}</td>
+    <td>${e.state_combat ? `<span class="gchip gc-c">${esc(e.state_combat)}</span>` : '—'}</td>
+    <td>${e.state_boss ? `<span class="gchip gc-c">${esc(e.state_boss)}</span>` : '—'}</td>
+    <td>${e.state_low_hp ? `<span class="gchip gc-l">${esc(e.state_low_hp)}</span>` : '—'}</td>
+    <td>${e.state_night ? `<span class="gchip gc-a">${esc(e.state_night)}</span>` : '—'}</td>
+    <td>${e.state_clear ? `<span class="gchip gc-e">${esc(e.state_clear)}</span>` : '—'}</td>
+  </tr>`).join('');
+}
+
+async function createGameMatrixEntry() {
+  const pid = document.getElementById('gm-project-select')?.value;
+  if (!pid) { toast('请先在顶部选择游戏项目'); return; }
+  const area = val('gm-area');
+  if (!area) { toast('请填写区域名称'); return; }
+  const { error } = await db.from('game_matrix_entries').insert({
+    project_id: pid, area,
+    state_explore: val('gm-explore'), state_combat: val('gm-combat'),
+    state_boss: val('gm-boss'), state_low_hp: val('gm-low'),
+    state_night: val('gm-night'), state_clear: val('gm-clear')
+  });
+  if (error) { toast('添加失败：' + error.message); return; }
+  toast('区域已添加');
+  closeModal('gamematrix');
+  loadGameMatrix();
+  clearInputs(['gm-area','gm-explore','gm-combat','gm-boss','gm-low','gm-night','gm-clear']);
+}
+
+// ════════════════════════════════════════════════════════
+// KNOWLEDGE ENTITIES
+// ════════════════════════════════════════════════════════
+async function loadEntities(type = '') {
+  if (!db) return;
+  let q = db.from('knowledge_entities').select('*').order('type').order('name');
+  if (type) q = q.eq('type', type);
+  const { data } = await q;
+  const el = document.getElementById('entities-table');
+  if (!data?.length) { el.innerHTML = '<div class="empty"><i class="ti ti-brain"></i><p>暂无知识实体</p></div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>名称</th><th>类型</th><th>生卒年</th><th>描述</th><th>标签</th><th></th></tr></thead>
+    <tbody>${data.map(e => `<tr>
+      <td class="td1">${esc(e.name)}</td>
+      <td><span class="badge b-def">${entityTypeName(e.type)}</span></td>
+      <td class="tdm">${e.birth_year || ''}${e.birth_year ? '—' : ''}${e.death_year || (e.birth_year ? '今' : '')}</td>
+      <td style="color:var(--t3);font-size:11px">${esc(e.description||'').slice(0,60)}${(e.description||'').length>60?'…':''}</td>
+      <td>${(e.tags||[]).map(t=>`<span class="tag" style="cursor:default;font-size:9px">${esc(t)}</span>`).join(' ')}</td>
+      <td><button onclick="deleteEntity('${e.id}','${esc(e.name)}')" class="ib danger" style="height:24px;padding:0 8px;font-size:11px"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+async function createEntity() {
+  const typeEl = document.querySelector('#entity-type-sel .sel');
+  const type = typeEl?.dataset.val || 'composer';
+  const name = val('e-name');
+  if (!name) { toast('请填写名称'); return; }
+  const tags = val('e-tags').split(',').map(s=>s.trim()).filter(Boolean);
+  const { error } = await db.from('knowledge_entities').insert({
+    name, type, description: val('e-desc'),
+    birth_year: parseInt(val('e-birth')) || null,
+    death_year: parseInt(val('e-death')) || null,
+    tags
+  });
+  if (error) { toast('创建失败：' + error.message); return; }
+  toast('知识实体已创建');
+  closeModal('entity');
+  loadEntities('');
+  loadDashStats();
+  clearInputs(['e-name','e-desc','e-birth','e-death','e-tags']);
+}
+
+// ════════════════════════════════════════════════════════
+// ARTICLES (KANBAN)
+// ════════════════════════════════════════════════════════
+const STATUS_COLS = [
+  { key: 'topic',      label: '选题' },
+  { key: 'collecting', label: '资料收集' },
+  { key: 'writing',    label: '撰写中' },
+  { key: 'review',     label: '事实核查' },
+  { key: 'published',  label: '已发布' },
+];
+
+async function loadArticles() {
+  if (!db) return;
+  const { data } = await db.from('articles').select('*').order('updated_at', { ascending: false });
+  articlesCache = data || [];
+  const board = document.getElementById('articles-board');
+  board.innerHTML = STATUS_COLS.map(col => {
+    const cards = articlesCache.filter(a => a.status === col.key);
+    return `<div class="kcol">
+      <div class="kct">${col.label} <span class="nb">${cards.length}</span></div>
+      ${cards.length ? cards.map(a => `
+        <div class="kcard" style="position:relative">
+          <div style="position:absolute;top:6px;right:6px">
+            <button onclick="event.stopPropagation();deleteArticle('${a.id}','${esc(a.title)}')" class="ib danger" style="height:22px;width:22px;padding:0;font-size:12px;opacity:0.6" title="删除稿件"><i class="ti ti-trash"></i></button>
+          </div>
+          <div class="kcard-t" style="cursor:pointer;padding-right:24px" onclick="openArticleInEditor('${a.id}')">${esc(a.title)}</div>
+          <div class="kcard-m">
+            ${(a.tags||[]).slice(0,2).map(t=>`<span class="tag" style="cursor:default;font-size:9px">${esc(t)}</span>`).join('')}
+            ${a.word_count > 0 ? `<span style="font-family:var(--mono);font-size:9px;color:var(--t4)">${a.word_count.toLocaleString()}字</span>` : ''}
+          </div>
+        </div>`).join('') : `<div style="font-family:var(--mono);font-size:10px;color:var(--t4);padding:8px 0;text-align:center">—</div>`}
+    </div>`;
+  }).join('');
+}
+
+async function createArticle() {
+  const title = val('a-title');
+  if (!title) { toast('请填写稿件标题'); return; }
+  const tags = val('a-tags').split(',').map(s=>s.trim()).filter(Boolean);
+  const { data, error } = await db.from('articles').insert({ title, status: val('a-status') || 'topic', tags }).select().single();
+  if (error) { toast('创建失败：' + error.message); return; }
+  toast('稿件已创建');
+  closeModal('article');
+  loadArticles();
+  loadDashStats();
+  clearInputs(['a-title','a-tags']);
+  openArticleInEditor(data.id);
+}
+
+function openArticleInEditor(id) {
+  go('editor', null);
+  setTimeout(() => {
+    const sel = document.getElementById('editor-article-select');
+    if (sel) { sel.value = id; loadArticleContent(); }
+  }, 100);
+}
+
+// ════════════════════════════════════════════════════════
+// EDITOR
+// ════════════════════════════════════════════════════════
+let editorTimer = null;
+let currentArticleId = null;
+
+async function loadEditorSelects() {
+  if (!db) return;
+  if (!articlesCache.length) {
+    const { data } = await db.from('articles').select('id,title,status,word_count').order('updated_at', { ascending: false });
+    articlesCache = data || [];
+  }
+  const sel = document.getElementById('editor-article-select');
+  sel.innerHTML = '<option value="">— 选择稿件 —</option>' +
+    articlesCache.map(a => `<option value="${a.id}">${esc(a.title)}</option>`).join('');
+  if (!projectsCache.length) await loadProjectSelects();
+}
+
+async function loadArticleContent() {
+  const id = document.getElementById('editor-article-select').value;
+  if (!id || !db) return;
+  currentArticleId = id;
+  const { data } = await db.from('articles').select('*').eq('id', id).single();
+  if (!data) return;
+  document.getElementById('editor-body').value = data.content || '';
+  document.getElementById('editor-status').value = data.status;
+  document.getElementById('editor-wc').textContent = (data.word_count || 0).toLocaleString() + ' 字';
+  document.getElementById('editor-status-label').textContent = statusText(data.status);
+  document.getElementById('editor-psub').textContent = data.title;
+  document.getElementById('editor-saved').textContent = '上次保存：' + new Date(data.updated_at).toLocaleTimeString();
+}
+
+function onEditorInput() {
+  const body = document.getElementById('editor-body').value;
+  const wc = body.replace(/\s+/g, '').length;
+  document.getElementById('editor-wc').textContent = wc.toLocaleString() + ' 字';
+  clearTimeout(editorTimer);
+  editorTimer = setTimeout(saveArticleContent, 5000);
+}
+
+async function saveArticleContent() {
+  if (!currentArticleId || !db) return;
+  const content = document.getElementById('editor-body').value;
+  const status = document.getElementById('editor-status').value;
+  const { error } = await db.from('articles').update({ content, status }).eq('id', currentArticleId);
+  if (error) { toast('保存失败：' + error.message); return; }
+  document.getElementById('editor-saved').textContent = '已保存 ' + new Date().toLocaleTimeString();
+  document.getElementById('editor-status-label').textContent = statusText(status);
+}
+
+function fmtDoc(cmd) { document.execCommand(cmd); }
+function insertMd(prefix, suffix = '') {
+  const ta = document.getElementById('editor-body');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end);
+  ta.value = ta.value.substring(0, start) + prefix + sel + suffix + ta.value.substring(end);
+  ta.focus();
+}
+
+// ════════════════════════════════════════════════════════
+// ASSETS
+// ════════════════════════════════════════════════════════
+async function loadAssets(type = '') {
+  if (!db) return;
+  let q = db.from('assets').select('*').order('created_at', { ascending: false });
+  if (type) q = q.eq('type', type);
+  const { data, count } = await q;
+  document.getElementById('nb-assets').textContent = count || (data||[]).length;
+  const el = document.getElementById('assets-table');
+  if (!data?.length) { el.innerHTML = '<div class="empty"><i class="ti ti-file-off"></i><p>暂无资料，点击右上角上传或登记</p></div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>资料名</th><th>类型</th><th>版权</th><th>时间/触发</th><th>链接</th><th></th></tr></thead>
+    <tbody>${data.map(a => `<tr>
+      <td class="td1">${esc(a.name)}</td>
+      <td><span class="badge b-def">${assetTypeName(a.type)}</span></td>
+      <td>${copyrightBadge(a.copyright_status)}</td>
+      <td class="tdm">${esc(a.timecode||a.trigger_desc||'—')}</td>
+      <td>${a.url ? `<a href="${esc(a.url)}" target="_blank" style="color:var(--info);font-family:var(--mono);font-size:10px">打开</a>` : '—'}</td>
+      <td><button onclick="deleteAsset('${a.id}','${esc(a.name)}')" class="ib danger" style="height:24px;padding:0 8px;font-size:11px"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+async function createAsset() {
+  const name = val('as-name');
+  if (!name) { toast('请填写资料名称'); return; }
+  const pid = val('as-project') || null;
+  if (!pid) { toast('请选择挂靠项目（当前版本必须挂靠项目）'); return; }
+  const { error } = await db.from('assets').insert({
+    name, type: val('as-type'), url: val('as-url') || null,
+    project_id: pid, copyright_status: val('as-copyright'),
+    timecode: val('as-timecode') || null, copyright_note: val('as-cnote') || null
+  });
+  if (error) { toast('创建失败：' + error.message); return; }
+  toast('资料已登记');
+  closeModal('asset');
+  loadAssets('');
+}
+
+async function uploadFile() {
+  const fileInput = document.getElementById('upload-file');
+  const file = fileInput.files[0];
+  if (!file) { toast('请选择文件'); return; }
+  const pid = val('upload-project') || null;
+  if (!pid) { toast('请选择挂靠项目'); return; }
+
+  document.getElementById('upload-progress').style.display = 'block';
+  document.getElementById('upload-status').textContent = '上传中…';
+  document.getElementById('upload-pbar').style.width = '30%';
+
+  const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const { data: upData, error: upErr } = await db.storage.from('music-cms-assets').upload(path, file);
+
+  if (upErr) {
+    toast('上传失败：' + upErr.message);
+    document.getElementById('upload-progress').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('upload-pbar').style.width = '70%';
+  const { data: urlData } = db.storage.from('music-cms-assets').getPublicUrl(path);
+
+  // Determine type from MIME
+  const mime = file.type;
+  let type = 'document';
+  if (mime.startsWith('audio/')) type = 'audio';
+  else if (mime.startsWith('video/')) type = 'video';
+  else if (mime.startsWith('image/')) type = 'image';
+  else if (mime === 'application/pdf') type = 'document';
+
+  const { error: dbErr } = await db.from('assets').insert({
+    name: file.name, type, storage_path: path,
+    url: urlData.publicUrl, project_id: pid,
+    copyright_status: val('upload-copyright')
+  });
+
+  document.getElementById('upload-pbar').style.width = '100%';
+  document.getElementById('upload-status').textContent = dbErr ? '数据库登记失败' : '上传完成';
+
+  if (!dbErr) {
+    toast('文件上传成功');
+    setTimeout(() => { closeModal('upload'); loadAssets(''); }, 800);
+  }
+  document.getElementById('upload-progress').style.display = 'none';
+  fileInput.value = '';
+}
+
+// ════════════════════════════════════════════════════════
+// TOPICS
+// ════════════════════════════════════════════════════════
+async function loadTopics() {
+  if (!db) return;
+  const [pr, ar, as] = await Promise.all([
+    db.from('projects').select('id,name,type'),
+    db.from('article_projects').select('project_id'),
+    db.from('assets').select('project_id')
+  ]);
+  const projects = pr.data || [];
+  const articleMap = {};
+  (ar.data || []).forEach(x => { articleMap[x.project_id] = (articleMap[x.project_id]||0)+1; });
+  const assetMap = {};
+  (as.data || []).forEach(x => { if(x.project_id) assetMap[x.project_id] = (assetMap[x.project_id]||0)+1; });
+
+  const rows = projects.map(p => ({
+    ...p,
+    articles: articleMap[p.id] || 0,
+    assets: assetMap[p.id] || 0,
+    score: Math.min(99, Math.round(((assetMap[p.id]||0) / Math.max(1, (articleMap[p.id]||0)+1)) * 10))
+  })).sort((a,b) => b.score - a.score);
+
+  const el = document.getElementById('topics-content');
+  el.innerHTML = `
+    <div class="sec">
+      <div class="sh"><div class="sh-t"><i class="ti ti-bulb"></i>推荐选题（资料/稿件比排序）</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>项目</th><th>类型</th><th>资料数</th><th>稿件数</th><th>缺口分</th><th></th></tr></thead>
+        <tbody>${rows.map(p => `<tr>
+          <td class="td1">${esc(p.name)}</td>
+          <td><span class="badge b-def">${typeName(p.type)}</span></td>
+          <td class="tdm" style="color:var(--t1);font-weight:600">${p.assets}</td>
+          <td class="tdm">${p.articles}</td>
+          <td><div style="display:flex;align-items:center;gap:8px">
+            <div class="pbar" style="width:80px"><div class="pfill" style="width:${p.score}%"></div></div>
+            <span class="tdm">${p.score}</span>
+          </div></td>
+          <td><button class="ib solid" style="font-size:11px;height:26px;padding:0 8px" onclick="openModal('article')">立即创稿</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="sec">
+      <div class="sh"><div class="sh-t"><i class="ti ti-chart-grid-dots"></i>内容矩阵热力图（示例）</div></div>
+      <div class="hgrid">
+        <div class="hh"></div><div class="hh">电影</div><div class="hh">游戏</div><div class="hh">音乐史</div><div class="hh">纯音乐</div><div class="hh">电视</div>
+        <div class="hrl">浪漫主义</div><div class="hc h4">8</div><div class="hc h2">3</div><div class="hc h3">6</div><div class="hc h3">5</div><div class="hc h1">1</div>
+        <div class="hrl">现代主义</div><div class="hc h3">5</div><div class="hc h1">1</div><div class="hc h2">2</div><div class="hc h2">3</div><div class="hc h0">0</div>
+        <div class="hrl">当代/实验</div><div class="hc h4">7</div><div class="hc h3">5</div><div class="hc h1">1</div><div class="hc h0">0</div><div class="hc h0">0</div>
+        <div class="hrl">民族乐派</div><div class="hc h1">1</div><div class="hc h0">0</div><div class="hc h2">2</div><div class="hc h1">1</div><div class="hc h0">0</div>
+        <div class="hrl">巴洛克</div><div class="hc h2">2</div><div class="hc h0">0</div><div class="hc h3">4</div><div class="hc h3">5</div><div class="hc h0">0</div>
+      </div>
+      <div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--t4)">深色=覆盖多 · 浅色/空白=内容盲区</div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════
+// COPYRIGHT
+// ════════════════════════════════════════════════════════
+async function loadCopyright() {
+  if (!db) return;
+  const { data } = await db.from('assets').select('*').order('copyright_status');
+  const all = data || [];
+  document.getElementById('cp-safe').textContent    = all.filter(a=>a.copyright_status==='safe').length;
+  document.getElementById('cp-credit').textContent  = all.filter(a=>a.copyright_status==='credit').length;
+  document.getElementById('cp-pending').textContent = all.filter(a=>a.copyright_status==='pending').length;
+  document.getElementById('cp-risk').textContent    = all.filter(a=>a.copyright_status==='risk').length;
+
+  const el = document.getElementById('copyright-table');
+  if (!all.length) { el.innerHTML = '<div class="empty"><i class="ti ti-license"></i><p>暂无资料版权记录</p></div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr><th>资料名</th><th>类型</th><th>版权状态</th><th>说明</th><th>到期日</th></tr></thead>
+    <tbody>${all.map(a => `<tr>
+      <td class="td1">${esc(a.name)}</td>
+      <td><span class="badge b-def">${assetTypeName(a.type)}</span></td>
+      <td>${copyrightBadge(a.copyright_status)}</td>
+      <td style="color:var(--t3);font-size:11px">${esc(a.copyright_note||'')}</td>
+      <td class="tdm">${a.license_expire || '—'}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// ════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════════════════════════════
+function openModal(name) {
+  if (name === 'asset' || name === 'upload') loadProjectSelects();
+  document.getElementById('modal-' + name)?.classList.add('open');
+}
+function closeModal(name, e) {
+  if (!e || e.target === document.getElementById('modal-'+name))
+    document.getElementById('modal-'+name)?.classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function val(id) { return (document.getElementById(id)?.value||'').trim(); }
+function clearInputs(ids) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.value=''; }); }
+
+function typeIcon(t) {
+  return {film:'🎬',game:'🎮',tv:'📺',album:'🎵',documentary:'📻'}[t]||'📁';
+}
+function typeName(t) {
+  return {film:'电影',game:'游戏',tv:'电视剧',album:'专辑',documentary:'纪录片'}[t]||t;
+}
+function entityTypeName(t) {
+  return {composer:'作曲家',technique:'技法',period:'历史时期',instrument:'乐器',motif:'母题'}[t]||t;
+}
+function assetTypeName(t) {
+  return {audio:'音频',video:'视频',image:'图片',document:'文档',score:'乐谱',link:'链接'}[t]||t;
+}
+function statusText(s) {
+  return {topic:'选题',collecting:'资料收集',writing:'撰写中',review:'事实核查',layout:'排版',published:'已发布',archived:'归档'}[s]||s;
+}
+function statusBadge(s) {
+  const cls = {topic:'b-def',collecting:'b-def',writing:'b-info',review:'b-warn',layout:'b-def',published:'b-ok',archived:'b-def'};
+  return `<span class="badge ${cls[s]||'b-def'}">${statusText(s)}</span>`;
+}
+function beatBadge(b) {
+  const cls = {高潮:'b-inv',铺垫:'b-def',转折:'b-warn',过渡:'b-def',尾声:'b-ok'};
+  return `<span class="badge ${cls[b]||'b-def'}">${esc(b||'')}</span>`;
+}
+function copyrightBadge(s) {
+  if (s === 'safe')    return `<span class="badge b-ok">✓ 安全</span>`;
+  if (s === 'credit')  return `<span class="badge b-info">署名</span>`;
+  if (s === 'pending') return `<span class="badge b-warn">授权中</span>`;
+  if (s === 'risk')    return `<span class="badge b-danger">⚠ 风险</span>`;
+  return `<span class="badge b-def">${s}</span>`;
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+async function deleteEntity(id, name) {
+  if (!confirm(`确认删除知识实体「${name}」？此操作不可撤销。`)) return;
+  const { error } = await db.from('knowledge_entities').delete().eq('id', id);
+  if (error) { toast('删除失败：' + error.message); return; }
+  toast(`「${name}」已删除`);
+  loadEntities('');
+  loadDashStats();
+}
+
+async function deleteAsset(id, name) {
+  if (!confirm(`确认删除资料「${name}」？此操作不可撤销。`)) return;
+  const { error } = await db.from('assets').delete().eq('id', id);
+  if (error) { toast('删除失败：' + error.message); return; }
+  toast(`「${name}」已删除`);
+  loadAssets('');
+}
+
+async function deleteArticle(id, title) {
+  if (!confirm(`确认删除稿件「${title}」？此操作不可撤销。`)) return;
+  const { error } = await db.from('articles').delete().eq('id', id);
+  if (error) { toast('删除失败：' + error.message); return; }
+  toast(`「${title}」已删除`);
+  loadArticles();
+  loadDashStats();
+}
+
+async function deleteTimelineEntry(id) {
+  if (!confirm('确认删除该时间轴标记？')) return;
+  const { error } = await db.from('timeline_entries').delete().eq('id', id);
+  if (error) { toast('删除失败：' + error.message); return; }
+  toast('标记已删除');
+  loadTimeline();
+}
+
+</script>
+
+<!-- ══ 智能导入 Modal ══ -->
+<div class="overlay" id="modal-import" onclick="closeModal('import',event)">
+  <div class="modal" style="width:620px">
+    <button class="ib ib-sq modal-close" onclick="closeModal('import')"><i class="ti ti-x"></i></button>
+    <div class="modal-title">智能导入稿件</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:14px">粘贴已有文章，AI 自动识别标题、关联项目、标签，一键导入写作台</div>
+    <div class="fg">
+      <label class="fl">粘贴文章内容</label>
+      <textarea class="fi" id="import-text" rows="10" placeholder="把你在公众号、Word、notion里写好的文章粘贴到这里…" style="resize:vertical"></textarea>
+    </div>
+    <div id="import-result" style="display:none;margin-bottom:14px">
+      <div style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:14px">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:10px">识别结果</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t4);width:60px;flex-shrink:0">标题</span>
+            <span id="ir-title" style="font-size:13px;font-weight:500;color:var(--t1)"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t4);width:60px;flex-shrink:0">关联项目</span>
+            <span id="ir-project" style="font-size:12px;color:var(--t2)"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t4);width:60px;flex-shrink:0">标签</span>
+            <span id="ir-tags" style="font-size:12px;color:var(--t2)"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:baseline">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t4);width:60px;flex-shrink:0">摘要</span>
+            <span id="ir-summary" style="font-size:12px;color:var(--t3);line-height:1.6"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="import-loading" style="display:none;padding:16px 0;text-align:center">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--t4);font-family:var(--mono);font-size:11px">
+        <div class="spinner"></div>DeepSeek 分析中，请稍候…
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="ib" onclick="closeModal('import')">取消</button>
+      <button class="ib" id="import-analyze-btn" onclick="analyzeImport()"><i class="ti ti-sparkles"></i>AI 识别</button>
+      <button class="ib solid" id="import-confirm-btn" style="display:none" onclick="confirmImport()"><i class="ti ti-check"></i>导入写作台</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DEEPSEEK 智能导入
+// ════════════════════════════════════════════════════════
+const DEEPSEEK_KEY = 'sk-30027fed3638496b8090fa0302eddc6a';
+let importResult = null;
+
+async function analyzeImport() {
+  const text = document.getElementById('import-text').value.trim();
+  if (!text) { toast('请先粘贴文章内容'); return; }
+  if (text.length < 50) { toast('文章内容太短，请粘贴完整文章'); return; }
+
+  document.getElementById('import-loading').style.display = 'block';
+  document.getElementById('import-result').style.display = 'none';
+  document.getElementById('import-analyze-btn').disabled = true;
+  document.getElementById('import-confirm-btn').style.display = 'none';
+
+  const projectNames = projectsCache.map(p => p.name).join('、') || '暂无项目';
+  const preview = text.slice(0, 3000);
+
+  const prompt = `你是一个音乐史内容管理系统的智能助手。请分析以下文章，提取关键信息，以JSON格式返回，不要有任何其他内容。
+
+已有项目列表：${projectNames}
+
+文章内容：
+${preview}
+
+请返回如下JSON格式（只返回JSON，不要有任何解释）：
+{
+  "title": "文章标题（从文章第一行或内容中提取，不超过30字）",
+  "project": "最匹配的项目名称（从已有项目列表中选择，如果没有匹配的返回空字符串）",
+  "tags": ["标签1", "标签2", "标签3"],
+  "summary": "文章内容摘要，2-3句话概括核心观点"
+}`;
+
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + DEEPSEEK_KEY
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 500,
+        temperature: 0.3
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || '请求失败');
+
+    let raw = data.choices[0].message.content.trim();
+    raw = raw.replace(/```json|```/g, '').trim();
+    importResult = JSON.parse(raw);
+
+    document.getElementById('ir-title').textContent = importResult.title || '未识别到标题';
+    document.getElementById('ir-project').textContent = importResult.project || '未匹配到已有项目';
+    document.getElementById('ir-tags').textContent = (importResult.tags || []).join(' · ') || '—';
+    document.getElementById('ir-summary').textContent = importResult.summary || '—';
+
+    document.getElementById('import-result').style.display = 'block';
+    document.getElementById('import-confirm-btn').style.display = 'inline-flex';
+
+  } catch (e) {
+    toast('识别失败：' + e.message);
+  } finally {
+    document.getElementById('import-loading').style.display = 'none';
+    document.getElementById('import-analyze-btn').disabled = false;
+  }
+}
+
+async function confirmImport() {
+  if (!importResult || !db) return;
+  const text = document.getElementById('import-text').value.trim();
+
+  const tags = importResult.tags || [];
+  const { data, error } = await db.from('articles').insert({
+    title: importResult.title || '未命名稿件',
+    content: text,
+    status: 'writing',
+    tags
+  }).select().single();
+
+  if (error) { toast('导入失败：' + error.message); return; }
+
+  // 关联项目
+  if (importResult.project) {
+    const matched = projectsCache.find(p => p.name === importResult.project);
+    if (matched) {
+      await db.from('article_projects').insert({ article_id: data.id, project_id: matched.id });
+    }
+  }
+
+  toast('导入成功，已进入写作台');
+  closeModal('import');
+  document.getElementById('import-text').value = '';
+  importResult = null;
+  document.getElementById('import-result').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+
+  await loadEditorSelects();
+  const sel = document.getElementById('editor-article-select');
+  if (sel) { sel.value = data.id; loadArticleContent(); }
+}
+</script>
+
+</body>
+</html>
