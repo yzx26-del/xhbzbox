@@ -1797,96 +1797,225 @@ function quickNoteFromSong(song, artist) {
 async function loadAlert() {
   if(!db) return;
   const el = document.getElementById('alert-content');
-  el.innerHTML = '<div class="loading"><div class="spinner"></div>分析中，同步拉取四大榜单…</div>';
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>分析中…</div>';
 
-  const [pr, ar, as, nc, lastfmRes, qqRes, neteaseRes, douyinRes] = await Promise.all([
+  // Fetch DB data + music charts in parallel
+  const [pr, ar, as, nc, lastfmRes, qqRes] = await Promise.all([
     db.from('projects').select('id,name,type,composer,created_at'),
     db.from('article_projects').select('project_id'),
     db.from('assets').select('project_id,created_at'),
     db.from('note_cards').select('project_id,created_at'),
-    fetch('https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=' + LASTFM_KEY + '&format=json&limit=10').then(r=>r.json()).catch(()=>null),
-    fetch('/api/qq').then(r=>r.json()).catch(()=>null),
-    fetch('/api/netease?id=3778678').then(r=>r.json()).catch(()=>null),
-    fetch('/api/douyin').then(r=>r.json()).catch(()=>null)
+    fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=${LASTFM_KEY}&format=json&limit=10`).then(r=>r.json()).catch(()=>null),
+    fetch('/api/qq').then(r=>r.json()).catch(()=>null)
   ]);
 
   const projects = pr.data||[];
-  var artMap={}, asMap={}, ncMap={};
-  (ar.data||[]).forEach(function(x){artMap[x.project_id]=(artMap[x.project_id]||0)+1;});
-  (as.data||[]).forEach(function(x){if(x.project_id)asMap[x.project_id]=(asMap[x.project_id]||0)+1;});
-  (nc.data||[]).forEach(function(x){if(x.project_id)ncMap[x.project_id]=(ncMap[x.project_id]||0)+1;});
+  const artMap={}, asMap={}, ncMap={};
+  (ar.data||[]).forEach(x=>{artMap[x.project_id]=(artMap[x.project_id]||0)+1;});
+  (as.data||[]).forEach(x=>{if(x.project_id)asMap[x.project_id]=(asMap[x.project_id]||0)+1;});
+  (nc.data||[]).forEach(x=>{if(x.project_id)ncMap[x.project_id]=(ncMap[x.project_id]||0)+1;});
 
-  var alerts = projects.map(function(p){return Object.assign({},p,{
-    arts:artMap[p.id]||0, assets:asMap[p.id]||0, notes:ncMap[p.id]||0,
-    alertLevel: !artMap[p.id]&&(asMap[p.id]||0)>=5?'high':!artMap[p.id]&&(asMap[p.id]||0)>=2?'mid':(ncMap[p.id]||0)>=3&&!artMap[p.id]?'note':null
-  });}).filter(function(p){return p.alertLevel;}).sort(function(a,b){return b.assets-a.assets;});
+  // Project alerts
+  const alerts = projects.map(p=>({
+    ...p,
+    arts: artMap[p.id]||0,
+    assets: asMap[p.id]||0,
+    notes: ncMap[p.id]||0,
+    alertLevel: !artMap[p.id] && (asMap[p.id]||0)>=5 ? 'high'
+      : !artMap[p.id] && (asMap[p.id]||0)>=2 ? 'mid'
+      : (ncMap[p.id]||0)>=3 && !artMap[p.id] ? 'note'
+      : null
+  })).filter(p=>p.alertLevel).sort((a,b)=>b.assets-a.assets);
 
-  var levelConfig = {
-    high:{cls:'b-danger',label:'🔥 高潜力未动笔',tip:'资料丰富，强烈建议立即创稿'},
-    mid:{cls:'b-warn',label:'⚡ 有资料未动笔',tip:'已有基础资料，可以开始'},
-    note:{cls:'b-info',label:'📝 笔记积累中',tip:'笔记已够，适合整理成文'}
+  const levelConfig = {
+    high: {cls:'b-danger', label:'🔥 高潜力未动笔', tip:'资料丰富，强烈建议立即创稿'},
+    mid:  {cls:'b-warn',   label:'⚡ 有资料未动笔', tip:'已有基础资料，可以开始'},
+    note: {cls:'b-info',   label:'📝 笔记积累中',   tip:'笔记已够，适合整理成文'}
   };
 
-  function songTable(tracks, keyName, keyArtist, keyPlay, keyCover) {
-    if(!tracks||!tracks.length) return '<div style="font-family:var(--mono);font-size:10px;color:var(--t4);padding:10px 0">加载失败，请刷新重试</div>';
-    var rows = '';
-    tracks.slice(0,10).forEach(function(t,i) {
-      var name = t[keyName]||'';
-      var artist = typeof keyArtist === 'function' ? keyArtist(t) : (t[keyArtist]||'');
-      var play = keyPlay ? parseInt(t[keyPlay]||0).toLocaleString() : '';
-      var cover = keyCover ? (t[keyCover]||'') : '';
-      rows += '<tr>'
-        +'<td class="tdm" style="color:var(--t4)">'+(i+1)+'</td>'
-        +(cover?'<td><img src="'+esc(cover)+'" style="width:28px;height:28px;object-fit:cover;border-radius:2px" onerror="this.onerror=null"></td>':'')
-        +'<td class="td1">'+esc(name)+'</td>'
-        +'<td style="color:var(--t3)">'+esc(artist)+'</td>'
-        +(play?'<td class="tdm">'+play+'</td>':'')
-        +'<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong(this.dataset.s,this.dataset.a)" data-s="'+esc(name)+'" data-a="'+esc(artist)+'"><i class="ti ti-pencil"></i>创稿</button></td>'
-        +'</tr>';
-    });
-    var hasCover = !!keyCover;
-    var hasPlay = !!keyPlay;
-    return '<div class="tw"><table><thead><tr><th>#</th>'+(hasCover?'<th>封面</th>':'')+'<th>歌曲</th><th>艺人</th>'+(hasPlay?'<th>播放量</th>':'')+'<th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
-  }
+  // International chart from Last.fm
+  const intlTracks = lastfmRes?.tracks?.track || [];
+  // Domestic chart from QQ
+  const cnTracks = qqRes?.songs || [];
 
-  var html = '';
+  let html = '';
 
-  // 项目预警
+  // ── 项目预警 ──
   if(alerts.length) {
-    html += '<div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-bell-ringing"></i>项目预警</div></div>';
+    html += '<div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-bell-ringing"></i>项目预警（有资料但未动笔）</div></div>';
     html += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">';
     alerts.forEach(function(p) {
       var lv = levelConfig[p.alertLevel];
       html += '<div style="border:1px solid var(--line);border-left:3px solid var(--danger);border-radius:4px;padding:12px 14px;display:flex;align-items:center;gap:14px">'
-        +'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge '+lv.cls+'">'+lv.label+'</span><span class="badge b-def">'+typeName(p.type)+'</span></div>'
-        +'<div style="font-family:var(--serif);font-size:13px;font-weight:600;margin-bottom:3px">'+esc(p.name)+'</div>'
-        +'<div style="font-family:var(--mono);font-size:9px;color:var(--t3)">资料 '+p.assets+' · 笔记 '+p.notes+' · 稿件 '+p.arts+' · '+lv.tip+'</div></div>'
-        +'<button class="ib solid" style="font-size:11px;height:28px;padding:0 10px;flex-shrink:0" onclick="createArticleForProject(this.dataset.id,this.dataset.name)" data-id="'+p.id+'" data-name="'+esc(p.name)+'"><i class="ti ti-pencil"></i>立即创稿</button>'
-        +'</div>';
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span class="badge ' + lv.cls + '">' + lv.label + '</span><span class="badge b-def">' + typeName(p.type) + '</span></div>'
+        + '<div style="font-family:var(--serif);font-size:13px;font-weight:600;margin-bottom:3px">' + esc(p.name) + '</div>'
+        + '<div style="font-family:var(--mono);font-size:9px;color:var(--t3)">资料 ' + p.assets + ' · 笔记 ' + p.notes + ' · 稿件 ' + p.arts + ' · ' + lv.tip + '</div>'
+        + '</div>'
+        + '<button class="ib solid" style="font-size:11px;height:28px;padding:0 10px;flex-shrink:0" onclick="createArticleForProject(this.dataset.id,this.dataset.name)" data-id="' + p.id + '" data-name="' + esc(p.name) + '"><i class="ti ti-pencil"></i>立即创稿</button>'
+        + '</div>';
     });
     html += '</div>';
   } else {
-    html += '<div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--ok);margin-bottom:20px"><i class="ti ti-check" style="margin-right:6px"></i>暂无项目预警</div>';
+    html += '<div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--ok);margin-bottom:20px"><i class="ti ti-check" style="margin-right:6px"></i>所有项目均已有稿件，无预警</div>';
   }
 
-  // 四大榜单
-  var charts = [
-    {title:'🌍 Last.fm 国际热歌', tracks: lastfmRes&&lastfmRes.tracks?lastfmRes.tracks.track:null, name:'name', artist:function(t){return t.artist&&t.artist.name?t.artist.name:'';}, play:'playcount', cover:null},
-    {title:'🎵 QQ音乐新歌榜', tracks: qqRes&&qqRes.songs?qqRes.songs:null, name:'name', artist:'artist', play:null, cover:'cover'},
-    {title:'☁️ 网易云热歌榜', tracks: neteaseRes&&neteaseRes.songs?neteaseRes.songs:null, name:'name', artist:'artist', play:null, cover:'cover'},
-    {title:'🎤 抖音/汽水热歌', tracks: douyinRes&&douyinRes.songs?douyinRes.songs:null, name:'name', artist:'artist', play:'hotVal', cover:'cover'}
-  ];
+  // ── 国际热歌榜 Last.fm ──
+  html += '<div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-world"></i>Last.fm 国际热歌榜</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span></div>';
+  if(intlTracks.length) {
+    html += '<div class="tw" style="margin-bottom:20px"><table><thead><tr><th>#</th><th>歌曲</th><th>艺人</th><th>播放量</th><th></th></tr></thead><tbody>';
+    intlTracks.forEach(function(t, i) {
+      html += '<tr>'
+        + '<td class="tdm" style="color:var(--t4)">' + (i+1) + '</td>'
+        + '<td class="td1">' + esc(t.name) + '</td>'
+        + '<td style="color:var(--t3)">' + esc(t.artist && t.artist.name ? t.artist.name : '') + '</td>'
+        + '<td class="tdm">' + parseInt(t.playcount||0).toLocaleString() + '</td>'
+        + '<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong(this.dataset.s,this.dataset.a)" data-s="' + esc(t.name) + '" data-a="' + esc(t.artist && t.artist.name ? t.artist.name : '') + '"><i class="ti ti-pencil"></i>创稿</button></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div style="font-family:var(--mono);font-size:10px;color:var(--t4);margin-bottom:20px">Last.fm 数据加载失败，请刷新重试</div>';
+  }
 
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-  charts.forEach(function(c) {
-    html += '<div>'
-      +'<div class="sh" style="margin-bottom:8px"><div class="sh-t">'+c.title+'</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时</span></div>'
-      + songTable(c.tracks, c.name, c.artist, c.play, c.cover)
-      +'</div>';
-  });
-  html += '</div>';
+  // ── 国内热歌榜 QQ音乐 ──
+  html += '<div class="sh" style="margin-bottom:10px"><div class="sh-t"><i class="ti ti-music"></i>QQ音乐新歌榜</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span></div>';
+  if(cnTracks.length) {
+    html += '<div class="tw"><table><thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th></th></tr></thead><tbody>';
+    cnTracks.slice(0,10).forEach(function(s, i) {
+      html += '<tr>'
+        + '<td class="tdm" style="color:var(--t4)">' + (i+1) + '</td>'
+        + '<td><img src="' + esc(s.cover) + '" style="width:28px;height:28px;object-fit:cover;border-radius:2px" onerror="this.onerror=null"></td>'
+        + '<td class="td1">' + esc(s.name) + '</td>'
+        + '<td style="color:var(--t3)">' + esc(s.artist) + '</td>'
+        + '<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong(this.dataset.s,this.dataset.a)" data-s="' + esc(s.name) + '" data-a="' + esc(s.artist) + '"><i class="ti ti-pencil"></i>创稿</button></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div style="font-family:var(--mono);font-size:10px;color:var(--t4)">QQ音乐数据加载失败，请刷新重试</div>';
+  }
 
   el.innerHTML = html;
 }
 
 
+// ══ 引用卡片生成器 ══
+
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('cg-platform-sel')?.addEventListener('click', e=>{
+    const t = e.target.closest('[data-platform]'); if(!t) return;
+    document.querySelectorAll('#cg-platform-sel .tag').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    currentPlatform = t.dataset.platform;
+    const labels = {weixin:'公众号格式',zhihu:'知乎格式',xiaohongshu:'小红书格式',bilibili:'B站专栏格式'};
+    document.getElementById('cg-platform-label').textContent = labels[currentPlatform]||'';
+    updateCardPreview();
+  });
+  ['cg-title','cg-artist','cg-date','cg-genre','cg-source','cg-verdict'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('input', updateCardPreview);
+  });
+  document.getElementById('cg-rating')?.addEventListener('input', e=>{
+    document.getElementById('cg-rating-display').textContent = e.target.value;
+    updateCardPreview();
+  });
+});
+
+
+
+
+// ══ 更新 loadMyData 加月度报告 ══
+const _origLoadMyData = loadMyData;
+async function loadMyData() {
+  if(!db) return;
+  const [pr,ar,as,nc] = await Promise.all([
+    db.from('projects').select('type'),
+    db.from('articles').select('status,word_count,tags,created_at'),
+    db.from('assets').select('type,copyright_status'),
+    db.from('note_cards').select('card_type,created_at,tags')
+  ]);
+  const el = document.getElementById('mydata-content');
+  const projects=pr.data||[], arts=ar.data||[], assets=as.data||[], notes=nc.data||[];
+  const published=arts.filter(a=>a.status==='published');
+  const totalWords=arts.reduce((s,a)=>s+(a.word_count||0),0);
+  const avgWords=arts.length?Math.round(totalWords/arts.length):0;
+  const domainMap={},statusMap={},noteTypeMap={};
+  projects.forEach(p=>{domainMap[p.type]=(domainMap[p.type]||0)+1;});
+  arts.forEach(a=>{statusMap[a.status]=(statusMap[a.status]||0)+1;});
+  notes.forEach(n=>{noteTypeMap[n.card_type]=(noteTypeMap[n.card_type]||0)+1;});
+
+  // 月度分析
+  const now = new Date();
+  const thisMonth = arts.filter(a=>a.created_at && new Date(a.created_at).getMonth()===now.getMonth());
+  const lastMonth = arts.filter(a=>a.created_at && new Date(a.created_at).getMonth()===now.getMonth()-1);
+  const thisMonthNotes = notes.filter(n=>n.created_at && new Date(n.created_at).getMonth()===now.getMonth());
+
+  // 标签云
+  const tagMap = {};
+  notes.forEach(n=>(n.tags||[]).forEach(t=>{tagMap[t]=(tagMap[t]||0)+1;}));
+  const topTags = Object.entries(tagMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+
+  el.innerHTML = `
+    <div class="srow" style="margin-bottom:20px">
+      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/专辑</div></div>
+      <div class="sc"><div class="sc-label">已发布稿件</div><div class="sc-val ok">${published.length}</div><div class="sc-sub">共 ${arts.length} 篇</div></div>
+      <div class="sc"><div class="sc-label">笔记卡片</div><div class="sc-val">${notes.length}</div><div class="sc-sub">本月新增 ${thisMonthNotes.length}</div></div>
+      <div class="sc"><div class="sc-label">平均字数</div><div class="sc-val">${avgWords.toLocaleString()}</div><div class="sc-sub">每篇稿件</div></div>
+    </div>
+
+    <!-- 月度报告 -->
+    <div class="sec">
+      <div class="sh"><div class="sh-t"><i class="ti ti-calendar-stats"></i>本月报告</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">${now.getFullYear()}年${now.getMonth()+1}月</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:14px;text-align:center">
+          <div style="font-family:var(--mono);font-size:24px;font-weight:600">${thisMonth.length}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">本月新建稿件</div>
+          <div style="font-family:var(--mono);font-size:10px;color:${thisMonth.length>=lastMonth.length?'var(--ok)':'var(--danger)'};margin-top:3px">${thisMonth.length>=lastMonth.length?'↑':'↓'} 较上月 ${Math.abs(thisMonth.length-lastMonth.length)} 篇</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:14px;text-align:center">
+          <div style="font-family:var(--mono);font-size:24px;font-weight:600">${thisMonthNotes.length}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">本月速记笔记</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:3px">积累知识资产</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:14px;text-align:center">
+          <div style="font-family:var(--mono);font-size:24px;font-weight:600">${published.length}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">累计发布稿件</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:3px">总字数 ${totalWords.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="sh"><div class="sh-t"><i class="ti ti-folder"></i>项目领域分布</div></div>
+        <div class="tw"><table><thead><tr><th>领域</th><th>项目数</th><th>占比</th></tr></thead><tbody>
+          ${Object.entries(domainMap).map(([k,v])=>`<tr><td class="td1">${typeName(k)}</td><td class="tdm">${v}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pbar" style="width:80px"><div class="pfill" style="width:${projects.length?Math.round(v/projects.length*100):0}%"></div></div><span class="tdm">${projects.length?Math.round(v/projects.length*100):0}%</span></div></td></tr>`).join('')}
+        </tbody></table></div>
+
+        <div class="sh" style="margin-top:16px"><div class="sh-t"><i class="ti ti-article"></i>稿件状态</div></div>
+        <div class="tw"><table><thead><tr><th>状态</th><th>数量</th></tr></thead><tbody>
+          ${Object.entries(statusMap).map(([k,v])=>`<tr><td>${statusBadge(k)}</td><td class="tdm">${v}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+      <div>
+        <div class="sh"><div class="sh-t"><i class="ti ti-tag"></i>我的标签云</div></div>
+        <div style="background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:14px;min-height:80px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start">
+          ${topTags.length ? topTags.map(([tag,count])=>`<span style="padding:3px 8px;border-radius:2px;font-family:var(--mono);font-size:${10+Math.min(count*2,6)}px;background:var(--bg3);border:1px solid var(--line);color:var(--t${count>=3?'1':count>=2?'2':'3'})">${esc(tag)} <span style="opacity:.6">${count}</span></span>`).join('') : '<span style="font-family:var(--mono);font-size:10px;color:var(--t4)">暂无标签数据，保存带标签的笔记卡片后显示</span>'}
+        </div>
+
+        <div class="sh" style="margin-top:16px"><div class="sh-t"><i class="ti ti-files"></i>资料版权分布</div></div>
+        <div class="tw"><table><thead><tr><th>版权状态</th><th>数量</th></tr></thead><tbody>
+          <tr><td>${copyrightBadge('safe')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='safe').length}</td></tr>
+          <tr><td>${copyrightBadge('credit')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='credit').length}</td></tr>
+          <tr><td>${copyrightBadge('pending')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='pending').length}</td></tr>
+          <tr><td>${copyrightBadge('risk')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='risk').length}</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>`;
+}
+
+
+</script>
+</body>
+</html>
