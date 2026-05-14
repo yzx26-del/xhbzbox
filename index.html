@@ -245,25 +245,32 @@ select.fi{cursor:pointer}
 .dice-stage::before{content:'';position:absolute;inset:0;background-image:linear-gradient(120deg,rgba(255,214,128,.08),transparent 28%,rgba(255,255,255,.03) 50%,transparent 72%);pointer-events:none}
 .dice-cover{position:relative;z-index:1;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .dice-stack{position:relative;width:112px;height:156px;margin-bottom:24px}
-.dice-stack span{position:absolute;inset:0;border:1px solid #cfa65a;border-radius:8px;background:linear-gradient(145deg,#171015,#382819);box-shadow:0 12px 34px rgba(0,0,0,.38)}
+.dice-stack span{position:absolute;inset:0;border:1px solid #cfa65a;border-radius:8px;background:linear-gradient(145deg,rgba(23,16,21,.42),rgba(56,40,25,.52)),url('/assets/review-dice-back.png') center/cover;box-shadow:0 12px 34px rgba(0,0,0,.38)}
 .dice-stack span:nth-child(1){transform:rotate(-10deg) translate(-10px,8px)}.dice-stack span:nth-child(2){transform:rotate(7deg) translate(8px,2px)}.dice-stack span:nth-child(3){transform:rotate(0)}
 .dice-title{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:.05em;margin-bottom:6px}
 .dice-sub{font-size:12px;color:#cbb98f;margin-bottom:22px}
 .dice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative;z-index:1}
-.dice-card{height:210px;perspective:900px;cursor:pointer}
-.dice-card-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.dice-card{height:230px;perspective:900px;cursor:pointer}
+.dice-card-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.75,.2,1);transform-style:preserve-3d}
 .dice-card.flipped .dice-card-inner{transform:rotateY(180deg)}
+.dice-card.spin .dice-card-inner{animation:diceFlipSpin .78s cubic-bezier(.18,.8,.2,1)}
+@keyframes diceFlipSpin{0%{transform:rotateY(0) scale(1)}55%{transform:rotateY(380deg) scale(1.07)}100%{transform:rotateY(540deg) scale(1)}}
 .dice-face{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;overflow:hidden;border:1px solid rgba(207,166,90,.72);box-shadow:0 10px 26px rgba(0,0,0,.28)}
-.dice-back{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#1a1118,#3a2716);color:#d7b66d;font-family:var(--serif);font-size:18px}
-.dice-front{transform:rotateY(180deg);background:#fffaf0;color:#17110d;padding:10px;display:flex;flex-direction:column}
-.dice-cover-art{height:72px;border-radius:5px;margin-bottom:8px;display:flex;align-items:end;padding:7px;color:#fff;font-family:var(--mono);font-size:9px}
-.dice-song{font-size:12px;font-weight:700;line-height:1.35;margin-bottom:3px}.dice-artist{font-family:var(--mono);font-size:9px;color:#725f45;margin-bottom:6px}
-.dice-msg{font-family:var(--serif);font-size:13px;color:#6d4520;margin:auto 0 7px}.dice-tags{display:flex;gap:4px;flex-wrap:wrap}.dice-tags span{font-family:var(--mono);font-size:8px;background:#efe2c2;color:#80612e;padding:2px 5px;border-radius:2px}
+.dice-back{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,color-mix(in srgb,var(--c1) 54%,transparent),color-mix(in srgb,var(--c2) 62%,transparent)),url('/assets/review-dice-back.png') center/cover;color:#fff;font-family:var(--serif);font-size:18px;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+.dice-front{transform:rotateY(180deg);background:linear-gradient(160deg,color-mix(in srgb,var(--c1) 18%,#fff),color-mix(in srgb,var(--c2) 22%,#fff));color:#17110d;padding:10px;display:flex;flex-direction:column}
+.dice-cover-art{height:84px;border-radius:6px;margin-bottom:8px;display:flex;align-items:end;padding:8px;color:#fff;font-family:var(--serif);font-size:13px;line-height:1.35;text-shadow:0 1px 7px rgba(0,0,0,.42);position:relative;overflow:hidden}
+.dice-cover-art::after{content:'点击进入歌单';position:absolute;right:7px;top:6px;font-family:var(--mono);font-size:8px;opacity:.75}
+.dice-song{font-size:13px;font-weight:700;line-height:1.35;margin-bottom:3px}.dice-artist{font-family:var(--mono);font-size:9px;color:#725f45;margin-bottom:6px}
+.dice-player{height:5px;border-radius:99px;background:rgba(0,0,0,.12);overflow:hidden;margin:2px 0 7px}.dice-player span{display:block;width:58%;height:100%;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.dice-msg{font-family:var(--serif);font-size:13px;color:#6d4520;margin:auto 0 7px}.dice-tags{display:flex;gap:4px;flex-wrap:wrap}.dice-tags span{font-family:var(--mono);font-size:8px;background:rgba(255,255,255,.5);color:#654b25;padding:2px 5px;border-radius:2px}
 .dice-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.dice-note{font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:8px}
 .playlist-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}
 .playlist-side{border:1px solid var(--line);border-radius:4px;background:var(--bg2);padding:14px}.playlist-theme{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:4px}
-.song-list{display:flex;flex-direction:column;gap:8px}.song-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:10px}
+.playlist-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0}.cal-day{height:28px;border:1px solid var(--line);border-radius:3px;background:var(--bg);font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer}.cal-day:hover,.cal-day.on{border-color:var(--t1);color:var(--t1);background:#fff}.cal-day.cached{background:#edf7f1;color:var(--ok);border-color:#bfe8cc}.cal-day.locked{opacity:.42}
+.song-list{display:flex;flex-direction:column;gap:8px}.song-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:10px 40px 10px 10px;position:relative}
 .song-cover{width:44px;height:44px;border-radius:4px;display:flex;align-items:end;padding:4px;color:#fff;font-family:var(--mono);font-size:8px}.song-title{font-size:13px;font-weight:700;color:var(--t1)}.song-meta{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:2px}.song-review{font-size:11px;color:var(--t3);line-height:1.6;margin-top:5px}
+.song-row.pinned{border-color:var(--t1);box-shadow:inset 2px 0 0 var(--t1)}.pin-btn{position:absolute;right:8px;top:8px;width:24px;height:24px;border:1px solid var(--line);border-radius:3px;background:var(--bg);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center}.pin-btn.on{color:var(--t1);border-color:var(--t1);background:var(--bg2)}
+.review-edit{width:100%;min-height:58px;border:1px solid var(--line);border-radius:3px;background:var(--bg2);padding:7px 8px;font-size:12px;color:var(--t2);font-family:var(--sans);resize:vertical;outline:none;margin-top:7px}.review-edit:focus{border-color:var(--t1);background:var(--bg)}
 @media(max-width:900px){.dice-grid{grid-template-columns:repeat(2,1fr)}.playlist-layout{grid-template-columns:1fr}.dice-stage{padding:18px}}
 </style>
 </head>
@@ -402,7 +409,7 @@ select.fi{cursor:pointer}
 <!-- 笔记卡片 -->
 <div class="page" id="pg-notes">
   <div class="ph"><div><div class="ptitle">笔记卡片库</div><div class="psub">原子化笔记·可复用模块·智能导入自动生成</div></div><div class="ph-r"><button class="ib solid" onclick="openModal('note')"><i class="ti ti-plus"></i>新建卡片</button></div></div>
-  <div style="display:flex;gap:5px;margin-bottom:16px" id="notes-filter"><span class="tag on" data-ntype="">全部</span><span class="tag" data-ntype="analysis">分析观点</span><span class="tag" data-ntype="fact">史实引用</span><span class="tag" data-ntype="technique">技法记录</span><span class="tag" data-ntype="reusable_module">可复用模块</span><span class="tag" data-ntype="quote">原文摘录</span></div>
+  <div style="display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap" id="notes-filter"><span class="tag on" data-ntype="">全部</span><span class="tag" data-ntype="song_review">歌曲点评</span><span class="tag" data-ntype="analysis">分析观点</span><span class="tag" data-ntype="fact">史实引用</span><span class="tag" data-ntype="technique">技法记录</span><span class="tag" data-ntype="reusable_module">可复用模块</span><span class="tag" data-ntype="quote">原文摘录</span></div>
   <div id="notes-grid"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div>
 
@@ -821,6 +828,7 @@ let db = null, projectsCache = [], articlesCache = [];
 let searchTimer = null;
 let pendingProjectId = null;
 let currentDicePlaylist = null;
+let pendingPlaylistSongIndex = null;
 function resetConfig(){localStorage.clear();location.reload();}
 
 // ══ STARTUP ══
@@ -1145,7 +1153,7 @@ async function loadNotes(type='') {
   document.getElementById('nb-notes').textContent=count;
   const el=document.getElementById('notes-grid');
   if(!data?.length){el.innerHTML='<div class="empty"><i class="ti ti-cards"></i><p>暂无笔记卡片，可通过智能导入自动生成</p></div>';return;}
-  const typeLabel={analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};
+  const typeLabel={song_review:'歌曲点评',analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};
   el.innerHTML=`<div class="nc-grid">${data.map(n=>{const article=n.source_article_title||n.article_title||articleByProject[n.project_id]||'';return`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${typeLabel[n.card_type]||n.card_type}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px;line-height:1.7">${article?`<div>来源文章：${esc(article)}</div>`:''}${n.source_desc?`<div>来源说明：${esc(n.source_desc)}</div>`:''}${!article&&!n.source_desc?'—':''}</div></div>`;}).join('')}</div>`;
 }
 async function createNote() {
@@ -1270,6 +1278,11 @@ function todayKey(){
   return `${d.getFullYear()}-${m}-${day}`;
 }
 function diceCacheKey(date=todayKey()){return `reviewDice:${date}`;}
+function diceUnlockKey(date=todayKey()){return `reviewDiceUnlocked:${date}`;}
+function diceReviewKey(date=todayKey(),i=0){return `reviewDiceReview:${date}:${i}`;}
+function dicePinnedKey(date=todayKey(),i=0){return `reviewDicePinned:${date}:${i}`;}
+function isDiceUnlocked(date=todayKey()){return localStorage.getItem(diceUnlockKey(date))==='1';}
+function unlockDice(date=todayKey()){localStorage.setItem(diceUnlockKey(date),'1');}
 function diceHistory(){
   try{return JSON.parse(localStorage.getItem('reviewDiceHistory')||'[]');}catch{return[];}
 }
@@ -1286,19 +1299,28 @@ function setCachedDice(data){
   rememberDiceDate(data.date);
   currentDicePlaylist=data;
 }
+function enrichDicePlaylist(data){
+  if(!data?.songs)return data;
+  data.songs=data.songs.map((s,i)=>({
+    ...s,
+    classic_lyric:s.classic_lyric||s.lyric_quote||s.tarot_message||'把今天听成一张牌',
+    custom_review:localStorage.getItem(diceReviewKey(data.date,i))||s.custom_review||''
+  }));
+  return data;
+}
 function loadReviewDiceHome(){
   const date=todayKey();
-  const cached=getCachedDice(date);
+  const cached=enrichDicePlaylist(getCachedDice(date));
   const note=document.getElementById('dice-cache-note');
   if(note) note.textContent=cached?'今日牌阵已缓存，继续打开不消耗 API':'今日未抽牌，点击后生成一次';
   if(cached){currentDicePlaylist=cached;renderDiceCards(cached,false);}
 }
 async function fetchDailyDice(date=todayKey()){
-  const cached=getCachedDice(date);
+  const cached=enrichDicePlaylist(getCachedDice(date));
   if(cached){currentDicePlaylist=cached;return cached;}
   const res=await fetch('/api/review-dice?date='+encodeURIComponent(date));
   if(!res.ok) throw new Error('生成失败');
-  const data=await res.json();
+  const data=enrichDicePlaylist(await res.json());
   setCachedDice(data);
   return data;
 }
@@ -1308,28 +1330,66 @@ async function startReviewDice(){
   try{
     const data=await fetchDailyDice();
     renderDiceCards(data,false);
-    renderDailyPlaylist(data);
   }catch(e){
     if(stage) stage.innerHTML='<div class="dice-cover"><div class="dice-title">今天的牌暂时洗不开</div><div class="dice-sub">请稍后再试，或检查 DeepSeek API 环境变量。</div><button class="ib solid" onclick="startReviewDice()">重试</button></div>';
   }
 }
-function coverStyle(song,i){
-  const colors=['#8b3a2b,#d7a45f','#244c74,#79a6d8','#6d3f7a,#d9a3c8','#286244,#9dd7a5','#4a3525,#cfa65a','#15213f,#778bd6'];
-  const c=colors[i%colors.length];
-  return `background:linear-gradient(135deg,${c});`;
+function dicePalette(song,i){
+  const text=[...(song?.emotion_tags||[]),song?.tarot_message||'',song?.story||''].join(' ');
+  const palettes=[
+    ['#8b3a2b','#d7a45f'],['#244c74','#79a6d8'],['#6d3f7a','#d9a3c8'],
+    ['#286244','#9dd7a5'],['#4a3525','#cfa65a'],['#15213f','#778bd6']
+  ];
+  if(/燃|热|爆|怒|战|fire|bold/i.test(text))return['#9c2f24','#f0a653'];
+  if(/丧|孤|暗|冷|sad|lonely/i.test(text))return['#24334f','#8da0c5'];
+  if(/治愈|温暖|柔|光|warm|soft/i.test(text))return['#8f5d4d','#e8ba91'];
+  if(/空灵|梦|幻|神秘|mystic/i.test(text))return['#5f4a83','#bca7d8'];
+  if(/复古|怀旧|旧|retro/i.test(text))return['#7b4f2a','#d1a35f'];
+  return palettes[i%palettes.length];
+}
+function cardVars(song,i){
+  const [a,b]=dicePalette(song,i);
+  return `--c1:${a};--c2:${b};background:linear-gradient(135deg,${a},${b});`;
+}
+function playDrawSound(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.type='triangle'; osc.frequency.setValueAtTime(220,ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(880,ctx.currentTime+.18);
+    gain.gain.setValueAtTime(.0001,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(.08,ctx.currentTime+.03); gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.28);
+    osc.connect(gain).connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime+.3);
+  }catch{}
 }
 function renderDiceCards(data,allOpen=false){
   const stage=document.getElementById('dice-stage'); if(!stage) return;
-  currentDicePlaylist=data;
-  stage.innerHTML=`<div style="position:relative;z-index:1;margin-bottom:18px;text-align:center"><div class="dice-title">${esc(data.theme||'今日牌阵')}</div><div class="dice-sub">${esc(data.subtitle||'12首歌已经落位，逐张翻开。')}</div></div><div class="dice-grid">${(data.songs||[]).map((s,i)=>`<div class="dice-card ${allOpen?'flipped':''}" onclick="flipDiceCard(this)"><div class="dice-card-inner"><div class="dice-face dice-back">第 ${i+1} 张</div><div class="dice-face dice-front"><div class="dice-cover-art" style="${coverStyle(s,i)}">${esc(s.group||s.era_tag||'')}</div><div class="dice-song">${esc(s.title)}</div><div class="dice-artist">${esc(s.artist)} · ${s.year||''}</div><div class="dice-msg">${esc(s.tarot_message||'今日听见它')}</div><div class="dice-tags">${(s.emotion_tags||[]).slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div></div></div></div>`).join('')}</div>`;
+  currentDicePlaylist=enrichDicePlaylist(data);
+  if(allOpen) unlockDice(data.date);
+  stage.innerHTML=`<div style="position:relative;z-index:1;margin-bottom:18px;text-align:center"><div class="dice-title">${esc(data.theme||'今日牌阵')}</div><div class="dice-sub">${esc(data.subtitle||'12首歌已经落位，逐张翻开。')}</div></div><div class="dice-grid">${(data.songs||[]).map((s,i)=>`<div class="dice-card ${allOpen?'flipped':''}" data-index="${i}" style="${cardVars(s,i)}" onclick="flipDiceCard(this)"><div class="dice-card-inner"><div class="dice-face dice-back">第 ${i+1} 张</div><div class="dice-face dice-front"><div class="dice-cover-art" style="${cardVars(s,i)}" onclick="jumpToPlaylistSong(${i},event)">${esc(s.classic_lyric||s.tarot_message||'今日听见它')}</div><div class="dice-song">${esc(s.title)}</div><div class="dice-artist">${esc(s.artist)} · ${s.year||''}</div><div class="dice-player"><span></span></div><div class="dice-msg">${esc(s.tarot_message||'今日听见它')}</div><div class="dice-tags">${(s.emotion_tags||[]).slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div></div></div></div>`).join('')}</div><div class="dice-tools"><button class="ib solid" onclick="go('dailyplaylist',null)"><i class="ti ti-playlist"></i>查看完整歌单</button></div>`;
 }
 function flipDiceCard(card){
-  card.classList.toggle('flipped');
+  if(card.classList.contains('flipped'))return;
+  card.classList.add('spin');
+  playDrawSound();
+  setTimeout(()=>{card.classList.add('flipped');card.classList.remove('spin');checkDiceComplete();},430);
   if(navigator.vibrate) navigator.vibrate(30);
 }
+function checkDiceComplete(){
+  const cards=[...document.querySelectorAll('#dice-stage .dice-card')];
+  if(cards.length&&cards.every(c=>c.classList.contains('flipped'))&&currentDicePlaylist){
+    unlockDice(currentDicePlaylist.date);
+    toast('12张卡已翻开，每日歌单已解锁');
+  }
+}
 function revealAllDiceCards(){
-  if(currentDicePlaylist) renderDiceCards(currentDicePlaylist,true);
+  if(currentDicePlaylist){unlockDice(currentDicePlaylist.date);renderDiceCards(currentDicePlaylist,true);go('dailyplaylist',null);}
   else startReviewDice().then(()=>setTimeout(revealAllDiceCards,100));
+}
+function jumpToPlaylistSong(i,e){
+  if(e)e.stopPropagation();
+  if(!currentDicePlaylist)return;
+  pendingPlaylistSongIndex=i;
+  unlockDice(currentDicePlaylist.date);
+  go('dailyplaylist',null);
 }
 function loadDailyPlaylist(){
   const select=document.getElementById('playlist-date-select');
@@ -1337,21 +1397,67 @@ function loadDailyPlaylist(){
   const today=todayKey();
   const dates=[today,...hist.filter(x=>x!==today)];
   if(select) select.innerHTML=dates.map(d=>`<option value="${d}">${d}${d===today?' · 今日':''}</option>`).join('');
-  const cached=getCachedDice(select?.value||today);
-  if(cached) renderDailyPlaylist(cached);
-  else fetchDailyDice(select?.value||today).then(renderDailyPlaylist).catch(()=>{document.getElementById('playlist-content').innerHTML='<div class="empty"><i class="ti ti-playlist-off"></i><p>今天的歌单还没生成，去乐评骰子抽一次</p></div>';});
+  const date=select?.value||today;
+  const cached=enrichDicePlaylist(getCachedDice(date));
+  if(cached&&isDiceUnlocked(date)) renderDailyPlaylist(cached);
+  else renderPlaylistLocked(date,cached);
 }
 function loadPlaylistFromHistory(){
   const date=val('playlist-date-select')||todayKey();
-  const cached=getCachedDice(date);
-  if(cached) renderDailyPlaylist(cached);
-  else fetchDailyDice(date).then(renderDailyPlaylist);
+  const cached=enrichDicePlaylist(getCachedDice(date));
+  if(cached&&isDiceUnlocked(date)) renderDailyPlaylist(cached);
+  else renderPlaylistLocked(date,cached);
+}
+function renderPlaylistLocked(date,cached){
+  const el=document.getElementById('playlist-content'); if(!el)return;
+  el.innerHTML=`<div class="playlist-layout"><div class="playlist-side"><div class="playlist-theme">${esc(cached?.theme||'未解锁')}</div>${monthCalendarHtml(date)}<div class="dice-note">完整歌单需要从“乐评骰子”抽完卡后显示。</div></div><div class="empty" style="min-height:260px"><i class="ti ti-lock"></i><p>${cached?'这天的歌单已生成，但还没抽完卡':'这天还没有生成歌单'}</p><button class="ib solid" onclick="go('reviewdice',null)">去抽牌</button></div></div>`;
+}
+function monthCalendarHtml(date=todayKey()){
+  const d=new Date(date), y=d.getFullYear(), m=d.getMonth(), selected=date;
+  const days=new Date(y,m+1,0).getDate();
+  const blanks=new Date(y,m,1).getDay();
+  let cells='<div class="playlist-calendar">'+['日','一','二','三','四','五','六'].map(x=>`<div style="font-family:var(--mono);font-size:9px;color:var(--t4);text-align:center">${x}</div>`).join('');
+  for(let i=0;i<blanks;i++)cells+='<div></div>';
+  for(let day=1;day<=days;day++){
+    const key=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const cached=!!getCachedDice(key), on=key===selected;
+    cells+=`<button class="cal-day ${cached?'cached':'locked'} ${on?'on':''}" onclick="selectPlaylistDate('${key}')">${day}</button>`;
+  }
+  return cells+'</div>';
+}
+function selectPlaylistDate(date){
+  const select=document.getElementById('playlist-date-select');
+  if(select&&!Array.from(select.options).some(o=>o.value===date))select.innerHTML=`<option value="${date}">${date}</option>`+select.innerHTML;
+  if(select)select.value=date;
+  loadPlaylistFromHistory();
 }
 function renderDailyPlaylist(data){
-  currentDicePlaylist=data;
+  currentDicePlaylist=enrichDicePlaylist(data);
   const el=document.getElementById('playlist-content'); if(!el) return;
-  const songs=data.songs||[];
-  el.innerHTML=`<div class="playlist-layout"><div class="playlist-side"><div class="playlist-theme">${esc(data.theme||'今日歌单')}</div><div style="font-size:12px;color:var(--t3);line-height:1.7;margin-bottom:12px">${esc(data.subtitle||'')}</div><div class="tdm" style="color:var(--t4);margin-bottom:12px">${esc(data.date||todayKey())} · ${songs.length}首</div><div class="dice-tools"><button class="ib solid" onclick="saveDicePlaylistToAssets()"><i class="ti ti-database-import"></i>并入资料库</button><button class="ib" onclick="go('reviewdice',null)"><i class="ti ti-cards"></i>牌阵</button></div><div class="dice-note">缓存策略：浏览器本地缓存 + 线上接口按日期缓存，避免重复消耗 API。</div></div><div class="song-list">${songs.map((s,i)=>`<div class="song-row"><div class="song-cover" style="${coverStyle(s,i)}">${String(i+1).padStart(2,'0')}</div><div><div class="song-title">${esc(s.title)} <span style="font-weight:400;color:var(--t4)">/ ${esc(s.artist)}</span></div><div class="song-meta">${esc(s.album||'')} · ${s.year||''} · ${esc(s.language||'')} · ${esc(s.group||s.era_tag||'')}</div><div class="song-review">${esc(s.story||s.award_or_buzz||'')}</div><div class="song-review">点评：${esc(s.tarot_message||'')} · ${esc(s.award_or_buzz||'')}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://music.163.com/#/search/m/?s=${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">网易云</a><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://open.spotify.com/search/${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">Spotify</a></div></div>`).join('')}</div></div>`;
+  const songs=currentDicePlaylist.songs||[];
+  el.innerHTML=`<div class="playlist-layout"><div class="playlist-side"><div class="playlist-theme">${esc(data.theme||'今日歌单')}</div><div style="font-size:12px;color:var(--t3);line-height:1.7;margin-bottom:12px">${esc(data.subtitle||'')}</div><div class="tdm" style="color:var(--t4);margin-bottom:8px">${esc(data.date||todayKey())} · ${songs.length}首</div>${monthCalendarHtml(data.date||todayKey())}<div class="dice-tools"><button class="ib solid" onclick="saveDicePlaylistToAssets()"><i class="ti ti-database-import"></i>并入资料库</button><button class="ib" onclick="go('reviewdice',null)"><i class="ti ti-cards"></i>牌阵</button></div><div class="dice-note">绿色日期表示本机已有缓存。点评会自动保存在本机，图钉会同步到笔记卡片。</div></div><div class="song-list">${songs.map((s,i)=>{const pinned=localStorage.getItem(dicePinnedKey(data.date,i))==='1';return`<div class="song-row ${pinned?'pinned':''}" id="playlist-song-${i}"><button class="pin-btn ${pinned?'on':''}" title="同步到笔记卡片" onclick="pinSongReview(${i})"><i class="ti ti-pin"></i></button><div class="song-cover" style="${cardVars(s,i)}">${String(i+1).padStart(2,'0')}</div><div><div class="song-title">${esc(s.title)} <span style="font-weight:400;color:var(--t4)">/ ${esc(s.artist)}</span></div><div class="song-meta">${esc(s.album||'')} · ${s.year||''} · ${esc(s.language||'')} · ${esc(s.group||s.era_tag||'')}</div><div class="song-review">${esc(s.story||s.award_or_buzz||'')}</div><textarea class="review-edit" oninput="saveSongReview(${i},this.value)" placeholder="添加自己的点评…">${esc(s.custom_review||`点评：${s.tarot_message||''} · ${s.award_or_buzz||''}`)}</textarea></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://music.163.com/#/search/m/?s=${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">网易云</a><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://open.spotify.com/search/${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">Spotify</a></div></div>`;}).join('')}</div></div>`;
+  if(pendingPlaylistSongIndex!==null){
+    setTimeout(()=>document.getElementById('playlist-song-'+pendingPlaylistSongIndex)?.scrollIntoView({behavior:'smooth',block:'center'}),80);
+    pendingPlaylistSongIndex=null;
+  }
+}
+function saveSongReview(i,text){
+  const data=currentDicePlaylist;if(!data?.songs?.[i])return;
+  data.songs[i].custom_review=text;
+  localStorage.setItem(diceReviewKey(data.date,i),text);
+  setCachedDice(data);
+}
+async function pinSongReview(i){
+  if(!db){toast('数据库未连接');return;}
+  const data=currentDicePlaylist, s=data?.songs?.[i]; if(!s)return;
+  const review=s.custom_review||localStorage.getItem(diceReviewKey(data.date,i))||`${s.tarot_message||''} · ${s.award_or_buzz||''}`;
+  const content=`《${s.title}》${s.artist}：${review}`;
+  const source_desc=`乐评骰子 ${data.date} · ${s.album||''} · ${s.year||''}`;
+  const {error}=await db.from('note_cards').insert({content,card_type:'song_review',source_desc,tags:['歌曲点评',s.language||'',...(s.emotion_tags||[]).slice(0,2)],is_module:false});
+  if(error){toast('同步失败：'+error.message);return;}
+  localStorage.setItem(dicePinnedKey(data.date,i),'1');
+  toast('已同步到笔记卡片');
+  renderDailyPlaylist(data);
 }
 async function saveDicePlaylistToAssets(){
   if(!db){toast('数据库未连接');return;}
