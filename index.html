@@ -1221,21 +1221,21 @@ async function loadTopicsSongs(tab) {
         <span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span>
       </div>`;
 
-      const r = await fetch(\`/api/netease?id=\${listId}\`);
+      const r = await fetch(`/api/netease?id=${listId}`);
       const data = await r.json();
       const songs = data.songs || [];
       if(!songs.length) throw new Error('暂无数据，网易云接口可能需要稍后重试');
-      el.innerHTML = tabs + selectHtml + \`<div class="tw"><table>
+      el.innerHTML = tabs + selectHtml + `<div class="tw"><table>
         <thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th>专辑</th><th></th></tr></thead>
-        <tbody>\${songs.map((s,i)=>\`<tr>
+        <tbody>${songs.map((s,i)=>`<tr>
           <td class="tdm" style="color:var(--t4)">\${i+1}</td>
-          <td><img src="\${esc(s.cover)}?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>
-          <td class="td1">\${esc(s.name)}</td>
-          <td style="color:var(--t3)">\${esc(s.artist)}</td>
-          <td style="color:var(--t4);font-size:11px">\${esc(s.album)}</td>
-          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('\${esc(s.name)}','\${esc(s.artist)}')"><i class="ti ti-pencil"></i>创稿</button></td>
-        </tr>\`).join('')}</tbody>
-      </table></div>\`;
+          <td><img src="${esc(s.cover)}?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>
+          <td class="td1">${esc(s.name)}</td>
+          <td style="color:var(--t3)">${esc(s.artist)}</td>
+          <td style="color:var(--t4);font-size:11px">${esc(s.album)}</td>
+          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(s.name)}','${esc(s.artist)}')"><i class="ti ti-pencil"></i>创稿</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
 
     } else if(currentSongsTab === 'qq') {
       const r = await fetch('/api/qq');
