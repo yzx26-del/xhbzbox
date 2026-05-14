@@ -99,12 +99,14 @@ tbody tr:hover{background:var(--bg2)}
 .pc{background:var(--bg);padding:16px;cursor:pointer;transition:background .12s;position:relative}
 .pc:hover{background:var(--bg2)}
 .pc-mark{position:absolute;top:0;left:0;bottom:0;width:2px}
-.pm-film{background:var(--t1)}.pm-game{background:var(--t3)}.pm-album{background:var(--t4)}.pm-tv{background:#888}
+.pm-film{background:#f08a24}.pm-game{background:#2f7dd3}.pm-album{background:#d9485f}.pm-tv{background:#2f9b5f}
 .pc-type{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:8px}
 .pc-name{font-family:var(--serif);font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px}
 .pc-meta{font-size:11px;color:var(--t4);margin-bottom:12px}
 .pc-stats{display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--line)}
 .pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
+.pc-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:2px;border:1px solid;font-family:var(--mono);font-size:10px;font-weight:600}
+.pt-film{background:#fff4e8;color:#b85e12;border-color:#ffd5ad}.pt-tv{background:#edf9f0;color:#247a46;border-color:#bfe8cc}.pt-game{background:#edf5ff;color:#225fa6;border-color:#bed8f6}.pt-album{background:#fff0f3;color:#ad2e45;border-color:#f5bdc7}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
 .mwrap::-webkit-scrollbar-thumb{background:var(--line)}
@@ -233,7 +235,6 @@ select.fi{cursor:pointer}
     <div class="nl">知识网络</div>
     <div class="ni" onclick="go('knowledge',this)"><i class="ti ti-brain"></i>知识实体<span class="nb" id="nb-entities">—</span></div>
     <div class="ni" onclick="go('notes',this)"><i class="ti ti-cards"></i>笔记卡片<span class="nb" id="nb-notes">—</span></div>
-    <div class="ni" onclick="go('motif',this)"><i class="ti ti-music"></i>母题对比</div>
     <div class="ni" onclick="go('graph',this)"><i class="ti ti-topology-star"></i>血缘图谱</div>
   </div>
   <div class="ns">
@@ -289,7 +290,7 @@ select.fi{cursor:pointer}
 <div class="page" id="pg-projects">
   <div class="ph"><div><div class="ptitle">项目母本库</div><div class="psub">以媒介作品为中心的资料聚合节点</div></div>
     <div class="ph-r">
-      <div style="display:flex;gap:5px;flex-wrap:wrap" id="proj-filter"><span class="tag on" data-type="">全部</span><span class="tag" data-type="film">电影</span><span class="tag" data-type="game">游戏</span><span class="tag" data-type="album">专辑</span><span class="tag" data-type="tv">电视剧</span></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap" id="proj-filter"><span class="tag on" data-type="">全部</span><span class="tag" data-type="film">电影</span><span class="tag" data-type="game">游戏</span><span class="tag" data-type="album">综艺</span><span class="tag" data-type="tv">电视剧</span></div>
       <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建</button>
     </div>
   </div>
@@ -331,12 +332,6 @@ select.fi{cursor:pointer}
   <div class="ph"><div><div class="ptitle">笔记卡片库</div><div class="psub">原子化笔记·可复用模块·智能导入自动生成</div></div><div class="ph-r"><button class="ib solid" onclick="openModal('note')"><i class="ti ti-plus"></i>新建卡片</button></div></div>
   <div style="display:flex;gap:5px;margin-bottom:16px" id="notes-filter"><span class="tag on" data-ntype="">全部</span><span class="tag" data-ntype="analysis">分析观点</span><span class="tag" data-ntype="fact">史实引用</span><span class="tag" data-ntype="technique">技法记录</span><span class="tag" data-ntype="reusable_module">可复用模块</span><span class="tag" data-ntype="quote">原文摘录</span></div>
   <div id="notes-grid"><div class="loading"><div class="spinner"></div>加载中…</div></div>
-</div>
-
-<!-- 母题对比 -->
-<div class="page" id="pg-motif">
-  <div class="ph"><div><div class="ptitle">母题对比</div><div class="psub">同一主题在不同版本/项目中的并列分析</div></div></div>
-  <div style="padding:48px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:12px;border:1px dashed var(--line);border-radius:4px">母题对比播放器·即将上线<br><span style="font-size:10px;margin-top:8px;display:block">已在数据库建立 motifs / motif_clips 表，等待前端音频播放器接入</span></div>
 </div>
 
 <!-- 血缘图谱 -->
@@ -453,7 +448,7 @@ select.fi{cursor:pointer}
         <span class="tag on" data-heat="">全部</span>
         <span class="tag" data-heat="film">电影</span>
         <span class="tag" data-heat="game">游戏</span>
-        <span class="tag" data-heat="album">专辑</span>
+        <span class="tag" data-heat="album">综艺</span>
       </div>
       <button class="ib" onclick="loadHeatmap()"><i class="ti ti-refresh"></i>刷新</button>
     </div>
@@ -464,7 +459,7 @@ select.fi{cursor:pointer}
 <!-- 发售日历 -->
 <div class="page" id="pg-calendar">
   <div class="ph">
-    <div><div class="ptitle">发售日历</div><div class="psub">未来30天 · 游戏发售 / 电影上映 / 专辑发布 · 配乐需求预判</div></div>
+    <div><div class="ptitle">发售日历</div><div class="psub">未来30天 · 游戏发售 / 电影上映 / 综艺发布 · 配乐需求预判</div></div>
     <div class="ph-r">
       <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>添加项目</button>
     </div>
@@ -584,7 +579,7 @@ select.fi{cursor:pointer}
 <div class="overlay" id="modal-project" onclick="closeModal('project',event)">
   <div class="modal"><button class="ib ib-sq modal-close" onclick="closeModal('project')"><i class="ti ti-x"></i></button>
     <div class="modal-title">新建项目母本</div>
-    <div class="fg"><label class="fl">媒介类型</label><div class="typsel" id="proj-type-sel"><div class="to sel" data-val="film">🎬 电影</div><div class="to" data-val="game">🎮 游戏</div><div class="to" data-val="tv">📺 电视剧</div><div class="to" data-val="album">🎵 专辑</div><div class="to" data-val="documentary">📻 纪录片</div></div></div>
+    <div class="fg"><label class="fl">媒介类型</label><div class="typsel" id="proj-type-sel"><div class="to sel" data-val="film">🎬 电影</div><div class="to" data-val="game">🎮 游戏</div><div class="to" data-val="tv">📺 电视剧</div><div class="to" data-val="album">🎤 综艺</div><div class="to" data-val="documentary">📻 纪录片</div></div></div>
     <div class="fg"><label class="fl">作品名称（中文）</label><input class="fi" id="p-name" placeholder="如：星际穿越"></div>
     <div class="fg"><label class="fl">英文名</label><input class="fi" id="p-name-en" placeholder="Interstellar"></div>
     <div class="fr2"><div class="fg"><label class="fl">作曲家</label><input class="fi" id="p-composer" placeholder="汉斯·季默"></div><div class="fg"><label class="fl">导演/开发商</label><input class="fi" id="p-director" placeholder="克里斯托弗·诺兰"></div></div>
@@ -842,7 +837,7 @@ async function loadDashStats() {
   document.getElementById('nb-entities').textContent=en.count||0;
   document.getElementById('nb-articles').textContent=ar.count||0;
   document.getElementById('nb-risk').textContent=(ri.data||[]).length;
-  document.getElementById('st-projects-sub').textContent=`电影 ${projects.filter(p=>p.type==='film').length} · 游戏 ${projects.filter(p=>p.type==='game').length} · 专辑 ${projects.filter(p=>p.type==='album').length}`;
+  document.getElementById('st-projects-sub').textContent=`电影 ${projects.filter(p=>p.type==='film').length} · 游戏 ${projects.filter(p=>p.type==='game').length} · 综艺 ${projects.filter(p=>p.type==='album').length}`;
   document.getElementById('st-articles-sub').textContent=`共 ${ar.count||0} 篇稿件`;
 }
 async function loadDashProjects() {
@@ -872,7 +867,7 @@ async function loadProjects() {
 function renderProjects(list) {
   const el=document.getElementById('projects-grid');
   if(!list.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>';return;}
-  el.innerHTML=`<div class="pcgrid">${list.map(p=>`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats"><span class="pc-stat"><i class="ti ti-tag"></i>${(p.tags||[]).join('·')||'—'}</span></div></div></div>`).join('')}</div>`;
+  el.innerHTML=`<div class="pcgrid">${list.map(p=>`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${projectTagHtml(p)}</div></div></div>`).join('')}</div>`;
 }
 function selectProject(id,type){if(type==='game')go('gamematrix',null);else go('timeline',null);}
 async function createProject() {
@@ -980,13 +975,20 @@ async function loadNotes(type='') {
   if(!db) return;
   let q=db.from('note_cards').select('*').order('created_at',{ascending:false});
   if(type) q=q.eq('card_type',type);
-  const {data}=await q;
+  const [{data},{data:links}] = await Promise.all([
+    q,
+    db.from('article_projects').select('project_id,articles(title,updated_at)')
+  ]);
+  const articleByProject = {};
+  (links||[]).sort((a,b)=>new Date(b.articles?.updated_at||0)-new Date(a.articles?.updated_at||0)).forEach(l=>{
+    if(l.project_id && l.articles?.title && !articleByProject[l.project_id]) articleByProject[l.project_id]=l.articles.title;
+  });
   const count=(data||[]).length;
   document.getElementById('nb-notes').textContent=count;
   const el=document.getElementById('notes-grid');
   if(!data?.length){el.innerHTML='<div class="empty"><i class="ti ti-cards"></i><p>暂无笔记卡片，可通过智能导入自动生成</p></div>';return;}
   const typeLabel={analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};
-  el.innerHTML=`<div class="nc-grid">${data.map(n=>`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${typeLabel[n.card_type]||n.card_type}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px">${esc(n.source_desc||'')}</div></div>`).join('')}</div>`;
+  el.innerHTML=`<div class="nc-grid">${data.map(n=>{const article=n.source_article_title||n.article_title||articleByProject[n.project_id]||'';return`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${typeLabel[n.card_type]||n.card_type}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px;line-height:1.7">${article?`<div>来源文章：${esc(article)}</div>`:''}${n.source_desc?`<div>来源说明：${esc(n.source_desc)}</div>`:''}${!article&&!n.source_desc?'—':''}</div></div>`;}).join('')}</div>`;
 }
 async function createNote() {
   const typeEl=document.querySelector('#note-type-sel .sel');
@@ -1006,16 +1008,16 @@ async function deleteNote(id) {
 // ══ GRAPH ══
 async function loadGraph() {
   if(!db) return;
-  const [pr,re]=await Promise.all([db.from('projects').select('id,name,type,tags'),db.from('project_relations').select('*')]);
+  const [pr,re]=await Promise.all([db.from('projects').select('id,name,type,tags,composer'),db.from('project_relations').select('*')]);
   const projects=pr.data||[], relations=re.data||[];
   const el=document.getElementById('graph-content');
   if(!projects.length){el.innerHTML='<div class="empty"><i class="ti ti-topology-star"></i><p>暂无项目，智能导入后自动生成图谱</p></div>';return;}
-  const colors={film:'#0a0a0a',game:'#666',album:'#aaa',tv:'#888',documentary:'#bbb'};
+  const colors={film:'#f08a24',game:'#2f7dd3',album:'#d9485f',tv:'#2f9b5f',documentary:'#888'};
   const W=700,H=360,n=projects.length;
   const nodes=projects.map((p,i)=>{const a=(2*Math.PI*i/n)-Math.PI/2,r=Math.min(W,H)*0.36;return{...p,x:W/2+r*Math.cos(a),y:H/2+r*Math.sin(a)};});
   const lines=relations.map(r=>{const f=nodes.find(n=>n.id===r.from_id),t=nodes.find(n=>n.id===r.to_id);if(!f||!t)return'';return`<line x1="${f.x}" y1="${f.y}" x2="${t.x}" y2="${t.y}" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>`;}).join('');
-  const relTable=relations.length?`<div style="margin-top:16px"><div class="sh"><div class="sh-t"><i class="ti ti-list"></i>血缘关系列表</div></div><div class="tw"><table><thead><tr><th>源项目</th><th>关系</th><th>目标</th><th>说明（AI推断）</th></tr></thead><tbody>${relations.map(r=>{const f=projects.find(p=>p.id===r.from_id),t=projects.find(p=>p.id===r.to_id);const rl={quote:'直接引用',style:'风格继承',composer_move:'作曲家迁移',technique:'技法迁移',motif_reuse:'母题复用'};return`<tr><td class="td1">${esc(f?.name||'')}</td><td><span class="badge b-def">${rl[r.relation]||r.relation}</span></td><td>${esc(t?.name||'')}</td><td style="color:var(--t3);font-size:11px">${esc(r.description||'')}</td></tr>`;}).join('')}</tbody></table></div></div>`:'<div style="font-family:var(--mono);font-size:11px;color:var(--t4);margin-top:12px">暂无关系，智能导入时会自动推断</div>';
-  el.innerHTML=`<div style="border:1px solid var(--line);border-radius:4px;height:${H}px;position:relative;overflow:hidden;background:var(--bg)"><svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ccc"/></marker></defs>${lines}</svg>${nodes.map(p=>`<div title="${esc(p.name)}&#10;特色：${(p.tags||[]).join('、')}" style="position:absolute;left:${p.x}px;top:${p.y}px;width:54px;height:54px;border-radius:50%;background:var(--bg);border:1.5px solid ${colors[p.type]||'#ccc'};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;text-align:center;cursor:pointer;line-height:1.3;padding:4px;transform:translate(-50%,-50%);color:var(--t1);transition:all .2s" onmouseover="this.style.background='var(--t1)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg)';this.style.color='var(--t1)'">${esc(p.name).slice(0,5)}</div>`).join('')}</div>${relTable}`;
+  const relTable=relations.length?`<div style="margin-top:16px"><div class="sh"><div class="sh-t"><i class="ti ti-list"></i>血缘关系列表</div></div><div class="tw"><table><thead><tr><th>源项目</th><th>作曲家</th><th>关系</th><th>目标</th><th>作曲家</th><th>说明（AI推断）</th></tr></thead><tbody>${relations.map(r=>{const f=projects.find(p=>p.id===r.from_id),t=projects.find(p=>p.id===r.to_id);const rl={quote:'直接引用',style:'风格继承',composer_move:'作曲家迁移',technique:'技法迁移',motif_reuse:'母题复用'};return`<tr><td class="td1">${esc(f?.name||'')}</td><td class="tdm">${esc(f?.composer||'—')}</td><td><span class="badge b-def">${rl[r.relation]||r.relation}</span></td><td>${esc(t?.name||'')}</td><td class="tdm">${esc(t?.composer||'—')}</td><td style="color:var(--t3);font-size:11px">${esc(r.description||'')}</td></tr>`;}).join('')}</tbody></table></div></div>`:'<div style="font-family:var(--mono);font-size:11px;color:var(--t4);margin-top:12px">暂无关系，智能导入时会自动推断</div>';
+  el.innerHTML=`<div style="border:1px solid var(--line);border-radius:4px;height:${H}px;position:relative;overflow:hidden;background:var(--bg)"><svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ccc"/></marker></defs>${lines}</svg>${nodes.map(p=>`<div title="${esc(p.name)}&#10;作曲家：${esc(p.composer||'—')}&#10;特色：${(p.tags||[]).join('、')}" style="position:absolute;left:${p.x}px;top:${p.y}px;width:72px;min-height:58px;border-radius:5px;background:var(--bg);border:1.5px solid ${colors[p.type]||'#ccc'};display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;text-align:center;cursor:pointer;line-height:1.35;padding:5px;transform:translate(-50%,-50%);color:var(--t1);transition:all .2s" onmouseover="this.style.background='var(--t1)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg)';this.style.color='var(--t1)'"><strong style="font-family:var(--sans);font-size:10px">${esc(p.name).slice(0,7)}</strong><span style="font-size:8px;color:inherit;opacity:.72">${esc(p.composer||'—').slice(0,8)}</span></div>`).join('')}</div>${relTable}`;
 }
 
 // ══ ARTICLES ══
@@ -1082,11 +1084,16 @@ async function loadAssets(type='') {
   if(!db) return;
   let q=db.from('assets').select('*').order('created_at',{ascending:false});
   if(type) q=q.eq('type',type);
-  const {data}=await q;
+  const [{data},{data:projects}] = await Promise.all([
+    q,
+    db.from('projects').select('id,name,composer')
+  ]);
+  const projectMap = {};
+  (projects||[]).forEach(p=>{projectMap[p.id]=p;});
   document.getElementById('nb-assets').textContent=(data||[]).length;
   const el=document.getElementById('assets-table');
   if(!data?.length){el.innerHTML='<div class="empty"><i class="ti ti-file-off"></i><p>暂无资料</p></div>';return;}
-  el.innerHTML=`<table><thead><tr><th>资料名</th><th>类型</th><th>版权</th><th>时间/触发</th><th>链接</th><th></th></tr></thead><tbody>${data.map(a=>`<tr><td class="td1">${esc(a.name)}</td><td><span class="badge b-def">${assetTypeName(a.type)}</span></td><td>${copyrightBadge(a.copyright_status)}</td><td class="tdm">${esc(a.timecode||a.trigger_desc||'—')}</td><td>${a.url?`<a href="${esc(a.url)}" target="_blank" style="color:var(--info);font-family:var(--mono);font-size:10px">打开</a>`:'—'}</td><td><button onclick="deleteAsset('${a.id}','${esc(a.name)}')" class="ib danger" style="height:24px;padding:0 8px;font-size:11px"><i class="ti ti-trash"></i></button></td></tr>`).join('')}</tbody></table>`;
+  el.innerHTML=`<table><thead><tr><th>资料名</th><th>作曲家</th><th>来源作品</th><th>类型</th><th>版权</th><th>时间/触发</th><th>链接</th><th></th></tr></thead><tbody>${data.map(a=>{const p=projectMap[a.project_id]||{};return`<tr><td class="td1"><div>${esc(a.name)}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:2px">${[p.composer,p.name].filter(Boolean).map(esc).join(' · ')||'未挂靠作品信息'}</div></td><td class="tdm">${esc(p.composer||'—')}</td><td>${esc(p.name||'—')}</td><td><span class="badge b-def">${assetTypeName(a.type)}</span></td><td>${copyrightBadge(a.copyright_status)}</td><td class="tdm">${esc(a.timecode||a.trigger_desc||'—')}</td><td>${a.url?`<a href="${esc(a.url)}" target="_blank" style="color:var(--info);font-family:var(--mono);font-size:10px">打开</a>`:'—'}</td><td><button onclick="deleteAsset('${a.id}','${esc(a.name)}')" class="ib danger" style="height:24px;padding:0 8px;font-size:11px"><i class="ti ti-trash"></i></button></td></tr>`;}).join('')}</tbody></table>`;
 }
 async function createAsset() {
   const name=val('as-name'); if(!name){toast('请填写资料名称');return;}
@@ -1546,7 +1553,7 @@ async function loadMyData() {
 
   el.innerHTML = `
     <div class="srow" style="margin-bottom:20px">
-      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/专辑</div></div>
+      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/综艺</div></div>
       <div class="sc"><div class="sc-label">已发布稿件</div><div class="sc-val ok">${published.length}</div><div class="sc-sub">共 ${arts.length} 篇</div></div>
       <div class="sc"><div class="sc-label">笔记卡片</div><div class="sc-val">${notes.length}</div><div class="sc-sub">原子化知识</div></div>
       <div class="sc"><div class="sc-label">平均字数</div><div class="sc-val">${avgWords.toLocaleString()}</div><div class="sc-sub">每篇稿件</div></div>
@@ -1623,6 +1630,7 @@ ${preview}
 
 注意：
 - projects只提取文章明确讨论的媒介作品
+- 如果是综艺项目，type使用album
 - entities重点提取作曲家和文章涉及的具体音乐技法
 - tracks提取文章明确提到的具体曲目名称，不要泛化
 - notes至少提取3条，每条是文章中有价值的分析或点评
@@ -1748,8 +1756,13 @@ function closeModal(name,e){if(!e||e.target===document.getElementById('modal-'+n
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function val(id){return(document.getElementById(id)?.value||'').trim();}
 function clearInputs(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
-function typeIcon(t){return{film:'🎬',game:'🎮',tv:'📺',album:'🎵',documentary:'📻'}[t]||'📁';}
-function typeName(t){return{film:'电影',game:'游戏',tv:'电视剧',album:'专辑',documentary:'纪录片'}[t]||t;}
+function typeIcon(t){return{film:'🎬',game:'🎮',tv:'📺',album:'🎤',documentary:'📻'}[t]||'📁';}
+function typeName(t){return{film:'电影',game:'游戏',tv:'电视剧',album:'综艺',documentary:'纪录片'}[t]||t;}
+function projectTagHtml(p){
+  const tags=(p.tags||[]).filter(Boolean);
+  if(!tags.length)return`<span class="pc-tag pt-${p.type||'def'}"><i class="ti ti-tag"></i>${typeName(p.type)||'未分类'}</span>`;
+  return tags.map(t=>`<span class="pc-tag pt-${p.type||'def'}"><i class="ti ti-tag"></i>${esc(t)}</span>`).join('');
+}
 function entityTypeName(t){return{composer:'作曲家',technique:'技法',period:'历史时期',instrument:'乐器',motif:'母题'}[t]||t;}
 function assetTypeName(t){return{audio:'音频',video:'视频',image:'图片',document:'文档',score:'乐谱',link:'链接'}[t]||t;}
 function statusText(s){return{topic:'选题',collecting:'资料收集',writing:'撰写中',review:'事实核查',layout:'排版',published:'已发布',archived:'归档'}[s]||s;}
@@ -2020,7 +2033,7 @@ async function loadMyData() {
 
   el.innerHTML = `
     <div class="srow" style="margin-bottom:20px">
-      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/专辑</div></div>
+      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/综艺</div></div>
       <div class="sc"><div class="sc-label">已发布稿件</div><div class="sc-val ok">${published.length}</div><div class="sc-sub">共 ${arts.length} 篇</div></div>
       <div class="sc"><div class="sc-label">笔记卡片</div><div class="sc-val">${notes.length}</div><div class="sc-sub">本月新增 ${thisMonthNotes.length}</div></div>
       <div class="sc"><div class="sc-label">平均字数</div><div class="sc-val">${avgWords.toLocaleString()}</div><div class="sc-sub">每篇稿件</div></div>
