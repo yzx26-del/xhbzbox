@@ -1205,37 +1205,41 @@ async function loadTopicsSongs(tab) {
 
   try {
     if(currentSongsTab === 'netease') {
-      // 榜单切换
-      const listMap = {'3779629':'新歌榜','3778678':'热歌榜','19723756':'飙升榜','2884035':'原创榜'};
-      const listId = document.getElementById('netease-list-select')?.value || '3779629';
-      const listName = listMap[listId] || '新歌榜';
+      const listId = document.getElementById('netease-list-select') ? document.getElementById('netease-list-select').value : '3779629';
+      const listNames = {'3779629':'新歌榜','3778678':'热歌榜','19723756':'飙升榜','2884035':'原创榜'};
 
-      const selectHtml = `<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--t3)">榜单：</span>
-        <select id="netease-list-select" class="fi" style="width:120px;height:28px;padding:0 8px;font-size:12px" onchange="loadTopicsSongs('netease')">
-          <option value="3779629" ${listId==='3779629'?'selected':''}>新歌榜</option>
-          <option value="3778678" ${listId==='3778678'?'selected':''}>热歌榜</option>
-          <option value="19723756" ${listId==='19723756'?'selected':''}>飙升榜</option>
-          <option value="2884035" ${listId==='2884035'?'selected':''}>原创榜</option>
-        </select>
-        <span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span>
-      </div>`;
+      const selectHtml = '<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px">'
+        + '<span style="font-size:12px;color:var(--t3)">榜单：</span>'
+        + '<select id="netease-list-select" class="fi" style="width:120px;height:28px;padding:0 8px;font-size:12px" onchange="loadTopicsSongs('netease')">'
+        + '<option value="3779629"' + (listId==='3779629'?' selected':'') + '>新歌榜</option>'
+        + '<option value="3778678"' + (listId==='3778678'?' selected':'') + '>热歌榜</option>'
+        + '<option value="19723756"' + (listId==='19723756'?' selected':'') + '>飙升榜</option>'
+        + '<option value="2884035"' + (listId==='2884035'?' selected':'') + '>原创榜</option>'
+        + '</select>'
+        + '<span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span>'
+        + '</div>';
 
-      const r = await fetch(`/api/netease?id=${listId}`);
+      const r = await fetch('/api/netease?id=' + listId);
       const data = await r.json();
       const songs = data.songs || [];
       if(!songs.length) throw new Error('暂无数据，网易云接口可能需要稍后重试');
-      el.innerHTML = tabs + selectHtml + `<div class="tw"><table>
-        <thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th>专辑</th><th></th></tr></thead>
-        <tbody>${songs.map((s,i)=>`<tr>
-          <td class="tdm" style="color:var(--t4)">\${i+1}</td>
-          <td><img src="${esc(s.cover)}?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>
-          <td class="td1">${esc(s.name)}</td>
-          <td style="color:var(--t3)">${esc(s.artist)}</td>
-          <td style="color:var(--t4);font-size:11px">${esc(s.album)}</td>
-          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(s.name)}','${esc(s.artist)}')"><i class="ti ti-pencil"></i>创稿</button></td>
-        </tr>`).join('')}</tbody>
-      </table></div>`;
+
+      let tableRows = '';
+      songs.forEach(function(s, i) {
+        tableRows += '<tr>'
+          + '<td class="tdm" style="color:var(--t4)">' + (i+1) + '</td>'
+          + '<td><img src="' + esc(s.cover) + '?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>'
+          + '<td class="td1">' + esc(s.name) + '</td>'
+          + '<td style="color:var(--t3)">' + esc(s.artist) + '</td>'
+          + '<td style="color:var(--t4);font-size:11px">' + esc(s.album) + '</td>'
+          + '<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('' + esc(s.name) + '','' + esc(s.artist) + '')"><i class="ti ti-pencil"></i>创稿</button></td>'
+          + '</tr>';
+      });
+
+      el.innerHTML = tabs + selectHtml + '<div class="tw"><table>'
+        + '<thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th>专辑</th><th></th></tr></thead>'
+        + '<tbody>' + tableRows + '</tbody>'
+        + '</table></div>';
 
     } else if(currentSongsTab === 'qq') {
       const r = await fetch('/api/qq');
