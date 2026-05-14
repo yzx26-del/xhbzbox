@@ -13,8 +13,10 @@ function fallbackPlaylist(date) {
   return {
     date,
     month,
-    theme: '时光回响',
+    theme: '回响',
     subtitle: `${month}月发行的12首品质歌曲，今天先用本地牌阵兜底。`,
+    theme_quote: '所有过往，皆为序章。',
+    theme_quote_source: '莎士比亚《暴风雨》',
     songs: [
       ['传奇','王菲','寓言',2000,'中文','中文经典','华语乐坛长期讨论的流行经典','旧梦忽然开花','空灵,怀旧','只是因为在人群中'],
       ['红豆','王菲','唱游',1998,'中文','中文经典','金曲奖与华语流行评论长期提及','等风也等你','克制,温柔','还没好好地感受'],
@@ -63,8 +65,10 @@ export default async function handler(req, res) {
 {
   "date":"${date}",
   "month":${month},
-  "theme":"4字以内",
+  "theme":"一个词，2到4个汉字，不要句子",
   "subtitle":"一句话",
+  "theme_quote":"一句电影台词或名著名言，20字以内",
+  "theme_quote_source":"出处，如电影名或书名",
   "songs":[
     {
       "card_no":1,
