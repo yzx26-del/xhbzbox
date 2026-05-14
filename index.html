@@ -1210,7 +1210,7 @@ async function loadTopicsSongs(tab) {
 
       const selectHtml = '<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px">'
         + '<span style="font-size:12px;color:var(--t3)">榜单：</span>'
-        + '<select id="netease-list-select" class="fi" style="width:120px;height:28px;padding:0 8px;font-size:12px" onchange="loadTopicsSongs('netease')">'
+        + '<select id="netease-list-select" class="fi" style="width:120px;height:28px;padding:0 8px;font-size:12px" onchange="loadTopicsSongs(\'netease\')">'
         + '<option value="3779629"' + (listId==='3779629'?' selected':'') + '>新歌榜</option>'
         + '<option value="3778678"' + (listId==='3778678'?' selected':'') + '>热歌榜</option>'
         + '<option value="19723756"' + (listId==='19723756'?' selected':'') + '>飙升榜</option>'
@@ -1228,11 +1228,11 @@ async function loadTopicsSongs(tab) {
       songs.forEach(function(s, i) {
         tableRows += '<tr>'
           + '<td class="tdm" style="color:var(--t4)">' + (i+1) + '</td>'
-          + '<td><img src="' + esc(s.cover) + '?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>'
+          + '<td><img src="' + esc(s.cover) + '?param=64y64" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.onerror=null"></td>'
           + '<td class="td1">' + esc(s.name) + '</td>'
           + '<td style="color:var(--t3)">' + esc(s.artist) + '</td>'
           + '<td style="color:var(--t4);font-size:11px">' + esc(s.album) + '</td>'
-          + '<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('' + esc(s.name) + '','' + esc(s.artist) + '')"><i class="ti ti-pencil"></i>创稿</button></td>'
+          + '<td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong(\'' + esc(s.name) + '\',\'' + esc(s.artist) + '\')"><i class="ti ti-pencil"></i>创稿</button></td>'
           + '</tr>';
       });
 
@@ -1250,7 +1250,7 @@ async function loadTopicsSongs(tab) {
         <thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th>专辑</th><th></th></tr></thead>
         <tbody>${songs.map((s,i)=>`<tr>
           <td class="tdm" style="color:var(--t4)">${i+1}</td>
-          <td><img src="${esc(s.cover)}" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>
+          <td><img src="${esc(s.cover)}" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.onerror=null"></td>
           <td class="td1">${esc(s.name)}</td>
           <td style="color:var(--t3)">${esc(s.artist)}</td>
           <td style="color:var(--t4);font-size:11px">${esc(s.album)}</td>
@@ -1282,7 +1282,7 @@ async function loadTopicsSongs(tab) {
       el.innerHTML = tabs + `<div style="display:flex;flex-direction:column;gap:8px">
         ${videos.map((v,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:4px;transition:border-color .12s" onmouseover="this.style.borderColor='var(--t1)'" onmouseout="this.style.borderColor='var(--line)'">
           <div style="font-family:var(--mono);font-size:10px;color:var(--t4);width:20px">${i+1}</div>
-          <img src="${esc(v.cover)}" style="width:80px;height:50px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">
+          <img src="${esc(v.cover)}" style="width:80px;height:50px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.onerror=null">
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(v.title)}</div>
             <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">UP: ${esc(v.author)} · 播放 ${parseInt(v.play).toLocaleString()}</div>
@@ -1372,23 +1372,31 @@ async function loadHeatmap() {
     const tvShows = [...(tvAiring.results||[]).slice(0,6), ...(tvComing.results||[]).slice(0,4)];
 
     function movieCard(m, badge) {
-      const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : '';
-      const rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
-      const date = m.release_date || m.first_air_date || '';
-      const title = m.title || m.name || '';
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);transition:background .1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
-        ${poster?`<img src="${poster}" style="width:36px;height:54px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`:'<div style="width:36px;height:54px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>'}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:3px">${esc(title)}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:4px">${date} · ⭐ ${rating}</div>
-          <div style="font-size:11px;color:var(--t3);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc((m.overview||'').slice(0,80))}${(m.overview||'').length>80?'…':''}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
-          <span class="badge ${badge==='now'?'b-ok':badge==='coming'?'b-warn':'b-info'}">${badge==='now'?'上映中':badge==='coming'?'即将上映':'热播中'}</span>
-          <button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createArticleFromMedia('${esc(title)}','${date}')"><i class="ti ti-pencil"></i>创稿</button>
-        </div>
-      </div>`;
+      var poster = m.poster_path ? 'https://image.tmdb.org/t/p/w92' + m.poster_path : '';
+      var rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
+      var date = m.release_date || m.first_air_date || '';
+      var title = m.title || m.name || '';
+      var imgHtml = poster
+        ? '<img src="' + poster + '" style="width:36px;height:54px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.onerror=null">'
+        : '<div style="width:36px;height:54px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>';
+      var badgeCls = badge==='now' ? 'b-ok' : badge==='coming' ? 'b-warn' : 'b-info';
+      var badgeText = badge==='now' ? '上映中' : badge==='coming' ? '即将上映' : '热播中';
+      var overview = (m.overview || '').slice(0, 80) + ((m.overview || '').length > 80 ? '…' : '');
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)">'
+        + imgHtml
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:3px">' + esc(title) + '</div>'
+        + '<div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:4px">' + date + ' · ⭐ ' + rating + '</div>'
+        + '<div style="font-size:11px;color:var(--t3);line-height:1.5">' + esc(overview) + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">'
+        + '<span class="badge ' + badgeCls + '">' + badgeText + '</span>'
+        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="openArticleModal(this)" data-title="' + esc(title) + '" data-date="' + date + '"><i class="ti ti-pencil"></i>创稿</button>'
+        + '</div>'
+        + '</div>';
     }
+
+    
 
     el.innerHTML = `
       <div class="g2" style="align-items:start">
@@ -1434,23 +1442,27 @@ async function loadCalendar() {
     const upcoming = upcomingRes.results || [];
 
     function gameCard(g, badge) {
-      const bg = g.background_image || '';
-      const rating = g.rating ? g.rating.toFixed(1) : '—';
-      const platforms = (g.platforms||[]).slice(0,3).map(p=>p.platform?.name||'').filter(Boolean).join(' · ');
-      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);transition:background .1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
-        ${bg?`<img src="${bg}" style="width:64px;height:36px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`:'<div style="width:64px;height:36px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>'}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px">${esc(g.name||'')}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:2px">${g.released||'TBD'} · ⭐ ${rating}</div>
-          <div style="font-size:10px;color:var(--t4)">${esc(platforms)}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
-          <span class="badge ${badge==='recent'?'b-ok':'b-warn'}">${badge==='recent'?'刚发售':'即将发售'}</span>
-          <button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createProjectFromGame('${esc(g.name||'')}','${g.released||''}')"><i class="ti ti-folder-plus"></i>建档</button>
-        </div>
-      </div>`;
+      var bg = g.background_image || '';
+      var rating = g.rating ? g.rating.toFixed(1) : '—';
+      var platforms = (g.platforms||[]).slice(0,3).map(function(p){return p.platform && p.platform.name ? p.platform.name : '';}).filter(Boolean).join(' · ');
+      var imgHtml = bg
+        ? '<img src="' + bg + '" style="width:64px;height:36px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.onerror=null">'
+        : '<div style="width:64px;height:36px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>';
+      var badgeText = badge==='recent' ? '刚发售' : '即将发售';
+      var badgeCls = badge==='recent' ? 'b-ok' : 'b-warn';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)">'
+        + imgHtml
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px">' + esc(g.name||'') + '</div>'
+        + '<div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:2px">' + (g.released||'TBD') + ' · ⭐ ' + rating + '</div>'
+        + '<div style="font-size:10px;color:var(--t4)">' + esc(platforms) + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">'
+        + '<span class="badge ' + badgeCls + '">' + badgeText + '</span>'
+        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="openGameModal(this)" data-name="' + esc(g.name||'') + '" data-date="' + (g.released||'') + '"><i class="ti ti-folder-plus"></i>建档</button>'
+        + '</div>'
+        + '</div>';
     }
-
     el.innerHTML = `
       <div class="g2" style="align-items:start">
         <div>
@@ -1771,12 +1783,10 @@ async function saveQNote(createArticle) {
     qnRating ? `【评分】${qnRating}/10` : '',
     emotions.length ? `【情绪】${emotions.join(' · ')}` : '',
     structs.length ? `【结构】${structs.join(' · ')}` : '',
-    timestamps ? `【时间轴】
-${timestamps}` : '',
+    timestamps ? '【时间轴】\n' + timestamps : '',
     analogy ? `【类比】${analogy}` : '',
     verdict ? `【Verdict】${verdict}` : ''
-  ].filter(Boolean).join('
-');
+  ].filter(Boolean).join('\n');
 
   const {data, error} = await db.from('note_cards').insert({
     content: content_val,
@@ -1913,57 +1923,45 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 function updateCardPreview() {
-  const title   = document.getElementById('cg-title')?.value || '歌曲名';
-  const artist  = document.getElementById('cg-artist')?.value || '艺人';
-  const date    = document.getElementById('cg-date')?.value || '';
-  const genre   = document.getElementById('cg-genre')?.value || '';
-  const source  = document.getElementById('cg-source')?.value || '';
-  const rating  = document.getElementById('cg-rating')?.value || '8';
-  const verdict = document.getElementById('cg-verdict')?.value || '';
-  const stars   = '★'.repeat(parseInt(rating)) + '☆'.repeat(10-parseInt(rating));
+  var title   = document.getElementById('cg-title') ? document.getElementById('cg-title').value : '歌曲名';
+  var artist  = document.getElementById('cg-artist') ? document.getElementById('cg-artist').value : '艺人';
+  var date    = document.getElementById('cg-date') ? document.getElementById('cg-date').value : '';
+  var genre   = document.getElementById('cg-genre') ? document.getElementById('cg-genre').value : '';
+  var source  = document.getElementById('cg-source') ? document.getElementById('cg-source').value : '';
+  var rating  = document.getElementById('cg-rating') ? document.getElementById('cg-rating').value : '8';
+  var verdict = document.getElementById('cg-verdict') ? document.getElementById('cg-verdict').value : '';
+  var stars   = '★'.repeat(parseInt(rating)) + '☆'.repeat(10-parseInt(rating));
 
-  let preview = '';
+  var preview = '';
   if(currentPlatform === 'weixin') {
-    preview = `**${title}**
-艺人：${artist}${date?' | 发行：'+date:''}
-${genre?'流派：'+genre+'
-':''}${source?'来源：'+source+'
-':''}
-评分：${stars} ${rating}/10
-
-${verdict}
-
-—— 声轨档案`;
+    preview = '**' + title + '**\n'
+      + '艺人：' + artist + (date ? ' | 发行：' + date : '') + '\n'
+      + (genre ? '流派：' + genre + '\n' : '')
+      + (source ? '来源：' + source + '\n' : '') + '\n'
+      + '评分：' + stars + ' ' + rating + '/10\n\n'
+      + verdict + '\n\n—— 声轨档案';
   } else if(currentPlatform === 'zhihu') {
-    preview = `> 🎵 **${title}** · ${artist}
-> ${date?'发行：'+date+' | ':''}评分：${rating}/10
-> ${genre||''}
-
-${verdict}
-
-${source?'*来源：'+source+'*':''}`;
+    preview = '> 🎵 **' + title + '** · ' + artist + '\n'
+      + (date ? '> 发行：' + date + ' | ' : '> ') + '评分：' + rating + '/10\n'
+      + (genre ? '> ' + genre : '') + '\n\n'
+      + verdict + '\n\n'
+      + (source ? '*来源：' + source + '*' : '');
   } else if(currentPlatform === 'xiaohongshu') {
-    preview = `🎵 ${title} - ${artist}
-
-${stars} ${rating}分
-
-${verdict}
-
-${genre?genre.split('·').map(g=>'#'+g.trim()).join(' '):''}
-${source?'#'+source.replace(/[《》]/g,''):''}
-#音乐推荐 #乐评`;
+    var tags = genre ? genre.split('·').map(function(g){return '#'+g.trim();}).join(' ') : '';
+    var srcTag = source ? '#' + source.replace(/[《》]/g,'') : '';
+    preview = '🎵 ' + title + ' - ' + artist + '\n\n'
+      + stars + ' ' + rating + '分\n\n'
+      + verdict + '\n\n'
+      + tags + ' ' + srcTag + '\n#音乐推荐 #乐评';
   } else if(currentPlatform === 'bilibili') {
-    preview = `**【${rating}分】${title} · ${artist}**
-
-${date?'📅 '+date+'
-':''}${source?'📌 '+source+'
-':''}${genre?'🎼 '+genre+'
-':''}
-
-${verdict}`;
+    preview = '**【' + rating + '分】' + title + ' · ' + artist + '**\n\n'
+      + (date ? '📅 ' + date + '\n' : '')
+      + (source ? '📌 ' + source + '\n' : '')
+      + (genre ? '🎼 ' + genre + '\n' : '') + '\n'
+      + verdict;
   }
 
-  const el = document.getElementById('card-preview-area');
+  var el = document.getElementById('card-preview-area');
   if(el) el.textContent = preview;
 }
 
@@ -2077,6 +2075,17 @@ async function loadMyData() {
     </div>`;
 }
 
+
+function openArticleModal(btn) {
+  var title = btn.getAttribute('data-title') || '';
+  var date = btn.getAttribute('data-date') || '';
+  createArticleFromMedia(title, date);
+}
+function openGameModal(btn) {
+  var name = btn.getAttribute('data-name') || '';
+  var date = btn.getAttribute('data-date') || '';
+  createProjectFromGame(name, date);
+}
 </script>
 </body>
 </html>
