@@ -35,7 +35,8 @@ function fallbackPlaylist(date) {
       language: s[4], era_tag: s[5], award_or_buzz: s[6],
       tarot_message: s[7], emotion_tags: s[8].split(','),
       classic_lyric: s[9],
-      story: `${s[0]}以鲜明的音乐记忆点和公共讨论价值，适合作为今天的乐评切口。`,
+      story_summary: `${s[0]}的时代切口`,
+      story: `${s[0]}围绕鲜明的旋律记忆、歌手表达和当时的公共讨论形成长期生命力。它既适合作为音乐工业案例，也适合作为情绪、叙事和时代审美的乐评入口。`,
       card_no: i + 1
     }))
   };
@@ -84,7 +85,8 @@ export default async function handler(req, res) {
       "tarot_message":"20字内塔罗风格签文",
       "classic_lyric":"经典歌词短句，中文不超过10字，英文不超过8个词",
       "emotion_tags":["情绪1","情绪2"],
-      "story":"50字内歌曲故事或乐评切口"
+      "story_summary":"15字以内，一句话概括故事背景",
+      "story":"100字以内，介绍歌曲故事背景、发行语境、行业讨论或为何值得写乐评"
     }
   ]
 }`;
@@ -96,7 +98,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 3600,
+        max_tokens: 4200,
         temperature: 0.35
       })
     });
