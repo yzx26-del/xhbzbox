@@ -1,20 +1,22 @@
+import { fetchJson, send } from './_utils.js';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const r = await fetch('https://api.bilibili.com/x/web-interface/ranking/v2?rid=3&type=all', {
-      headers: {'User-Agent':'Mozilla/5.0','Referer':'https://www.bilibili.com'}
+    const data = await fetchJson('https://api.bilibili.com/x/web-interface/ranking/v2?rid=3&type=all', {
+      headers: {
+        Referer: 'https://www.bilibili.com/',
+        'User-Agent': 'Mozilla/5.0'
+      }
     });
-    const data = await r.json();
-    const list = data?.data?.list || [];
-    res.json({ videos: list.slice(0,20).map(v=>({
-      title: v.title,
-      author: v.owner?.name || '',
-      play: v.stat?.view || 0,
-      cover: v.pic || '',
-      url: `https://www.bilibili.com/video/${v.bvid}`,
-      bvid: v.bvid
-    }))});
-  } catch(e) {
-    res.status(500).json({error: e.message});
+    const videos = (data?.data?.list || []).slice(0, 20).map((item) => ({
+      title: item.title,
+      author: item.owner?.name || '',
+      cover: item.pic || '',
+      play: item.stat?.view || 0,
+      url: `https://www.bilibili.com/video/${item.bvid}`
+    }));
+    return send(res, 200, { videos });
+  } catch (error) {
+    return send(res, error.status || 500, { error: error.message, videos: [] });
   }
 }

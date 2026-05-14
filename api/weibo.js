@@ -1,22 +1,19 @@
+import { fetchJson, send } from './_utils.js';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const r = await fetch('https://weibo.com/ajax/side/hotSearch', {
-      headers: {'User-Agent':'Mozilla/5.0','Referer':'https://weibo.com'}
+    const data = await fetchJson('https://weibo.com/ajax/side/hotSearch', {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
-    const data = await r.json();
-    const items = data?.data?.realtime || [];
-    const music = items.filter(i => 
-      i.word?.includes('音乐') || i.word?.includes('歌') || 
-      i.word?.includes('专辑') || i.word?.includes('演唱会') ||
-      i.word?.includes('MV') || i.word?.includes('新歌')
-    );
-    res.json({ hot: items.slice(0,20).map(i=>({
-      word: i.word,
-      num: i.num,
-      isMusic: music.some(m=>m.word===i.word)
-    }))});
-  } catch(e) {
-    res.status(500).json({error: e.message});
+    const words = data?.data?.realtime || [];
+    const musicKeys = ['音乐', '歌', '演唱会', '专辑', '乐队', 'OST', 'MV', '新曲'];
+    const hot = words.slice(0, 30).map((item) => ({
+      word: item.word || item.note || '',
+      num: item.num || item.raw_hot || 0,
+      isMusic: musicKeys.some((key) => String(item.word || item.note || '').includes(key))
+    })).filter((item) => item.word);
+    return send(res, 200, { hot });
+  } catch (error) {
+    return send(res, error.status || 500, { error: error.message, hot: [] });
   }
 }

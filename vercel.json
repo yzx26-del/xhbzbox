@@ -1,1 +1,9 @@
-{"rewrites":[{"source":"/api/:path*","destination":"/api/:path*"}]}
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ]
+}

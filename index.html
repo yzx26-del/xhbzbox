@@ -20,6 +20,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t1);font-size:13px
 .sw-wrap input:focus{border-color:var(--t1)}
 .sw-wrap input::placeholder{color:var(--t4)}
 .sw-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t4);font-size:15px}
+.search-panel{position:fixed;top:42px;left:236px;width:min(520px,calc(100vw - 260px));max-height:360px;overflow:auto;background:var(--bg);border:1px solid var(--line2);border-radius:5px;box-shadow:0 8px 28px rgba(0,0,0,.12);z-index:260;display:none}
+.search-panel.open{display:block}
+.sr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.sr:last-child{border-bottom:none}
+.sr:hover{background:var(--bg2)}
+.sr-ico{width:28px;height:28px;border:1px solid var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3)}
+.sr-main{flex:1;min-width:0}
+.sr-title{font-size:12px;font-weight:500;color:var(--t1);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sr-sub{font-family:var(--mono);font-size:9px;color:var(--t4);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sr-empty{padding:18px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:10px}
 .tr{display:flex;gap:6px;margin-left:auto;align-items:center}
 .ib{display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 10px;gap:5px;background:transparent;border:1px solid var(--line);border-radius:3px;cursor:pointer;font-size:12px;font-family:var(--sans);color:var(--t2);transition:all .12s;white-space:nowrap}
 .ib:hover{border-color:var(--t1);color:var(--t1)}
@@ -209,6 +219,7 @@ select.fi{cursor:pointer}
     <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建项目</button>
   </div>
 </header>
+<div class="search-panel" id="search-panel"></div>
 <div class="shell">
 <nav class="sidebar">
   <div class="ns">
@@ -455,7 +466,7 @@ select.fi{cursor:pointer}
   <div class="ph">
     <div><div class="ptitle">发售日历</div><div class="psub">未来30天 · 游戏发售 / 电影上映 / 专辑发布 · 配乐需求预判</div></div>
     <div class="ph-r">
-      <button class="ib solid" onclick="openModal('calendar-add')"><i class="ti ti-plus"></i>添加事件</button>
+      <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>添加项目</button>
     </div>
   </div>
   <div id="calendar-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
@@ -703,11 +714,9 @@ select.fi{cursor:pointer}
 // ══ CONFIG ══
 const SUPABASE_URL = 'https://gsohsckwqabejntaqgtb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzb2hzY2t3cWFiZWpudGFxZ3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzEzNTcsImV4cCI6MjA5NDMwNzM1N30.ysZsEAi6Jh-1LqXnQzjFEX_qtUayYpGW7ESR8iOw-xw';
-const DEEPSEEK_KEY = 'sk-30027fed3638496b8090fa0302eddc6a';
-const TMDB_KEY   = '0dd710f4c84c0ef8252d8cb3332b2a90';
-const RAWG_KEY   = '75d8d7aa7a724b84a7c3c560efbf64fd';
 const LASTFM_KEY = '92282476874fb4eb82b58d13d129bfdc';
 let db = null, projectsCache = [], articlesCache = [];
+let searchTimer = null;
 function resetConfig(){localStorage.clear();location.reload();}
 
 // ══ STARTUP ══
@@ -746,6 +755,18 @@ window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('#'+id+' .to').forEach(x=>x.classList.remove('sel')); t.classList.add('sel');
     });
   });
+
+  const searchInput = document.getElementById('gs');
+  searchInput?.addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => handleGlobalSearch(e), 320);
+  });
+  searchInput?.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeSearchPanel();
+  });
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.sw-wrap') && !e.target.closest('#search-panel')) closeSearchPanel();
+  });
 });
 
 // ══ NAV ══
@@ -757,6 +778,47 @@ function go(id, el) {
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
   const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamematrix:()=>{loadProjectSelects();loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) loaders[id]();
+}
+
+async function handleGlobalSearch(e) {
+  const q = e.target.value.trim().toLowerCase();
+  const panel = document.getElementById('search-panel');
+  if(!q){closeSearchPanel();return;}
+  panel.classList.add('open');
+  panel.innerHTML = '<div class="sr-empty">搜索中…</div>';
+
+  try {
+    const [pr,en,ar,as,nc] = await Promise.all([
+      db.from('projects').select('id,name,name_en,type,composer,tags').limit(80),
+      db.from('knowledge_entities').select('id,name,type,description,tags').limit(80),
+      db.from('articles').select('id,title,status,tags,content').limit(80),
+      db.from('assets').select('id,name,type,copyright_status,url').limit(80),
+      db.from('note_cards').select('id,content,card_type,source_desc,tags').limit(80)
+    ]);
+    const rows = [
+      ...(pr.data||[]).map(x=>({kind:'项目',icon:'ti-folder',page:x.type==='game'?'gamematrix':'timeline',title:x.name,sub:[typeName(x.type),x.composer,(x.tags||[]).join(' ')].filter(Boolean).join(' · ')})),
+      ...(en.data||[]).map(x=>({kind:'实体',icon:'ti-brain',page:'knowledge',title:x.name,sub:[entityTypeName(x.type),x.description,(x.tags||[]).join(' ')].filter(Boolean).join(' · ')})),
+      ...(ar.data||[]).map(x=>({kind:'稿件',icon:'ti-article',page:'editor',id:x.id,title:x.title,sub:[statusText(x.status),(x.tags||[]).join(' '),String(x.content||'').slice(0,80)].filter(Boolean).join(' · ')})),
+      ...(as.data||[]).map(x=>({kind:'资料',icon:'ti-files',page:'assets',title:x.name,sub:[assetTypeName(x.type),x.copyright_status,x.url].filter(Boolean).join(' · ')})),
+      ...(nc.data||[]).map(x=>({kind:'笔记',icon:'ti-cards',page:'notes',title:String(x.content||'').slice(0,60),sub:[x.card_type,x.source_desc,(x.tags||[]).join(' ')].filter(Boolean).join(' · ')}))
+    ].filter(x => (x.title + ' ' + x.sub + ' ' + x.kind).toLowerCase().includes(q)).slice(0,12);
+
+    if(!rows.length){panel.innerHTML='<div class="sr-empty">没有找到匹配内容</div>';return;}
+    panel.innerHTML = rows.map(r=>`<div class="sr" onclick="openSearchResult('${r.page}','${r.id||''}')"><div class="sr-ico"><i class="ti ${r.icon}"></i></div><div class="sr-main"><div class="sr-title">${esc(r.title)}</div><div class="sr-sub">${r.kind} · ${esc(r.sub||'')}</div></div></div>`).join('');
+  } catch(err) {
+    panel.innerHTML = `<div class="sr-empty">搜索失败：${esc(err.message)}</div>`;
+  }
+}
+
+function closeSearchPanel() {
+  document.getElementById('search-panel')?.classList.remove('open');
+}
+
+function openSearchResult(page, id) {
+  closeSearchPanel();
+  document.getElementById('gs').value = '';
+  if(page === 'editor' && id) openArticleInEditor(id);
+  else go(page, null);
 }
 
 // ══ LOAD ALL ══
@@ -1321,10 +1383,10 @@ async function loadHeatmap() {
 
   try {
     const [moviesNow, moviesComing, tvAiring, tvComing] = await Promise.all([
-      fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${TMDB_KEY}&language=zh-CN&region=CN&page=1`).then(r=>r.json()),
-      fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${TMDB_KEY}&language=zh-CN&region=CN&page=1`).then(r=>r.json()),
-      fetch(`https://api.themoviedb.org/3/tv/on_the_air?api_key=${TMDB_KEY}&language=zh-CN&page=1`).then(r=>r.json()),
-      fetch(`https://api.themoviedb.org/3/tv/airing_today?api_key=${TMDB_KEY}&language=zh-CN&page=1`).then(r=>r.json())
+      fetch('/api/tmdb?type=movie-now').then(r=>r.json()),
+      fetch('/api/tmdb?type=movie-upcoming').then(r=>r.json()),
+      fetch('/api/tmdb?type=tv-on-air').then(r=>r.json()),
+      fetch('/api/tmdb?type=tv-today').then(r=>r.json())
     ]);
 
     const movies = [...(moviesNow.results||[]).slice(0,8), ...(moviesComing.results||[]).slice(0,4)];
@@ -1350,7 +1412,7 @@ async function loadHeatmap() {
         + '</div>'
         + '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">'
         + '<span class="badge ' + badgeCls + '">' + badgeText + '</span>'
-        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="openArticleModal(this)" data-title="' + esc(title) + '" data-date="' + date + '"><i class="ti ti-pencil"></i>创稿</button>'
+        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createArticleFromMedia(this.dataset.title,this.dataset.date)" data-title="' + esc(title) + '" data-date="' + date + '"><i class="ti ti-pencil"></i>创稿</button>'
         + '</div>'
         + '</div>';
     }
@@ -1393,8 +1455,8 @@ async function loadCalendar() {
 
   try {
     const [recentRes, upcomingRes] = await Promise.all([
-      fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&dates=${past7},${today}&ordering=-released&page_size=10`).then(r=>r.json()),
-      fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&dates=${today},${future30}&ordering=released&page_size=10`).then(r=>r.json())
+      fetch(`/api/rawg?dates=${past7},${today}&ordering=-released&page_size=10`).then(r=>r.json()),
+      fetch(`/api/rawg?dates=${today},${future30}&ordering=released&page_size=10`).then(r=>r.json())
     ]);
 
     const recent   = recentRes.results   || [];
@@ -1418,7 +1480,7 @@ async function loadCalendar() {
         + '</div>'
         + '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">'
         + '<span class="badge ' + badgeCls + '">' + badgeText + '</span>'
-        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="openGameModal(this)" data-name="' + esc(g.name||'') + '" data-date="' + (g.released||'') + '"><i class="ti ti-folder-plus"></i>建档</button>'
+        + '<button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createProjectFromGame(this.dataset.name,this.dataset.date)" data-name="' + esc(g.name||'') + '" data-date="' + (g.released||'') + '"><i class="ti ti-folder-plus"></i>建档</button>'
         + '</div>'
         + '</div>';
     }
@@ -1567,7 +1629,7 @@ ${preview}
 - graph_traits根据文章内容推断作品间的影响关系，只有明确关联时才填写`;
 
   try {
-    const res=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_KEY},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:prompt}],max_tokens:4000,temperature:0.2})});
+    const res=await fetch('/api/analyze-import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
     const data=await res.json();
     if(!res.ok) throw new Error(data.error?.message||'请求失败');
     let raw=data.choices[0].message.content.trim().replace(/```json|```/g,'').trim();
