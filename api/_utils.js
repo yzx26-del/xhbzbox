@@ -1,7 +1,9 @@
 export function send(res, status, data) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  if (!res.getHeader('Cache-Control')) {
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  }
   res.end(JSON.stringify(data));
 }
 

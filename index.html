@@ -240,6 +240,31 @@ select.fi{cursor:pointer}
 .alert-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
 .alert-row:last-child{border-bottom:none}
 .alert-badge{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* ── 乐评骰子 ── */
+.dice-stage{min-height:420px;border:1px solid #3b3120;border-radius:6px;background:radial-gradient(circle at 50% 0,#2b2117 0,#100f12 46%,#08080a 100%);color:#f7e7bd;position:relative;overflow:hidden;padding:28px}
+.dice-stage::before{content:'';position:absolute;inset:0;background-image:linear-gradient(120deg,rgba(255,214,128,.08),transparent 28%,rgba(255,255,255,.03) 50%,transparent 72%);pointer-events:none}
+.dice-cover{position:relative;z-index:1;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.dice-stack{position:relative;width:112px;height:156px;margin-bottom:24px}
+.dice-stack span{position:absolute;inset:0;border:1px solid #cfa65a;border-radius:8px;background:linear-gradient(145deg,#171015,#382819);box-shadow:0 12px 34px rgba(0,0,0,.38)}
+.dice-stack span:nth-child(1){transform:rotate(-10deg) translate(-10px,8px)}.dice-stack span:nth-child(2){transform:rotate(7deg) translate(8px,2px)}.dice-stack span:nth-child(3){transform:rotate(0)}
+.dice-title{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:.05em;margin-bottom:6px}
+.dice-sub{font-size:12px;color:#cbb98f;margin-bottom:22px}
+.dice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative;z-index:1}
+.dice-card{height:210px;perspective:900px;cursor:pointer}
+.dice-card-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.dice-card.flipped .dice-card-inner{transform:rotateY(180deg)}
+.dice-face{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;overflow:hidden;border:1px solid rgba(207,166,90,.72);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.dice-back{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#1a1118,#3a2716);color:#d7b66d;font-family:var(--serif);font-size:18px}
+.dice-front{transform:rotateY(180deg);background:#fffaf0;color:#17110d;padding:10px;display:flex;flex-direction:column}
+.dice-cover-art{height:72px;border-radius:5px;margin-bottom:8px;display:flex;align-items:end;padding:7px;color:#fff;font-family:var(--mono);font-size:9px}
+.dice-song{font-size:12px;font-weight:700;line-height:1.35;margin-bottom:3px}.dice-artist{font-family:var(--mono);font-size:9px;color:#725f45;margin-bottom:6px}
+.dice-msg{font-family:var(--serif);font-size:13px;color:#6d4520;margin:auto 0 7px}.dice-tags{display:flex;gap:4px;flex-wrap:wrap}.dice-tags span{font-family:var(--mono);font-size:8px;background:#efe2c2;color:#80612e;padding:2px 5px;border-radius:2px}
+.dice-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.dice-note{font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:8px}
+.playlist-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}
+.playlist-side{border:1px solid var(--line);border-radius:4px;background:var(--bg2);padding:14px}.playlist-theme{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:4px}
+.song-list{display:flex;flex-direction:column;gap:8px}.song-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:10px}
+.song-cover{width:44px;height:44px;border-radius:4px;display:flex;align-items:end;padding:4px;color:#fff;font-family:var(--mono);font-size:8px}.song-title{font-size:13px;font-weight:700;color:var(--t1)}.song-meta{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:2px}.song-review{font-size:11px;color:var(--t3);line-height:1.6;margin-top:5px}
+@media(max-width:900px){.dice-grid{grid-template-columns:repeat(2,1fr)}.playlist-layout{grid-template-columns:1fr}.dice-stage{padding:18px}}
 </style>
 </head>
 <body>
@@ -274,6 +299,8 @@ select.fi{cursor:pointer}
     <div class="nl">内容创作</div>
     <div class="ni" onclick="go('articles',this)"><i class="ti ti-article"></i>稿件管理<span class="nb" id="nb-articles">—</span></div>
     <div class="ni" onclick="go('editor',this)"><i class="ti ti-pencil"></i>写作台</div>
+    <div class="ni" onclick="go('reviewdice',this)"><i class="ti ti-cards"></i>乐评骰子</div>
+    <div class="ni" onclick="go('dailyplaylist',this)"><i class="ti ti-playlist"></i>每日歌单</div>
     <div class="ni" onclick="go('assets',this)"><i class="ti ti-files"></i>资料库<span class="nb" id="nb-assets">—</span></div>
   </div>
   <div class="ns">
@@ -424,6 +451,31 @@ select.fi{cursor:pointer}
       </div>
     </div>
   </div>
+</div>
+
+<!-- 乐评骰子 -->
+<div class="page" id="pg-reviewdice">
+  <div class="ph"><div><div class="ptitle">乐评骰子</div><div class="psub">每日12张命运卡牌 · 6首中文 / 6首英文 · 全站共享24小时缓存</div></div>
+    <div class="ph-r"><button class="ib" onclick="go('dailyplaylist',null)"><i class="ti ti-playlist"></i>查看歌单</button><button class="ib solid" onclick="startReviewDice()"><i class="ti ti-cards"></i>开始抽牌</button></div>
+  </div>
+  <div class="dice-stage" id="dice-stage">
+    <div class="dice-cover">
+      <div class="dice-stack"><span></span><span></span><span></span></div>
+      <div class="dice-title">今日12张命运卡牌已洗好</div>
+      <div class="dice-sub">点击开始抽牌。今天只生成一次，之后直接读取缓存。</div>
+      <button class="ib solid" style="height:38px;padding:0 18px;background:#d4aa5d;border-color:#d4aa5d;color:#130f0b" onclick="startReviewDice()"><i class="ti ti-sparkles"></i>开始抽牌</button>
+      <div class="dice-note" id="dice-cache-note">—</div>
+    </div>
+  </div>
+  <div class="dice-tools"><button class="ib" onclick="revealAllDiceCards()"><i class="ti ti-eye"></i>全部翻开</button><button class="ib" onclick="saveDicePlaylistToAssets()"><i class="ti ti-database-import"></i>并入资料库</button><button class="ib" onclick="reportDiceIssue()"><i class="ti ti-alert-circle"></i>报错</button></div>
+</div>
+
+<!-- 每日歌单 -->
+<div class="page" id="pg-dailyplaylist">
+  <div class="ph"><div><div class="ptitle">每日歌单</div><div class="psub">与乐评骰子平行的歌单界面 · 可查历史 · 每首带点评</div></div>
+    <div class="ph-r"><select class="fi" id="playlist-date-select" style="width:180px;height:30px;padding:0 10px;font-size:12px" onchange="loadPlaylistFromHistory()"></select><button class="ib" onclick="go('reviewdice',null)"><i class="ti ti-cards"></i>去抽牌</button><button class="ib solid" onclick="saveDicePlaylistToAssets()"><i class="ti ti-database-import"></i>并入资料库</button></div>
+  </div>
+  <div id="playlist-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div>
 
 <!-- 资料库 -->
@@ -768,6 +820,7 @@ const LASTFM_KEY = '92282476874fb4eb82b58d13d129bfdc';
 let db = null, projectsCache = [], articlesCache = [];
 let searchTimer = null;
 let pendingProjectId = null;
+let currentDicePlaylist = null;
 function resetConfig(){localStorage.clear();location.reload();}
 
 // ══ STARTUP ══
@@ -827,7 +880,7 @@ function go(id, el) {
   document.getElementById('pg-'+id)?.classList.add('on');
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
-  const loaders={projects:loadProjects,timeline:async()=>{await loadProjectSelects();applyPendingProject('tl-project-select');loadTimeline();},gamematrix:async()=>{await loadProjectSelects();applyPendingProject('gm-project-select');loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
+  const loaders={projects:loadProjects,timeline:async()=>{await loadProjectSelects();applyPendingProject('tl-project-select');loadTimeline();},gamematrix:async()=>{await loadProjectSelects();applyPendingProject('gm-project-select');loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) loaders[id]();
 }
 
@@ -1208,6 +1261,127 @@ async function saveArticleContent() {
   document.getElementById('editor-saved').textContent='已保存 '+new Date().toLocaleTimeString();
 }
 function insertMd(prefix,suffix=''){const ta=document.getElementById('editor-body');const s=ta.selectionStart,e=ta.selectionEnd;const sel=ta.value.substring(s,e);ta.value=ta.value.substring(0,s)+prefix+sel+suffix+ta.value.substring(e);ta.focus();}
+
+// ══ 乐评骰子 / 每日歌单 ══
+function todayKey(){
+  const d=new Date();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+function diceCacheKey(date=todayKey()){return `reviewDice:${date}`;}
+function diceHistory(){
+  try{return JSON.parse(localStorage.getItem('reviewDiceHistory')||'[]');}catch{return[];}
+}
+function rememberDiceDate(date){
+  const list=[date,...diceHistory().filter(x=>x!==date)].slice(0,30);
+  localStorage.setItem('reviewDiceHistory',JSON.stringify(list));
+}
+function getCachedDice(date=todayKey()){
+  try{return JSON.parse(localStorage.getItem(diceCacheKey(date))||'null');}catch{return null;}
+}
+function setCachedDice(data){
+  if(!data?.date)data.date=todayKey();
+  localStorage.setItem(diceCacheKey(data.date),JSON.stringify(data));
+  rememberDiceDate(data.date);
+  currentDicePlaylist=data;
+}
+function loadReviewDiceHome(){
+  const date=todayKey();
+  const cached=getCachedDice(date);
+  const note=document.getElementById('dice-cache-note');
+  if(note) note.textContent=cached?'今日牌阵已缓存，继续打开不消耗 API':'今日未抽牌，点击后生成一次';
+  if(cached){currentDicePlaylist=cached;renderDiceCards(cached,false);}
+}
+async function fetchDailyDice(date=todayKey()){
+  const cached=getCachedDice(date);
+  if(cached){currentDicePlaylist=cached;return cached;}
+  const res=await fetch('/api/review-dice?date='+encodeURIComponent(date));
+  if(!res.ok) throw new Error('生成失败');
+  const data=await res.json();
+  setCachedDice(data);
+  return data;
+}
+async function startReviewDice(){
+  const stage=document.getElementById('dice-stage');
+  if(stage) stage.innerHTML='<div class="dice-cover"><div class="dice-stack"><span></span><span></span><span></span></div><div class="dice-title">正在查阅命运曲库</div><div class="dice-sub">如果今天已经生成，会直接读取缓存。</div></div>';
+  try{
+    const data=await fetchDailyDice();
+    renderDiceCards(data,false);
+    renderDailyPlaylist(data);
+  }catch(e){
+    if(stage) stage.innerHTML='<div class="dice-cover"><div class="dice-title">今天的牌暂时洗不开</div><div class="dice-sub">请稍后再试，或检查 DeepSeek API 环境变量。</div><button class="ib solid" onclick="startReviewDice()">重试</button></div>';
+  }
+}
+function coverStyle(song,i){
+  const colors=['#8b3a2b,#d7a45f','#244c74,#79a6d8','#6d3f7a,#d9a3c8','#286244,#9dd7a5','#4a3525,#cfa65a','#15213f,#778bd6'];
+  const c=colors[i%colors.length];
+  return `background:linear-gradient(135deg,${c});`;
+}
+function renderDiceCards(data,allOpen=false){
+  const stage=document.getElementById('dice-stage'); if(!stage) return;
+  currentDicePlaylist=data;
+  stage.innerHTML=`<div style="position:relative;z-index:1;margin-bottom:18px;text-align:center"><div class="dice-title">${esc(data.theme||'今日牌阵')}</div><div class="dice-sub">${esc(data.subtitle||'12首歌已经落位，逐张翻开。')}</div></div><div class="dice-grid">${(data.songs||[]).map((s,i)=>`<div class="dice-card ${allOpen?'flipped':''}" onclick="flipDiceCard(this)"><div class="dice-card-inner"><div class="dice-face dice-back">第 ${i+1} 张</div><div class="dice-face dice-front"><div class="dice-cover-art" style="${coverStyle(s,i)}">${esc(s.group||s.era_tag||'')}</div><div class="dice-song">${esc(s.title)}</div><div class="dice-artist">${esc(s.artist)} · ${s.year||''}</div><div class="dice-msg">${esc(s.tarot_message||'今日听见它')}</div><div class="dice-tags">${(s.emotion_tags||[]).slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div></div></div></div>`).join('')}</div>`;
+}
+function flipDiceCard(card){
+  card.classList.toggle('flipped');
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+function revealAllDiceCards(){
+  if(currentDicePlaylist) renderDiceCards(currentDicePlaylist,true);
+  else startReviewDice().then(()=>setTimeout(revealAllDiceCards,100));
+}
+function loadDailyPlaylist(){
+  const select=document.getElementById('playlist-date-select');
+  const hist=diceHistory();
+  const today=todayKey();
+  const dates=[today,...hist.filter(x=>x!==today)];
+  if(select) select.innerHTML=dates.map(d=>`<option value="${d}">${d}${d===today?' · 今日':''}</option>`).join('');
+  const cached=getCachedDice(select?.value||today);
+  if(cached) renderDailyPlaylist(cached);
+  else fetchDailyDice(select?.value||today).then(renderDailyPlaylist).catch(()=>{document.getElementById('playlist-content').innerHTML='<div class="empty"><i class="ti ti-playlist-off"></i><p>今天的歌单还没生成，去乐评骰子抽一次</p></div>';});
+}
+function loadPlaylistFromHistory(){
+  const date=val('playlist-date-select')||todayKey();
+  const cached=getCachedDice(date);
+  if(cached) renderDailyPlaylist(cached);
+  else fetchDailyDice(date).then(renderDailyPlaylist);
+}
+function renderDailyPlaylist(data){
+  currentDicePlaylist=data;
+  const el=document.getElementById('playlist-content'); if(!el) return;
+  const songs=data.songs||[];
+  el.innerHTML=`<div class="playlist-layout"><div class="playlist-side"><div class="playlist-theme">${esc(data.theme||'今日歌单')}</div><div style="font-size:12px;color:var(--t3);line-height:1.7;margin-bottom:12px">${esc(data.subtitle||'')}</div><div class="tdm" style="color:var(--t4);margin-bottom:12px">${esc(data.date||todayKey())} · ${songs.length}首</div><div class="dice-tools"><button class="ib solid" onclick="saveDicePlaylistToAssets()"><i class="ti ti-database-import"></i>并入资料库</button><button class="ib" onclick="go('reviewdice',null)"><i class="ti ti-cards"></i>牌阵</button></div><div class="dice-note">缓存策略：浏览器本地缓存 + 线上接口按日期缓存，避免重复消耗 API。</div></div><div class="song-list">${songs.map((s,i)=>`<div class="song-row"><div class="song-cover" style="${coverStyle(s,i)}">${String(i+1).padStart(2,'0')}</div><div><div class="song-title">${esc(s.title)} <span style="font-weight:400;color:var(--t4)">/ ${esc(s.artist)}</span></div><div class="song-meta">${esc(s.album||'')} · ${s.year||''} · ${esc(s.language||'')} · ${esc(s.group||s.era_tag||'')}</div><div class="song-review">${esc(s.story||s.award_or_buzz||'')}</div><div class="song-review">点评：${esc(s.tarot_message||'')} · ${esc(s.award_or_buzz||'')}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://music.163.com/#/search/m/?s=${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">网易云</a><a class="ib" style="height:24px;font-size:11px;padding:0 8px" target="_blank" href="https://open.spotify.com/search/${encodeURIComponent((s.title||'')+' '+(s.artist||''))}">Spotify</a></div></div>`).join('')}</div></div>`;
+}
+async function saveDicePlaylistToAssets(){
+  if(!db){toast('数据库未连接');return;}
+  const data=currentDicePlaylist||getCachedDice(todayKey());
+  if(!data?.songs?.length){toast('请先生成今日歌单');return;}
+  const prefix=`乐评骰子 ${data.date}`;
+  const {data:existing}=await db.from('assets').select('name').ilike('name',prefix+'%');
+  const names=new Set((existing||[]).map(x=>x.name));
+  const rows=data.songs.map((s,i)=>({
+    name:`${prefix} - ${String(i+1).padStart(2,'0')} ${s.title} - ${s.artist}`,
+    type:'link',
+    url:`https://music.163.com/#/search/m/?s=${encodeURIComponent((s.title||'')+' '+(s.artist||''))}`,
+    copyright_status:'safe',
+    copyright_note:`${s.album||''} · ${s.year||''} · ${s.award_or_buzz||''} · 点评：${s.story||s.tarot_message||''}`
+  })).filter(r=>!names.has(r.name));
+  if(!rows.length){toast('这份歌单已经并入资料库');return;}
+  const {error}=await db.from('assets').insert(rows);
+  if(error){toast('并入失败：'+error.message);return;}
+  toast(`已并入资料库：${rows.length}首`);
+  loadAssets('');
+}
+function reportDiceIssue(){
+  const data=currentDicePlaylist||getCachedDice(todayKey());
+  const msg=prompt('记录这份歌单的事实错误，例如：某首歌发行月份不对、奖项依据不准。');
+  if(!msg) return;
+  const reports=JSON.parse(localStorage.getItem('reviewDiceReports')||'[]');
+  reports.unshift({date:data?.date||todayKey(),msg,created_at:new Date().toISOString()});
+  localStorage.setItem('reviewDiceReports',JSON.stringify(reports.slice(0,50)));
+  toast('已记录报错，用于后续优化 Prompt');
+}
 
 // ══ ASSETS ══
 async function loadAssets(type='') {
