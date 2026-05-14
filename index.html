@@ -247,6 +247,10 @@ select.fi{cursor:pointer}
 .dice-stack{position:relative;width:112px;height:156px;margin-bottom:24px}
 .dice-stack span{position:absolute;inset:0;border:1px solid #d7d1c8;border-radius:8px;background:#fff url('/assets/review-dice-back.png') center/cover;box-shadow:0 12px 34px rgba(0,0,0,.28)}
 .dice-stack span:nth-child(1){transform:rotate(-10deg) translate(-10px,8px)}.dice-stack span:nth-child(2){transform:rotate(7deg) translate(8px,2px)}.dice-stack span:nth-child(3){transform:rotate(0)}
+.dice-stack.shuffle{width:180px;height:170px}
+.dice-stack.shuffle span{animation:diceGather 1.35s cubic-bezier(.18,.8,.2,1) infinite}
+.dice-stack.shuffle span:nth-child(1){animation-delay:0s}.dice-stack.shuffle span:nth-child(2){animation-delay:.08s}.dice-stack.shuffle span:nth-child(3){animation-delay:.16s}.dice-stack.shuffle span:nth-child(4){animation-delay:.24s}.dice-stack.shuffle span:nth-child(5){animation-delay:.32s}.dice-stack.shuffle span:nth-child(6){animation-delay:.4s}.dice-stack.shuffle span:nth-child(7){animation-delay:.48s}.dice-stack.shuffle span:nth-child(8){animation-delay:.56s}.dice-stack.shuffle span:nth-child(9){animation-delay:.64s}.dice-stack.shuffle span:nth-child(10){animation-delay:.72s}.dice-stack.shuffle span:nth-child(11){animation-delay:.8s}.dice-stack.shuffle span:nth-child(12){animation-delay:.88s}
+@keyframes diceGather{0%{transform:translate(var(--sx),var(--sy)) rotate(var(--sr));opacity:.28}58%{transform:translate(0,0) rotate(var(--er));opacity:1}100%{transform:translate(0,0) rotate(var(--er));opacity:1}}
 .dice-title{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:.05em;margin-bottom:6px}
 .dice-sub{font-size:12px;color:#cbb98f;margin-bottom:22px}
 .dice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative;z-index:1}
@@ -466,14 +470,14 @@ select.fi{cursor:pointer}
 <!-- 乐评骰子 -->
 <div class="page" id="pg-reviewdice">
   <div class="ph"><div><div class="ptitle">乐评骰子</div><div class="psub">每日12张命运卡牌 · 6首中文 / 6首英文 · 全站共享24小时缓存</div></div>
-    <div class="ph-r"><button class="ib" onclick="go('dailyplaylist',null)"><i class="ti ti-playlist"></i>查看歌单</button><button class="ib solid" onclick="startReviewDice()"><i class="ti ti-cards"></i>开始抽牌</button></div>
+    <div class="ph-r"><button class="ib" onclick="go('dailyplaylist',null)"><i class="ti ti-playlist"></i>查看歌单</button><button class="ib" onclick="regenerateTodayDice()"><i class="ti ti-refresh"></i>重新生成今天</button><button class="ib solid" onclick="startReviewDice()"><i class="ti ti-cards"></i>开始抽牌</button></div>
   </div>
   <div class="dice-stage" id="dice-stage">
     <div class="dice-cover">
       <div class="dice-stack"><span></span><span></span><span></span></div>
       <div class="dice-title">今日12张命运卡牌已洗好</div>
       <div class="dice-sub">点击开始抽牌。今天只生成一次，之后直接读取缓存。</div>
-      <button class="ib solid" style="height:38px;padding:0 18px;background:#d4aa5d;border-color:#d4aa5d;color:#130f0b" onclick="startReviewDice()"><i class="ti ti-sparkles"></i>开始抽牌</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="ib solid" style="height:38px;padding:0 18px;background:#d4aa5d;border-color:#d4aa5d;color:#130f0b" onclick="startReviewDice()"><i class="ti ti-sparkles"></i>开始抽牌</button><button class="ib" style="height:38px;padding:0 14px;color:#f7e7bd;border-color:#7d6840" onclick="regenerateTodayDice()"><i class="ti ti-refresh"></i>重新生成今天</button></div>
       <div class="dice-note" id="dice-cache-note">—</div>
     </div>
   </div>
@@ -833,6 +837,7 @@ let searchTimer = null;
 let pendingProjectId = null;
 let currentDicePlaylist = null;
 let pendingPlaylistSongIndex = null;
+const DICE_CACHE_VERSION = '20260515-regenerate-1';
 function resetConfig(){localStorage.clear();location.reload();}
 
 // ══ STARTUP ══
@@ -1282,7 +1287,7 @@ function todayKey(){
   const day=String(d.getDate()).padStart(2,'0');
   return `${d.getFullYear()}-${m}-${day}`;
 }
-function diceCacheKey(date=todayKey()){return `reviewDice:${date}`;}
+function diceCacheKey(date=todayKey()){return `reviewDice:${DICE_CACHE_VERSION}:${date}`;}
 function diceUnlockKey(date=todayKey()){return `reviewDiceUnlocked:${date}`;}
 function diceReviewKey(date=todayKey(),i=0){return `reviewDiceReview:${date}:${i}`;}
 function dicePinnedKey(date=todayKey(),i=0){return `reviewDicePinned:${date}:${i}`;}
@@ -1330,14 +1335,33 @@ function loadReviewDiceHome(){
   if(note) note.textContent=cached?'今日牌阵已缓存，继续打开不消耗 API':'今日未抽牌，点击后生成一次';
   if(cached){currentDicePlaylist=cached;renderDiceCards(cached,false);}
 }
-async function fetchDailyDice(date=todayKey()){
-  const cached=enrichDicePlaylist(getCachedDice(date));
+async function fetchDailyDice(date=todayKey(),force=false){
+  const cached=force?null:enrichDicePlaylist(getCachedDice(date));
   if(cached){currentDicePlaylist=cached;return cached;}
-  const res=await fetch('/api/review-dice?date='+encodeURIComponent(date));
+  const qs=new URLSearchParams({date,v:DICE_CACHE_VERSION});
+  if(force)qs.set('refresh',String(Date.now()));
+  const res=await fetch('/api/review-dice?'+qs.toString());
   if(!res.ok) throw new Error('生成失败');
   const data=enrichDicePlaylist(await res.json());
   setCachedDice(data);
   return data;
+}
+async function regenerateTodayDice(){
+  const date=todayKey();
+  localStorage.removeItem(diceCacheKey(date));
+  localStorage.removeItem(diceUnlockKey(date));
+  currentDicePlaylist=null;
+  const stage=document.getElementById('dice-stage');
+  if(stage) stage.innerHTML=`<div class="dice-cover">${shuffleStackHtml()}<div class="dice-title">正在重新洗今天的牌</div><div class="dice-sub">卡牌正在落回牌堆。这会消耗一次 DeepSeek API，之后今天继续读取缓存。</div></div>`;
+  playShuffleSound();
+  try{
+    const data=await fetchDailyDice(date,true);
+    renderDiceCards(data,false);
+    toast('今天的牌阵已重新生成');
+  }catch(e){
+    toast('重新生成失败，请稍后再试');
+    loadReviewDiceHome();
+  }
 }
 async function startReviewDice(){
   const stage=document.getElementById('dice-stage');
@@ -1376,6 +1400,29 @@ function playDrawSound(){
     const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.22,ctx.currentTime+.035);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
     const thud=ctx.createOscillator();const thudGain=ctx.createGain();thud.type='sine';thud.frequency.setValueAtTime(92,ctx.currentTime);thud.frequency.exponentialRampToValueAtTime(48,ctx.currentTime+.18);thudGain.gain.setValueAtTime(.12,ctx.currentTime);thudGain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.24);
     noise.connect(low).connect(gain).connect(ctx.destination);thud.connect(thudGain).connect(ctx.destination);noise.start();noise.stop(ctx.currentTime+dur);thud.start();thud.stop(ctx.currentTime+.26);
+  }catch{}
+}
+function shuffleStackHtml(){
+  const cards=[
+    ['-76px','-30px','-18deg','-7deg'],['68px','-34px','14deg','5deg'],['-42px','58px','28deg','-3deg'],
+    ['58px','46px','-26deg','4deg'],['-96px','34px','9deg','-5deg'],['86px','6px','21deg','6deg'],
+    ['-18px','-70px','-31deg','-2deg'],['24px','72px','17deg','3deg'],['-66px','6px','-12deg','-6deg'],
+    ['72px','-66px','33deg','5deg'],['-8px','48px','-24deg','-1deg'],['10px','-4px','6deg','0deg']
+  ];
+  return `<div class="dice-stack shuffle">${cards.map((c,i)=>`<span style="--sx:${c[0]};--sy:${c[1]};--sr:${c[2]};--er:${c[3]};z-index:${i}"></span>`).join('')}</div>`;
+}
+function playShuffleSound(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    for(let n=0;n<7;n++){
+      const dur=.16, buffer=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate), arr=buffer.getChannelData(0);
+      for(let i=0;i<arr.length;i++){const t=i/arr.length;arr[i]=(Math.random()*2-1)*(1-t)*.18;}
+      const src=ctx.createBufferSource();src.buffer=buffer;
+      const filter=ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=360+n*45;filter.Q.value=.9;
+      const gain=ctx.createGain();const start=ctx.currentTime+n*.105;
+      gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.11,start+.018);gain.gain.exponentialRampToValueAtTime(.0001,start+dur);
+      src.connect(filter).connect(gain).connect(ctx.destination);src.start(start);src.stop(start+dur);
+    }
   }catch{}
 }
 function renderDiceCards(data,allOpen=false){
