@@ -897,7 +897,7 @@ async function analyzeImport() {
   document.getElementById('import-confirm-btn').style.display='none';
   document.getElementById('import-loading-text').textContent='DeepSeek 全文解析中，约10-20秒…';
 
-  const preview=text.slice(0,4000);
+  const preview=text.slice(0,2500);
   const prompt=`你是音乐史内容管理系统的智能解析引擎。深度分析以下文章，提取所有音乐相关信息，返回严格JSON，不要有任何其他文字。
 
 文章：
@@ -921,11 +921,24 @@ ${preview}
 - graph_traits根据文章内容推断作品间的影响关系，只有明确关联时才填写`;
 
   try {
-    const res=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_KEY},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:prompt}],max_tokens:2000,temperature:0.2})});
+    const res=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_KEY},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'user',content:prompt}],max_tokens:4000,temperature:0.2})});
     const data=await res.json();
     if(!res.ok) throw new Error(data.error?.message||'请求失败');
     let raw=data.choices[0].message.content.trim().replace(/```json|```/g,'').trim();
-    importResult=JSON.parse(raw);
+    // Fix truncated JSON by finding last complete object
+    try { importResult=JSON.parse(raw); }
+    catch(e) {
+      // Try to salvage partial JSON
+      const lastBrace = raw.lastIndexOf('}');
+      if(lastBrace>0) {
+        let fixed = raw.substring(0, lastBrace+1);
+        // Count braces to find matching close
+        let depth=0, cutAt=0;
+        for(let i=0;i<fixed.length;i++){if(fixed[i]==='{')depth++;else if(fixed[i]==='}'){depth--;if(depth===0){cutAt=i;break;}}}
+        fixed = fixed.substring(0,cutAt+1);
+        importResult=JSON.parse(fixed);
+      } else throw e;
+    }
     const r=importResult;
     document.getElementById('ir-projects').innerHTML=(r.projects||[]).map(p=>`<div style="margin-bottom:4px"><span class="badge b-def">${typeName(p.type)}</span> <strong>${esc(p.name)}</strong>${p.composer?' · '+esc(p.composer):''}</div>`).join('')||'未识别到作品';
     document.getElementById('ir-entities').innerHTML=(r.entities||[]).map(e=>`<div style="margin-bottom:4px"><span class="badge b-def">${entityTypeName(e.type)}</span> <strong>${esc(e.name)}</strong></div>`).join('')||'未识别到实体';
@@ -1040,4 +1053,4 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 </script>
 </body>
 </html>
-2026年 5月14日 星期四 19时05分46秒 +08
+2026年 5月14日 星期四 19时09分43秒 +08
