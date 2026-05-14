@@ -727,7 +727,7 @@ async function loadNotes(type='') {
   const el=document.getElementById('notes-grid');
   if(!data?.length){el.innerHTML='<div class="empty"><i class="ti ti-cards"></i><p>暂无笔记卡片，可通过智能导入自动生成</p></div>';return;}
   const typeLabel={analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};
-  el.innerHTML=`<div class="nc-grid">${data.map(n=>`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${typeLabel[n.card_type]||n.card_type}${n.card_type==='reusable_module?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px">${esc(n.source_desc||'')}</div></div>`).join('')}</div>`;
+  el.innerHTML=`<div class="nc-grid">${data.map(n=>`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${typeLabel[n.card_type]||n.card_type}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px">${esc(n.source_desc||'')}</div></div>`).join('')}</div>`;
 }
 async function createNote() {
   const typeEl=document.querySelector('#note-type-sel .sel');
@@ -1040,4 +1040,4 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 </script>
 </body>
 </html>
-2026年 5月14日 星期四 19时02分12秒 +08
+2026年 5月14日 星期四 19时05分46秒 +08
