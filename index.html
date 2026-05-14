@@ -595,6 +595,9 @@ select.fi{cursor:pointer}
 const SUPABASE_URL = 'https://gsohsckwqabejntaqgtb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzb2hzY2t3cWFiZWpudGFxZ3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzEzNTcsImV4cCI6MjA5NDMwNzM1N30.ysZsEAi6Jh-1LqXnQzjFEX_qtUayYpGW7ESR8iOw-xw';
 const DEEPSEEK_KEY = 'sk-30027fed3638496b8090fa0302eddc6a';
+const TMDB_KEY   = '0dd710f4c84c0ef8252d8cb3332b2a90';
+const RAWG_KEY   = '75d8d7aa7a724b84a7c3c560efbf64fd';
+const LASTFM_KEY = '92282476874fb4eb82b58d13d129bfdc';
 let db = null, projectsCache = [], articlesCache = [];
 function resetConfig(){localStorage.clear();location.reload();}
 
@@ -643,7 +646,7 @@ function go(id, el) {
   document.getElementById('pg-'+id)?.classList.add('on');
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
-  const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamematrix:()=>{loadProjectSelects();loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:loadTopics,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
+  const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamematrix:()=>{loadProjectSelects();loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) loaders[id]();
 }
 
@@ -1035,89 +1038,223 @@ async function createArticleForProject(projectId, projectName) {
   openArticleInEditor(data.id);
 }
 
-// ══ 热点追踪 ══
-async function loadHeatmap() {
-  if(!db) return;
-  const [pr,ar,as,nc] = await Promise.all([
-    db.from('projects').select('id,name,type,composer,tags'),
-    db.from('article_projects').select('project_id'),
-    db.from('assets').select('project_id,type,copyright_status'),
-    db.from('note_cards').select('project_id,card_type')
-  ]);
-  const projects = pr.data||[];
-  const el = document.getElementById('heatmap-content');
-  if(!projects.length){el.innerHTML='<div class="empty"><i class="ti ti-flame"></i><p>暂无项目数据</p></div>';return;}
+// ══ 选题情报板：Last.fm 新歌 ══
+async function loadTopicsSongs() {
+  const el = document.getElementById('topics-fmi');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>从 Last.fm 拉取新歌…</div>';
+  try {
+    // Last.fm 热门新歌
+    const [chartRes, newRes] = await Promise.all([
+      fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=${LASTFM_KEY}&format=json&limit=20`),
+      fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key=${LASTFM_KEY}&format=json&limit=10`)
+    ]);
+    const chartData = await chartRes.json();
+    const artistData = await newRes.json();
+    const tracks = chartData?.tracks?.track || [];
+    const artists = artistData?.artists?.artist || [];
 
-  const articleMap={},assetMap={},noteMap={};
-  (ar.data||[]).forEach(x=>{articleMap[x.project_id]=(articleMap[x.project_id]||0)+1;});
-  (as.data||[]).forEach(x=>{if(x.project_id)assetMap[x.project_id]=(assetMap[x.project_id]||0)+1;});
-  (nc.data||[]).forEach(x=>{if(x.project_id)noteMap[x.project_id]=(noteMap[x.project_id]||0)+1;});
+    if(!tracks.length){ el.innerHTML='<div class="empty"><i class="ti ti-music-off"></i><p>暂无数据</p></div>'; return; }
 
-  const rows = projects.map(p=>({
-    ...p,
-    arts: articleMap[p.id]||0,
-    assets: assetMap[p.id]||0,
-    notes: noteMap[p.id]||0,
-    heat: (articleMap[p.id]||0)*30 + (assetMap[p.id]||0)*5 + (noteMap[p.id]||0)*10
-  })).sort((a,b)=>b.heat-a.heat);
-
-  const maxHeat = Math.max(...rows.map(r=>r.heat), 1);
-
-  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">
-    ${rows.map((p,i)=>{
-      const pct = Math.round(p.heat/maxHeat*100);
-      const profRatio = p.notes > 0 ? Math.min(100, Math.round(p.notes/(p.notes+p.arts+1)*100)) : 0;
-      return `<div style="background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--t4);width:20px">#${i+1}</div>
-          <div style="font-family:var(--serif);font-size:13px;font-weight:600;flex:1">${esc(p.name)}</div>
-          <span class="badge b-def">${typeName(p.type)}</span>
-          ${p.arts>=3?'<span class="badge b-warn">已深度覆盖</span>':p.arts>=1?'<span class="badge b-info">有稿件</span>':'<span class="badge b-ok">零覆盖</span>'}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <div style="background:var(--bg3);border-radius:2px;height:6px;flex:1;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:var(--t1);border-radius:2px"></div>
-          </div>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--t4);white-space:nowrap">热度 ${p.heat}</span>
-        </div>
-        <div style="display:flex;gap:16px;font-family:var(--mono);font-size:9px;color:var(--t4)">
-          <span>专业讨论(笔记) <strong style="color:var(--t1)">${p.notes}</strong></span>
-          <span>资料数 <strong style="color:var(--t1)">${p.assets}</strong></span>
-          <span>已有稿件 <strong style="color:var(--t1)">${p.arts}</strong></span>
-          <span style="margin-left:auto">专业占比 <strong style="color:var(--t1)">${profRatio}%</strong></span>
+    el.innerHTML = `
+      <div style="margin-bottom:16px">
+        <div class="sh"><div class="sh-t"><i class="ti ti-chart-bar"></i>Last.fm 本周热门歌曲</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>#</th><th>歌曲</th><th>艺人</th><th>播放量</th><th></th></tr></thead>
+          <tbody>${tracks.map((t,i)=>`<tr>
+            <td class="tdm" style="color:var(--t4)">${i+1}</td>
+            <td class="td1">${esc(t.name)}</td>
+            <td style="color:var(--t3)">${esc(t.artist?.name||'')}</td>
+            <td class="tdm">${parseInt(t.playcount||0).toLocaleString()}</td>
+            <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(t.name)}','${esc(t.artist?.name||'')}')"><i class="ti ti-pencil"></i>创稿</button></td>
+          </tr>`).join('')}
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <div class="sh"><div class="sh-t"><i class="ti ti-users"></i>热门艺人</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${artists.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;cursor:pointer" onclick="searchArtistSongs('${esc(a.name)}')">
+            <img src="${a.image?.find(i=>i.size==='small')?.['#text']||''}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--bg3)" onerror="this.style.display='none'">
+            <div>
+              <div style="font-size:12px;font-weight:500">${esc(a.name)}</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${parseInt(a.listeners||0).toLocaleString()} 听众</div>
+            </div>
+          </div>`).join('')}
         </div>
       </div>`;
-    }).join('')}
-  </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i><p>加载失败：${esc(e.message)}</p></div>`;
+  }
 }
 
-// ══ 发售日历 ══
-async function loadCalendar() {
+async function searchArtistSongs(artist) {
+  const el = document.getElementById('topics-fmi');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>搜索中…</div>';
+  try {
+    const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=${encodeURIComponent(artist)}&api_key=${LASTFM_KEY}&format=json&limit=10`);
+    const data = await res.json();
+    const tracks = data?.toptracks?.track || [];
+    el.innerHTML = `
+      <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        <button class="ib" onclick="loadTopicsSongs()" style="font-size:11px;height:26px;padding:0 8px"><i class="ti ti-arrow-left"></i>返回</button>
+        <span style="font-family:var(--serif);font-size:14px;font-weight:600">${esc(artist)} 热门曲目</span>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>#</th><th>歌曲</th><th>播放量</th><th></th></tr></thead>
+        <tbody>${tracks.map((t,i)=>`<tr>
+          <td class="tdm" style="color:var(--t4)">${i+1}</td>
+          <td class="td1">${esc(t.name)}</td>
+          <td class="tdm">${parseInt(t.playcount||0).toLocaleString()}</td>
+          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(t.name)}','${esc(artist)}')"><i class="ti ti-pencil"></i>创稿</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i><p>加载失败</p></div>`;
+  }
+}
+
+async function createArticleFromSong(song, artist) {
   if(!db) return;
-  const {data} = await db.from('projects').select('*').order('created_at',{ascending:false});
-  const el = document.getElementById('calendar-content');
-
-  el.innerHTML = `
-    <div class="notice" style="border-left-color:var(--info)">
-      <i class="ti ti-info-circle" style="color:var(--info)"></i>
-      <div>发售日历目前显示已录入项目。点击<strong>添加事件</strong>可手动添加即将发售的游戏、电影、专辑，系统会自动关联作曲家信息并提示配乐需求。</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      ${(data||[]).map(p=>`
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:4px">
-          <div style="font-size:20px;flex-shrink:0">${typeIcon(p.type)}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-family:var(--serif);font-size:13px;font-weight:600">${esc(p.name)}</div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${p.year?p.year+'年':'年份未知'} · ${esc(p.composer||'作曲家未知')} · ${typeName(p.type)}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            ${p.year>=2024?`<span class="badge b-ok">近期作品</span>`:`<span class="badge b-def">历史档案</span>`}
-          </div>
-          <button class="ib" style="font-size:11px;height:26px;padding:0 8px;flex-shrink:0" onclick="createArticleForProject('${p.id}','${esc(p.name)}')"><i class="ti ti-pencil"></i>创稿</button>
-        </div>`).join('')}
-    </div>`;
+  const title = `${artist}《${song}》乐评`;
+  const {data,error} = await db.from('articles').insert({title, status:'topic', tags:['乐评','新歌']}).select().single();
+  if(error){toast('创建失败：'+error.message);return;}
+  toast(`选题「${title}」已创建`);
+  openArticleInEditor(data.id);
 }
 
+// ══ 热点追踪：TMDB 影视开播 ══
+async function loadHeatmap() {
+  if(!db) return;
+  const el = document.getElementById('heatmap-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>从 TMDB 拉取影视数据…</div>';
+
+  const today = new Date().toISOString().split('T')[0];
+  const past30 = new Date(Date.now()-30*864e5).toISOString().split('T')[0];
+  const future14 = new Date(Date.now()+14*864e5).toISOString().split('T')[0];
+
+  try {
+    const [moviesNow, moviesComing, tvAiring, tvComing] = await Promise.all([
+      fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${TMDB_KEY}&language=zh-CN&region=CN&page=1`).then(r=>r.json()),
+      fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${TMDB_KEY}&language=zh-CN&region=CN&page=1`).then(r=>r.json()),
+      fetch(`https://api.themoviedb.org/3/tv/on_the_air?api_key=${TMDB_KEY}&language=zh-CN&page=1`).then(r=>r.json()),
+      fetch(`https://api.themoviedb.org/3/tv/airing_today?api_key=${TMDB_KEY}&language=zh-CN&page=1`).then(r=>r.json())
+    ]);
+
+    const movies = [...(moviesNow.results||[]).slice(0,8), ...(moviesComing.results||[]).slice(0,4)];
+    const tvShows = [...(tvAiring.results||[]).slice(0,6), ...(tvComing.results||[]).slice(0,4)];
+
+    function movieCard(m, badge) {
+      const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : '';
+      const rating = m.vote_average ? m.vote_average.toFixed(1) : '—';
+      const date = m.release_date || m.first_air_date || '';
+      const title = m.title || m.name || '';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);transition:background .1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+        ${poster?`<img src="${poster}" style="width:36px;height:54px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`:'<div style="width:36px;height:54px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>'}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:3px">${esc(title)}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:4px">${date} · ⭐ ${rating}</div>
+          <div style="font-size:11px;color:var(--t3);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc((m.overview||'').slice(0,80))}${(m.overview||'').length>80?'…':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          <span class="badge ${badge==='now'?'b-ok':badge==='coming'?'b-warn':'b-info'}">${badge==='now'?'上映中':badge==='coming'?'即将上映':'热播中'}</span>
+          <button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createArticleFromMedia('${esc(title)}','${date}')"><i class="ti ti-pencil"></i>创稿</button>
+        </div>
+      </div>`;
+    }
+
+    el.innerHTML = `
+      <div class="g2" style="align-items:start">
+        <div>
+          <div class="sh"><div class="sh-t"><i class="ti ti-movie"></i>电影（上映中 + 即将上映）</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">TMDB 实时</span></div>
+          <div class="tw">${movies.slice(0,8).map((m,i)=>movieCard(m,i<(moviesNow.results||[]).length?'now':'coming')).join('')}</div>
+        </div>
+        <div>
+          <div class="sh"><div class="sh-t"><i class="ti ti-device-tv"></i>剧集（热播中 + 今日开播）</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">TMDB 实时</span></div>
+          <div class="tw">${tvShows.slice(0,8).map((t,i)=>movieCard(t,i<(tvAiring.results||[]).length?'airing':'coming')).join('')}</div>
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i><p>TMDB 加载失败：${esc(e.message)}</p></div>`;
+  }
+}
+
+async function createArticleFromMedia(title, date) {
+  if(!db) return;
+  const artTitle = `《${title}》配乐分析`;
+  const {data,error} = await db.from('articles').insert({title:artTitle, status:'topic', tags:['影视配乐','新作']}).select().single();
+  if(error){toast('创建失败：'+error.message);return;}
+  toast(`选题「${artTitle}」已创建`);
+  openArticleInEditor(data.id);
+}
+
+// ══ 发售日历：RAWG 游戏 + B站游戏区 ══
+async function loadCalendar() {
+  const el = document.getElementById('calendar-content');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>从 RAWG 拉取游戏数据…</div>';
+
+  const today = new Date().toISOString().split('T')[0];
+  const past7  = new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+  const future30 = new Date(Date.now()+30*864e5).toISOString().split('T')[0];
+
+  try {
+    const [recentRes, upcomingRes] = await Promise.all([
+      fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&dates=${past7},${today}&ordering=-released&page_size=10`).then(r=>r.json()),
+      fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&dates=${today},${future30}&ordering=released&page_size=10`).then(r=>r.json())
+    ]);
+
+    const recent   = recentRes.results   || [];
+    const upcoming = upcomingRes.results || [];
+
+    function gameCard(g, badge) {
+      const bg = g.background_image || '';
+      const rating = g.rating ? g.rating.toFixed(1) : '—';
+      const platforms = (g.platforms||[]).slice(0,3).map(p=>p.platform?.name||'').filter(Boolean).join(' · ');
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);transition:background .1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+        ${bg?`<img src="${bg}" style="width:64px;height:36px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`:'<div style="width:64px;height:36px;background:var(--bg3);border-radius:2px;flex-shrink:0"></div>'}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px">${esc(g.name||'')}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:2px">${g.released||'TBD'} · ⭐ ${rating}</div>
+          <div style="font-size:10px;color:var(--t4)">${esc(platforms)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          <span class="badge ${badge==='recent'?'b-ok':'b-warn'}">${badge==='recent'?'刚发售':'即将发售'}</span>
+          <button class="ib" style="font-size:11px;height:24px;padding:0 8px;margin-top:4px" onclick="createProjectFromGame('${esc(g.name||'')}','${g.released||''}')"><i class="ti ti-folder-plus"></i>建档</button>
+        </div>
+      </div>`;
+    }
+
+    el.innerHTML = `
+      <div class="g2" style="align-items:start">
+        <div>
+          <div class="sh"><div class="sh-t"><i class="ti ti-device-gamepad"></i>近7天发售</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">RAWG 实时</span></div>
+          <div class="tw">${recent.length ? recent.map(g=>gameCard(g,'recent')).join('') : '<div class="empty"><p>暂无近期发售</p></div>'}</div>
+        </div>
+        <div>
+          <div class="sh"><div class="sh-t"><i class="ti ti-calendar-event"></i>未来30天发售</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">RAWG 实时</span></div>
+          <div class="tw">${upcoming.length ? upcoming.map(g=>gameCard(g,'upcoming')).join('') : '<div class="empty"><p>暂无即将发售</p></div>'}</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:10px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--t4)">
+        点击「建档」可直接从游戏信息创建项目母本，并自动跳转到时间轴矩阵 · 数据来源：RAWG.io
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i><p>RAWG 加载失败：${esc(e.message)}</p></div>`;
+  }
+}
+
+async function createProjectFromGame(name, releaseDate) {
+  if(!db) return;
+  const year = releaseDate ? parseInt(releaseDate.split('-')[0]) : null;
+  const {data,error} = await db.from('projects').insert({
+    name, type:'game', year, tags:['游戏','配乐待分析']
+  }).select().single();
+  if(error){toast('建档失败：'+error.message);return;}
+  projectsCache.push(data);
+  toast(`「${name}」项目已建档`);
+  go('timeline',null);
+}
+
+// ══ 我的数据 ══
 // ══ 我的数据 ══
 async function loadMyData() {
   if(!db) return;
@@ -1363,4 +1500,4 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 </script>
 </body>
 </html>
-2026年 5月14日 星期四 19时17分37秒 +08
+2026年 5月14日 星期四 19时47分13秒 +08
