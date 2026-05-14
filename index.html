@@ -107,6 +107,26 @@ tbody tr:hover{background:var(--bg2)}
 .pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
 .pc-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:2px;border:1px solid;font-family:var(--mono);font-size:10px;font-weight:600}
 .pt-film{background:#fff4e8;color:#b85e12;border-color:#ffd5ad}.pt-tv{background:#edf9f0;color:#247a46;border-color:#bfe8cc}.pt-game{background:#edf5ff;color:#225fa6;border-color:#bed8f6}.pt-album{background:#fff0f3;color:#ad2e45;border-color:#f5bdc7}
+.hg-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:stretch}
+.hg-canvas{position:relative;min-height:520px;border:1px solid var(--line);border-radius:4px;background:var(--bg);overflow:hidden}
+.hg-canvas svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hg-node{position:absolute;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:opacity .15s,transform .15s,box-shadow .15s;background:var(--bg)}
+.hg-node:hover{box-shadow:0 4px 14px rgba(0,0,0,.12);transform:translate(-50%,-50%) scale(1.04)!important}
+.hg-node.dim{opacity:.22}
+.hg-node.on{box-shadow:0 0 0 3px rgba(10,10,10,.12)}
+.hg-composer{width:78px;height:78px;border-radius:50%;border:1.5px solid var(--t1);font-family:var(--serif);font-size:12px;font-weight:700;line-height:1.25;padding:8px}
+.hg-work{width:108px;min-height:58px;border-radius:5px;border:1.5px solid;font-size:11px;line-height:1.35;flex-direction:column;padding:7px 8px}
+.hg-work span{font-family:var(--mono);font-size:8px;color:var(--t4);margin-top:3px}
+.hg-work-film{border-color:#f08a24}.hg-work-tv{border-color:#2f9b5f}.hg-work-game{border-color:#2f7dd3}.hg-work-album{border-color:#d9485f}
+.hg-side{border:1px solid var(--line);border-radius:4px;background:var(--bg2);padding:14px;min-height:520px}
+.hg-side-title{font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:4px}
+.hg-side-meta{font-family:var(--mono);font-size:10px;color:var(--t4);margin-bottom:12px}
+.hg-list{display:flex;flex-direction:column;gap:7px}
+.hg-rel{background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:9px 10px}
+.hg-rel-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.hg-rel-name{font-size:12px;font-weight:600;color:var(--t1)}
+.hg-rel-desc{font-size:11px;color:var(--t3);line-height:1.55}
+.hg-legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--t4)}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
 .mwrap::-webkit-scrollbar-thumb{background:var(--line)}
@@ -1012,12 +1032,37 @@ async function loadGraph() {
   const projects=pr.data||[], relations=re.data||[];
   const el=document.getElementById('graph-content');
   if(!projects.length){el.innerHTML='<div class="empty"><i class="ti ti-topology-star"></i><p>暂无项目，智能导入后自动生成图谱</p></div>';return;}
-  const colors={film:'#f08a24',game:'#2f7dd3',album:'#d9485f',tv:'#2f9b5f',documentary:'#888'};
-  const W=700,H=360,n=projects.length;
-  const nodes=projects.map((p,i)=>{const a=(2*Math.PI*i/n)-Math.PI/2,r=Math.min(W,H)*0.36;return{...p,x:W/2+r*Math.cos(a),y:H/2+r*Math.sin(a)};});
-  const lines=relations.map(r=>{const f=nodes.find(n=>n.id===r.from_id),t=nodes.find(n=>n.id===r.to_id);if(!f||!t)return'';return`<line x1="${f.x}" y1="${f.y}" x2="${t.x}" y2="${t.y}" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>`;}).join('');
-  const relTable=relations.length?`<div style="margin-top:16px"><div class="sh"><div class="sh-t"><i class="ti ti-list"></i>血缘关系列表</div></div><div class="tw"><table><thead><tr><th>源项目</th><th>作曲家</th><th>关系</th><th>目标</th><th>作曲家</th><th>说明（AI推断）</th></tr></thead><tbody>${relations.map(r=>{const f=projects.find(p=>p.id===r.from_id),t=projects.find(p=>p.id===r.to_id);const rl={quote:'直接引用',style:'风格继承',composer_move:'作曲家迁移',technique:'技法迁移',motif_reuse:'母题复用'};return`<tr><td class="td1">${esc(f?.name||'')}</td><td class="tdm">${esc(f?.composer||'—')}</td><td><span class="badge b-def">${rl[r.relation]||r.relation}</span></td><td>${esc(t?.name||'')}</td><td class="tdm">${esc(t?.composer||'—')}</td><td style="color:var(--t3);font-size:11px">${esc(r.description||'')}</td></tr>`;}).join('')}</tbody></table></div></div>`:'<div style="font-family:var(--mono);font-size:11px;color:var(--t4);margin-top:12px">暂无关系，智能导入时会自动推断</div>';
-  el.innerHTML=`<div style="border:1px solid var(--line);border-radius:4px;height:${H}px;position:relative;overflow:hidden;background:var(--bg)"><svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#ccc"/></marker></defs>${lines}</svg>${nodes.map(p=>`<div title="${esc(p.name)}&#10;作曲家：${esc(p.composer||'—')}&#10;特色：${(p.tags||[]).join('、')}" style="position:absolute;left:${p.x}px;top:${p.y}px;width:72px;min-height:58px;border-radius:5px;background:var(--bg);border:1.5px solid ${colors[p.type]||'#ccc'};display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;text-align:center;cursor:pointer;line-height:1.35;padding:5px;transform:translate(-50%,-50%);color:var(--t1);transition:all .2s" onmouseover="this.style.background='var(--t1)';this.style.color='#fff'" onmouseout="this.style.background='var(--bg)';this.style.color='var(--t1)'"><strong style="font-family:var(--sans);font-size:10px">${esc(p.name).slice(0,7)}</strong><span style="font-size:8px;color:inherit;opacity:.72">${esc(p.composer||'—').slice(0,8)}</span></div>`).join('')}</div>${relTable}`;
+  const W=820,H=520;
+  const composers=[];
+  const composerMap={};
+  projects.forEach(p=>splitComposers(p.composer).forEach(c=>{if(!composerMap[c]){composerMap[c]={id:'composer:'+c,type:'composer',name:c,works:[]};composers.push(composerMap[c]);}composerMap[c].works.push(p);}));
+  const workNodes=projects.map(p=>({id:'work:'+p.id,type:'work',project:p,name:p.name,kind:p.type,tags:p.tags||[],composer:p.composer||''}));
+  const nodes=[...composers,...workNodes];
+  const topY=120,bottomY=360;
+  composers.forEach((c,i)=>{c.x=(W/(composers.length+1))*(i+1);c.y=topY;});
+  workNodes.forEach((w,i)=>{w.x=(W/(workNodes.length+1))*(i+1);w.y=bottomY+(i%2?34:-18);});
+  const byId=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  const relationLabel={created:'创作',quote:'直接引用',style:'风格继承',composer_move:'作曲家迁移',technique:'技法迁移',motif_reuse:'母题复用'};
+  const edgeColor={created:'#111',quote:'#7a7a7a',style:'#7d5fd1',composer_move:'#0f8f54',technique:'#1a6fb3',motif_reuse:'#b7791f'};
+  const edges=[];
+  projects.forEach(p=>splitComposers(p.composer).forEach(c=>edges.push({source:'composer:'+c,target:'work:'+p.id,relation:'created',strength:100,description:`${c} 创作 / 参与创作《${p.name}》`})));
+  relations.forEach(r=>{if(byId['work:'+r.from_id]&&byId['work:'+r.to_id])edges.push({source:'work:'+r.from_id,target:'work:'+r.to_id,relation:r.relation||'style',strength:r.relation==='composer_move'?86:72,description:r.description||'AI 推断关系'});});
+  const lines=edges.map(e=>{const s=byId[e.source],t=byId[e.target];if(!s||!t)return'';const dashed=e.relation==='created'?'':' stroke-dasharray="5 5"';return`<line data-edge-source="${e.source}" data-edge-target="${e.target}" x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="${edgeColor[e.relation]||'#aaa'}" stroke-width="${e.relation==='created'?2.2:1.5}"${dashed} marker-end="url(#hg-arr)"><title>${esc(relationLabel[e.relation]||e.relation)}：${esc(e.description)}</title></line>`;}).join('');
+  el.innerHTML=`<div class="hg-wrap">
+    <div>
+      <div class="hg-canvas" id="hg-canvas">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><marker id="hg-arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#999"/></marker></defs>${lines}</svg>
+        ${nodes.map(n=>n.type==='composer'
+          ? `<div class="hg-node hg-composer" data-node="${attrEsc(n.id)}" onclick="selectGraphNode('${jsStr(n.id)}')" style="left:${n.x/W*100}%;top:${n.y/H*100}%;transform:translate(-50%,-50%)" title="作曲家：${attrEsc(n.name)}">${esc(n.name)}</div>`
+          : `<div class="hg-node hg-work hg-work-${n.kind}" data-node="${attrEsc(n.id)}" onclick="selectGraphNode('${jsStr(n.id)}')" style="left:${n.x/W*100}%;top:${n.y/H*100}%;transform:translate(-50%,-50%)" title="作品：${attrEsc(n.name)}&#10;品类：${typeName(n.kind)}&#10;作曲家：${attrEsc(n.composer||'—')}"><strong>${esc(n.name).slice(0,9)}</strong><span>${typeName(n.kind)}</span></div>`).join('')}
+      </div>
+      <div class="hg-legend"><span>圆圈=作曲家</span><span>矩形=作品</span><span>实线=直接创作</span><span>虚线=AI推断</span><span>橙/绿/蓝/红=电影/电视/游戏/综艺</span></div>
+    </div>
+    <aside class="hg-side" id="hg-side"><div class="hg-side-title">异构血缘图谱</div><div class="hg-side-meta">点击任意作曲家或作品，查看一跳关联与强度排序。</div><div class="hg-list">${graphRelationList(nodes[0]?.id,nodes,edges,relationLabel)}</div></aside>
+  </div>
+  <div style="margin-top:16px"><div class="sh"><div class="sh-t"><i class="ti ti-list"></i>显性关系列表</div></div><div class="tw"><table><thead><tr><th>源节点</th><th>关系</th><th>目标节点</th><th>强度</th><th>说明</th></tr></thead><tbody>${edges.map(e=>{const s=byId[e.source],t=byId[e.target];return`<tr><td class="td1">${esc(s?.name||'')}</td><td><span class="badge ${e.relation==='created'?'b-inv':'b-def'}">${relationLabel[e.relation]||e.relation}</span></td><td>${esc(t?.name||'')}</td><td class="tdm">${e.strength}%</td><td style="color:var(--t3);font-size:11px">${esc(e.description)}</td></tr>`;}).join('')}</tbody></table></div></div>`;
+  window.hgState={nodes,edges,relationLabel};
+  if(nodes[0]) selectGraphNode(nodes[0].id);
 }
 
 // ══ ARTICLES ══
@@ -1754,6 +1799,8 @@ function closeModal(name,e){if(!e||e.target===document.getElementById('modal-'+n
 
 // ══ HELPERS ══
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function attrEsc(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function jsStr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
 function val(id){return(document.getElementById(id)?.value||'').trim();}
 function clearInputs(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
 function typeIcon(t){return{film:'🎬',game:'🎮',tv:'📺',album:'🎤',documentary:'📻'}[t]||'📁';}
@@ -1762,6 +1809,36 @@ function projectTagHtml(p){
   const tags=(p.tags||[]).filter(Boolean);
   if(!tags.length)return`<span class="pc-tag pt-${p.type||'def'}"><i class="ti ti-tag"></i>${typeName(p.type)||'未分类'}</span>`;
   return tags.map(t=>`<span class="pc-tag pt-${p.type||'def'}"><i class="ti ti-tag"></i>${esc(t)}</span>`).join('');
+}
+function splitComposers(s){
+  return String(s||'').split(/[,，、/&＋+]| 和 | and /).map(x=>x.trim()).filter(Boolean);
+}
+function graphRelationList(nodeId,nodes,edges,labels){
+  const nodeMap=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  const rows=edges.filter(e=>e.source===nodeId||e.target===nodeId).map(e=>{
+    const other=nodeMap[e.source===nodeId?e.target:e.source];
+    return{...e,other};
+  }).sort((a,b)=>b.strength-a.strength);
+  if(!rows.length)return'<div class="empty" style="padding:24px"><p>暂无直接关联</p></div>';
+  return rows.map(r=>`<div class="hg-rel"><div class="hg-rel-top"><span class="hg-rel-name">${esc(r.other?.name||'')}</span><span class="badge ${r.relation==='created'?'b-inv':'b-def'}">${labels[r.relation]||r.relation} · ${r.strength}%</span></div><div class="hg-rel-desc">${esc(r.description)}</div></div>`).join('');
+}
+function selectGraphNode(nodeId){
+  const st=window.hgState;if(!st)return;
+  const selected=st.nodes.find(n=>n.id===nodeId);if(!selected)return;
+  const connected=new Set([nodeId]);
+  st.edges.forEach(e=>{if(e.source===nodeId)connected.add(e.target);if(e.target===nodeId)connected.add(e.source);});
+  document.querySelectorAll('.hg-node').forEach(n=>{
+    const id=n.dataset.node;
+    n.classList.toggle('dim',!connected.has(id));
+    n.classList.toggle('on',id===nodeId);
+  });
+  document.querySelectorAll('#hg-canvas line').forEach(line=>{
+    const active=line.dataset.edgeSource===nodeId||line.dataset.edgeTarget===nodeId;
+    line.style.opacity=active?'1':'.16';
+    line.style.strokeWidth=active?'3':'1.4';
+  });
+  const side=document.getElementById('hg-side');
+  if(side)side.innerHTML=`<div class="hg-side-title">${esc(selected.name)}</div><div class="hg-side-meta">${selected.type==='composer'?'作曲家节点':'作品节点 · '+typeName(selected.kind)} · 1跳关联</div><div class="hg-list">${graphRelationList(nodeId,st.nodes,st.edges,st.relationLabel)}</div>`;
 }
 function entityTypeName(t){return{composer:'作曲家',technique:'技法',period:'历史时期',instrument:'乐器',motif:'母题'}[t]||t;}
 function assetTypeName(t){return{audio:'音频',video:'视频',image:'图片',document:'文档',score:'乐谱',link:'链接'}[t]||t;}
