@@ -208,7 +208,10 @@ select.fi{cursor:pointer}
   </div>
   <div class="ns">
     <div class="nl">分析运营</div>
-    <div class="ni" onclick="go('topics',this)"><i class="ti ti-chart-bar"></i>选题看板</div>
+    <div class="ni" onclick="go('topics',this)"><i class="ti ti-bulb"></i>选题情报板</div>
+    <div class="ni" onclick="go('heatmap',this)"><i class="ti ti-flame"></i>热点追踪</div>
+    <div class="ni" onclick="go('calendar',this)"><i class="ti ti-calendar-event"></i>发售日历</div>
+    <div class="ni" onclick="go('mydata',this)"><i class="ti ti-chart-bar"></i>我的数据</div>
     <div class="ni" onclick="go('copyright',this)"><i class="ti ti-license"></i>版权管理<span class="nb red" id="nb-risk">—</span></div>
   </div>
   <div class="sidebar-foot">
@@ -353,10 +356,92 @@ select.fi{cursor:pointer}
   <div class="tw" id="assets-table"><div class="loading"><div class="spinner"></div>加载中…</div></div>
 </div>
 
-<!-- 选题看板 -->
+<!-- 选题情报板 -->
 <div class="page" id="pg-topics">
-  <div class="ph"><div><div class="ptitle">选题缺口看板</div><div class="psub">数据驱动的内容规划·高资料低稿件=优先选题</div></div><div class="ph-r"><button class="ib" onclick="loadTopics()"><i class="ti ti-refresh"></i>刷新</button></div></div>
-  <div id="topics-content"><div class="loading"><div class="spinner"></div>分析中…</div></div>
+  <div class="ph">
+    <div><div class="ptitle">选题情报板</div><div class="psub">空白机会算法 · FMI抢先指数 · 高品质低覆盖 = 优先选题</div></div>
+    <div class="ph-r">
+      <div style="display:flex;gap:5px" id="fmi-filter">
+        <span class="tag on" data-fmi="0">全部</span>
+        <span class="tag" data-fmi="80">🔥 极高 FMI>80</span>
+        <span class="tag" data-fmi="60">💎 高 FMI>60</span>
+        <span class="tag" data-fmi="40">⚡ 中 FMI>40</span>
+      </div>
+      <button class="ib" onclick="loadTopics()"><i class="ti ti-refresh"></i>刷新</button>
+    </div>
+  </div>
+  <!-- FMI说明 -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;font-size:11px;color:var(--t3);flex-wrap:wrap">
+    <span><strong style="color:var(--t1)">FMI抢先指数</strong> = 品质分 × 0.4 + 潜力分 × 0.3 ÷ 热度分 × 0.3</span>
+    <span style="margin-left:auto;display:flex;gap:12px">
+      <span>🔥 FMI≥80 极高优先级</span>
+      <span>💎 FMI≥60 高优先级</span>
+      <span>⚡ FMI≥40 中等优先级</span>
+    </span>
+  </div>
+  <div class="g2" style="align-items:start">
+    <div>
+      <div class="sh"><div class="sh-t"><i class="ti ti-diamond"></i>空白机会（按FMI排序）</div></div>
+      <div id="topics-fmi"><div class="loading"><div class="spinner"></div>计算中…</div></div>
+    </div>
+    <div>
+      <div class="sh"><div class="sh-t"><i class="ti ti-chart-bar"></i>内容矩阵覆盖度</div></div>
+      <div class="hgrid" style="margin-bottom:8px">
+        <div class="hh"></div>
+        <div class="hh">电影</div><div class="hh">游戏</div><div class="hh">音乐史</div><div class="hh">纯音乐</div><div class="hh">电视</div>
+        <div class="hrl">浪漫主义</div>
+        <div class="hc h4">8</div><div class="hc h2">3</div><div class="hc h3">6</div><div class="hc h3">5</div><div class="hc h1">1</div>
+        <div class="hrl">现代主义</div>
+        <div class="hc h3">5</div><div class="hc h1">1</div><div class="hc h2">2</div><div class="hc h2">3</div><div class="hc h0">0</div>
+        <div class="hrl">当代/实验</div>
+        <div class="hc h4">7</div><div class="hc h3">5</div><div class="hc h1">1</div><div class="hc h0">0</div><div class="hc h0">0</div>
+        <div class="hrl">民族乐派</div>
+        <div class="hc h1">1</div><div class="hc h0">0</div><div class="hc h2">2</div><div class="hc h1">1</div><div class="hc h0">0</div>
+        <div class="hrl">巴洛克</div>
+        <div class="hc h2">2</div><div class="hc h0">0</div><div class="hc h3">4</div><div class="hc h3">5</div><div class="hc h0">0</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-bottom:16px">深色=覆盖多 · 空白格=内容盲区</div>
+      <div class="sh"><div class="sh-t"><i class="ti ti-clock"></i>即将到来的机会</div></div>
+      <div id="topics-upcoming"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 热点追踪 -->
+<div class="page" id="pg-heatmap">
+  <div class="ph">
+    <div><div class="ptitle">热点追踪</div><div class="psub">按项目讨论热度排序 · 专业讨论 vs 大众讨论 · 头部覆盖检测</div></div>
+    <div class="ph-r">
+      <div style="display:flex;gap:5px" id="heat-filter">
+        <span class="tag on" data-heat="">全部</span>
+        <span class="tag" data-heat="film">电影</span>
+        <span class="tag" data-heat="game">游戏</span>
+        <span class="tag" data-heat="album">专辑</span>
+      </div>
+      <button class="ib" onclick="loadHeatmap()"><i class="ti ti-refresh"></i>刷新</button>
+    </div>
+  </div>
+  <div id="heatmap-content"><div class="loading"><div class="spinner"></div>分析中…</div></div>
+</div>
+
+<!-- 发售日历 -->
+<div class="page" id="pg-calendar">
+  <div class="ph">
+    <div><div class="ptitle">发售日历</div><div class="psub">未来30天 · 游戏发售 / 电影上映 / 专辑发布 · 配乐需求预判</div></div>
+    <div class="ph-r">
+      <button class="ib solid" onclick="openModal('calendar-add')"><i class="ti ti-plus"></i>添加事件</button>
+    </div>
+  </div>
+  <div id="calendar-content"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- 我的数据 -->
+<div class="page" id="pg-mydata">
+  <div class="ph">
+    <div><div class="ptitle">我的数据</div><div class="psub">听音统计 · 稿件产出 · 领域覆盖度 · 月度报告</div></div>
+    <div class="ph-r"><button class="ib" onclick="loadMyData()"><i class="ti ti-refresh"></i>刷新</button></div>
+  </div>
+  <div id="mydata-content"><div class="loading"><div class="spinner"></div>统计中…</div></div>
 </div>
 
 <!-- 版权管理 -->
@@ -558,7 +643,7 @@ function go(id, el) {
   document.getElementById('pg-'+id)?.classList.add('on');
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
-  const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamematrix:()=>{loadProjectSelects();loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:loadTopics,copyright:loadCopyright};
+  const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamematrix:()=>{loadProjectSelects();loadGameMatrix();},knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,assets:()=>loadAssets(''),topics:loadTopics,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) loaders[id]();
 }
 
@@ -862,14 +947,239 @@ async function uploadFile() {
 // ══ TOPICS ══
 async function loadTopics() {
   if(!db) return;
-  const [pr,ar,as]=await Promise.all([db.from('projects').select('id,name,type'),db.from('article_projects').select('project_id'),db.from('assets').select('project_id')]);
-  const projects=pr.data||[];
-  const articleMap={},assetMap={};
+  const [pr,ar,as,nc] = await Promise.all([
+    db.from('projects').select('id,name,type,tags,composer'),
+    db.from('article_projects').select('project_id'),
+    db.from('assets').select('project_id'),
+    db.from('note_cards').select('project_id')
+  ]);
+  const projects = pr.data||[];
+  const articleMap={}, assetMap={}, noteMap={};
   (ar.data||[]).forEach(x=>{articleMap[x.project_id]=(articleMap[x.project_id]||0)+1;});
   (as.data||[]).forEach(x=>{if(x.project_id)assetMap[x.project_id]=(assetMap[x.project_id]||0)+1;});
-  const rows=projects.map(p=>({...p,articles:articleMap[p.id]||0,assets:assetMap[p.id]||0,score:Math.min(99,Math.round(((assetMap[p.id]||0)/Math.max(1,(articleMap[p.id]||0)+1))*10))})).sort((a,b)=>b.score-a.score);
-  const el=document.getElementById('topics-content');
-  el.innerHTML=`<div class="sec"><div class="sh"><div class="sh-t"><i class="ti ti-bulb"></i>推荐选题（资料/稿件比排序）</div></div><div class="tw"><table><thead><tr><th>项目</th><th>类型</th><th>资料数</th><th>稿件数</th><th>缺口分</th><th></th></tr></thead><tbody>${rows.map(p=>`<tr><td class="td1">${esc(p.name)}</td><td><span class="badge b-def">${typeName(p.type)}</span></td><td class="tdm" style="color:var(--t1);font-weight:600">${p.assets}</td><td class="tdm">${p.articles}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pbar" style="width:80px"><div class="pfill" style="width:${p.score}%"></div></div><span class="tdm">${p.score}</span></div></td><td><button class="ib solid" style="font-size:11px;height:26px;padding:0 8px" onclick="openModal('article')">立即创稿</button></td></tr>`).join('')}</tbody></table></div></div>`;
+  (nc.data||[]).forEach(x=>{if(x.project_id)noteMap[x.project_id]=(noteMap[x.project_id]||0)+1;});
+
+  // FMI计算：品质信号×0.4 + 潜力×0.3 ÷ 热度×0.3
+  const rows = projects.map(p => {
+    const arts = articleMap[p.id]||0;
+    const assets = assetMap[p.id]||0;
+    const notes = noteMap[p.id]||0;
+    // 品质分：资料越多、笔记越多说明研究越深
+    const qualityScore = Math.min(100, (assets*3 + notes*5));
+    // 潜力分：有资料但稿件少 = 高潜力
+    const potentialScore = Math.min(100, Math.max(0, (assets - arts*10) * 2));
+    // 热度分：已有稿件数量
+    const heatScore = arts * 20;
+    // FMI
+    const fmi = Math.round((qualityScore*0.4 + potentialScore*0.3) / Math.max(heatScore*0.3 + 1, 1) * 10);
+    return {...p, arts, assets, notes, qualityScore, potentialScore, heatScore, fmi: Math.min(fmi,100)};
+  }).sort((a,b)=>b.fmi-a.fmi);
+
+  const fmiEl = document.getElementById('topics-fmi');
+  if(!rows.length){fmiEl.innerHTML='<div class="empty"><i class="ti ti-bulb"></i><p>暂无项目数据</p></div>';return;}
+
+  function fmiLabel(f){
+    if(f>=80) return {icon:'🔥',cls:'b-danger',text:'极高优先级',tip:'建议24小时内动笔'};
+    if(f>=60) return {icon:'💎',cls:'b-warn',text:'高优先级',tip:'建议本周内完成'};
+    if(f>=40) return {icon:'⚡',cls:'b-info',text:'中等优先级',tip:'作为储备选题'};
+    return {icon:'📌',cls:'b-def',text:'观察中',tip:'持续关注'};
+  }
+
+  fmiEl.innerHTML = rows.map(p => {
+    const lb = fmiLabel(p.fmi);
+    return `<div style="background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:10px;transition:border-color .12s" onmouseover="this.style.borderColor='var(--t1)'" onmouseout="this.style.borderColor='var(--line)'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${lb.icon}</span>
+          <div>
+            <div style="font-family:var(--serif);font-size:13px;font-weight:600">${esc(p.name)}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${typeName(p.type)}${p.composer?' · '+esc(p.composer):''}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:600;color:var(--t1)">${p.fmi}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">FMI</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-bottom:10px;font-family:var(--mono);font-size:10px;color:var(--t3)">
+        <span>资料 <strong style="color:var(--t1)">${p.assets}</strong></span>
+        <span>笔记 <strong style="color:var(--t1)">${p.notes}</strong></span>
+        <span>稿件 <strong style="color:var(--t1)">${p.arts}</strong></span>
+        <span style="margin-left:auto"><span class="badge ${lb.cls}">${lb.text}</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div class="pbar" style="flex:1"><div class="pfill" style="width:${p.fmi}%"></div></div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--t4)">${lb.tip}</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="ib solid" style="font-size:11px;height:26px;padding:0 10px" onclick="createArticleForProject('${p.id}','${esc(p.name)}')"><i class="ti ti-pencil"></i>立即创稿</button>
+        <button class="ib" style="font-size:11px;height:26px;padding:0 10px" onclick="go('timeline',null)"><i class="ti ti-files"></i>查看资料</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Upcoming opportunities
+  const upEl = document.getElementById('topics-upcoming');
+  const highPriority = rows.filter(p=>p.fmi>=60&&p.arts===0);
+  if(!highPriority.length){upEl.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--t4);padding:8px 0">暂无零稿件高潜力项目</div>';return;}
+  upEl.innerHTML=`<div class="tw"><table><thead><tr><th>项目</th><th>FMI</th><th>资料数</th><th>当前稿件</th></tr></thead><tbody>${highPriority.slice(0,5).map(p=>`<tr><td class="td1">${esc(p.name)}</td><td class="tdm" style="color:var(--t1);font-weight:600">${p.fmi}</td><td class="tdm">${p.assets}</td><td><span class="badge b-ok">零稿件</span></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function createArticleForProject(projectId, projectName) {
+  if(!db) return;
+  const title = `${projectName} · 配乐分析`;
+  const {data,error} = await db.from('articles').insert({title, status:'topic', tags:[typeName('film')]}).select().single();
+  if(error){toast('创建失败：'+error.message);return;}
+  if(projectId) await db.from('article_projects').insert({article_id:data.id, project_id:projectId});
+  toast('选题已创建');
+  openArticleInEditor(data.id);
+}
+
+// ══ 热点追踪 ══
+async function loadHeatmap() {
+  if(!db) return;
+  const [pr,ar,as,nc] = await Promise.all([
+    db.from('projects').select('id,name,type,composer,tags'),
+    db.from('article_projects').select('project_id'),
+    db.from('assets').select('project_id,type,copyright_status'),
+    db.from('note_cards').select('project_id,card_type')
+  ]);
+  const projects = pr.data||[];
+  const el = document.getElementById('heatmap-content');
+  if(!projects.length){el.innerHTML='<div class="empty"><i class="ti ti-flame"></i><p>暂无项目数据</p></div>';return;}
+
+  const articleMap={},assetMap={},noteMap={};
+  (ar.data||[]).forEach(x=>{articleMap[x.project_id]=(articleMap[x.project_id]||0)+1;});
+  (as.data||[]).forEach(x=>{if(x.project_id)assetMap[x.project_id]=(assetMap[x.project_id]||0)+1;});
+  (nc.data||[]).forEach(x=>{if(x.project_id)noteMap[x.project_id]=(noteMap[x.project_id]||0)+1;});
+
+  const rows = projects.map(p=>({
+    ...p,
+    arts: articleMap[p.id]||0,
+    assets: assetMap[p.id]||0,
+    notes: noteMap[p.id]||0,
+    heat: (articleMap[p.id]||0)*30 + (assetMap[p.id]||0)*5 + (noteMap[p.id]||0)*10
+  })).sort((a,b)=>b.heat-a.heat);
+
+  const maxHeat = Math.max(...rows.map(r=>r.heat), 1);
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">
+    ${rows.map((p,i)=>{
+      const pct = Math.round(p.heat/maxHeat*100);
+      const profRatio = p.notes > 0 ? Math.min(100, Math.round(p.notes/(p.notes+p.arts+1)*100)) : 0;
+      return `<div style="background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t4);width:20px">#${i+1}</div>
+          <div style="font-family:var(--serif);font-size:13px;font-weight:600;flex:1">${esc(p.name)}</div>
+          <span class="badge b-def">${typeName(p.type)}</span>
+          ${p.arts>=3?'<span class="badge b-warn">已深度覆盖</span>':p.arts>=1?'<span class="badge b-info">有稿件</span>':'<span class="badge b-ok">零覆盖</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="background:var(--bg3);border-radius:2px;height:6px;flex:1;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--t1);border-radius:2px"></div>
+          </div>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--t4);white-space:nowrap">热度 ${p.heat}</span>
+        </div>
+        <div style="display:flex;gap:16px;font-family:var(--mono);font-size:9px;color:var(--t4)">
+          <span>专业讨论(笔记) <strong style="color:var(--t1)">${p.notes}</strong></span>
+          <span>资料数 <strong style="color:var(--t1)">${p.assets}</strong></span>
+          <span>已有稿件 <strong style="color:var(--t1)">${p.arts}</strong></span>
+          <span style="margin-left:auto">专业占比 <strong style="color:var(--t1)">${profRatio}%</strong></span>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ══ 发售日历 ══
+async function loadCalendar() {
+  if(!db) return;
+  const {data} = await db.from('projects').select('*').order('created_at',{ascending:false});
+  const el = document.getElementById('calendar-content');
+
+  el.innerHTML = `
+    <div class="notice" style="border-left-color:var(--info)">
+      <i class="ti ti-info-circle" style="color:var(--info)"></i>
+      <div>发售日历目前显示已录入项目。点击<strong>添加事件</strong>可手动添加即将发售的游戏、电影、专辑，系统会自动关联作曲家信息并提示配乐需求。</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${(data||[]).map(p=>`
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:4px">
+          <div style="font-size:20px;flex-shrink:0">${typeIcon(p.type)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:var(--serif);font-size:13px;font-weight:600">${esc(p.name)}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${p.year?p.year+'年':'年份未知'} · ${esc(p.composer||'作曲家未知')} · ${typeName(p.type)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${p.year>=2024?`<span class="badge b-ok">近期作品</span>`:`<span class="badge b-def">历史档案</span>`}
+          </div>
+          <button class="ib" style="font-size:11px;height:26px;padding:0 8px;flex-shrink:0" onclick="createArticleForProject('${p.id}','${esc(p.name)}')"><i class="ti ti-pencil"></i>创稿</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ══ 我的数据 ══
+async function loadMyData() {
+  if(!db) return;
+  const [pr,ar,as,nc] = await Promise.all([
+    db.from('projects').select('type'),
+    db.from('articles').select('status,word_count,tags,created_at'),
+    db.from('assets').select('type,copyright_status'),
+    db.from('note_cards').select('card_type,created_at')
+  ]);
+  const el = document.getElementById('mydata-content');
+
+  const projects = pr.data||[], arts = ar.data||[], assets = as.data||[], notes = nc.data||[];
+  const published = arts.filter(a=>a.status==='published');
+  const totalWords = arts.reduce((s,a)=>s+(a.word_count||0),0);
+  const avgWords = arts.length ? Math.round(totalWords/arts.length) : 0;
+
+  // Domain breakdown
+  const domainMap = {};
+  projects.forEach(p=>{ domainMap[p.type]=(domainMap[p.type]||0)+1; });
+
+  // Note type breakdown
+  const noteTypeMap = {};
+  notes.forEach(n=>{ noteTypeMap[n.card_type]=(noteTypeMap[n.card_type]||0)+1; });
+
+  // Article status breakdown
+  const statusMap = {};
+  arts.forEach(a=>{ statusMap[a.status]=(statusMap[a.status]||0)+1; });
+
+  el.innerHTML = `
+    <div class="srow" style="margin-bottom:20px">
+      <div class="sc"><div class="sc-label">项目母本</div><div class="sc-val">${projects.length}</div><div class="sc-sub">电影/游戏/专辑</div></div>
+      <div class="sc"><div class="sc-label">已发布稿件</div><div class="sc-val ok">${published.length}</div><div class="sc-sub">共 ${arts.length} 篇</div></div>
+      <div class="sc"><div class="sc-label">笔记卡片</div><div class="sc-val">${notes.length}</div><div class="sc-sub">原子化知识</div></div>
+      <div class="sc"><div class="sc-label">平均字数</div><div class="sc-val">${avgWords.toLocaleString()}</div><div class="sc-sub">每篇稿件</div></div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="sh"><div class="sh-t"><i class="ti ti-folder"></i>项目领域分布</div></div>
+        <div class="tw"><table><thead><tr><th>领域</th><th>项目数</th><th>占比</th></tr></thead><tbody>
+          ${Object.entries(domainMap).map(([k,v])=>`<tr><td class="td1">${typeName(k)}</td><td class="tdm">${v}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pbar" style="width:80px"><div class="pfill" style="width:${Math.round(v/projects.length*100)}%"></div></div><span class="tdm">${Math.round(v/projects.length*100)}%</span></div></td></tr>`).join('')}
+        </tbody></table></div>
+
+        <div class="sh" style="margin-top:16px"><div class="sh-t"><i class="ti ti-article"></i>稿件状态分布</div></div>
+        <div class="tw"><table><thead><tr><th>状态</th><th>数量</th></tr></thead><tbody>
+          ${Object.entries(statusMap).map(([k,v])=>`<tr><td>${statusBadge(k)}</td><td class="tdm">${v}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+      <div>
+        <div class="sh"><div class="sh-t"><i class="ti ti-cards"></i>笔记类型分布</div></div>
+        <div class="tw"><table><thead><tr><th>类型</th><th>数量</th><th>占比</th></tr></thead><tbody>
+          ${Object.entries(noteTypeMap).map(([k,v])=>{const nl={analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};return`<tr><td class="td1">${nl[k]||k}</td><td class="tdm">${v}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pbar" style="width:80px"><div class="pfill" style="width:${Math.round(v/notes.length*100)}%"></div></div><span class="tdm">${Math.round(v/notes.length*100)}%</span></div></td></tr>`;}).join('')}
+        </tbody></table></div>
+
+        <div class="sh" style="margin-top:16px"><div class="sh-t"><i class="ti ti-files"></i>资料库分布</div></div>
+        <div class="tw"><table><thead><tr><th>版权状态</th><th>数量</th></tr></thead><tbody>
+          <tr><td>${copyrightBadge('safe')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='safe').length}</td></tr>
+          <tr><td>${copyrightBadge('credit')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='credit').length}</td></tr>
+          <tr><td>${copyrightBadge('pending')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='pending').length}</td></tr>
+          <tr><td>${copyrightBadge('risk')}</td><td class="tdm">${assets.filter(a=>a.copyright_status==='risk').length}</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>`;
 }
 
 // ══ COPYRIGHT ══
@@ -1053,4 +1363,4 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 </script>
 </body>
 </html>
-2026年 5月14日 星期四 19时09分43秒 +08
+2026年 5月14日 星期四 19时17分37秒 +08
