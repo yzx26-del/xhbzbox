@@ -1038,52 +1038,93 @@ async function createArticleForProject(projectId, projectName) {
   openArticleInEditor(data.id);
 }
 
-// ══ 选题情报板：Last.fm 新歌 ══
-async function loadTopicsSongs() {
+// ══ 选题情报板：中国新歌 + 国际新歌 ══
+let currentSongsTab = 'qq';
+
+async function loadTopicsSongs(tab) {
+  if(tab) currentSongsTab = tab;
   const el = document.getElementById('topics-fmi');
-  el.innerHTML = '<div class="loading"><div class="spinner"></div>从 Last.fm 拉取新歌…</div>';
+
+  const tabs = `<div style="display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:16px">
+    ${[['qq','QQ音乐新歌'],['weibo','微博音乐热搜'],['bilibili','B站音乐区'],['lastfm','Last.fm国际']].map(([k,v])=>
+      `<button onclick="loadTopicsSongs('${k}')" style="padding:8px 14px;background:none;border:none;border-bottom:2px solid ${currentSongsTab===k?'var(--t1)':'transparent'};cursor:pointer;font-size:12px;font-family:var(--sans);color:${currentSongsTab===k?'var(--t1)':'var(--t4)'};transition:all .15s">${v}</button>`
+    ).join('')}
+  </div>`;
+
+  el.innerHTML = tabs + '<div class="loading"><div class="spinner"></div>加载中…</div>';
+
   try {
-    // Last.fm 热门新歌
-    const [chartRes, newRes] = await Promise.all([
-      fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=${LASTFM_KEY}&format=json&limit=20`),
-      fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key=${LASTFM_KEY}&format=json&limit=10`)
-    ]);
-    const chartData = await chartRes.json();
-    const artistData = await newRes.json();
-    const tracks = chartData?.tracks?.track || [];
-    const artists = artistData?.artists?.artist || [];
+    if(currentSongsTab === 'qq') {
+      const r = await fetch('/api/qq');
+      const data = await r.json();
+      const songs = data.songs || [];
+      if(!songs.length) throw new Error('暂无数据');
+      el.innerHTML = tabs + `<div class="tw"><table>
+        <thead><tr><th>#</th><th>封面</th><th>歌曲</th><th>歌手</th><th>专辑</th><th></th></tr></thead>
+        <tbody>${songs.map((s,i)=>`<tr>
+          <td class="tdm" style="color:var(--t4)">${i+1}</td>
+          <td><img src="${esc(s.cover)}" style="width:32px;height:32px;object-fit:cover;border-radius:2px" onerror="this.style.display='none'"></td>
+          <td class="td1">${esc(s.name)}</td>
+          <td style="color:var(--t3)">${esc(s.artist)}</td>
+          <td style="color:var(--t4);font-size:11px">${esc(s.album)}</td>
+          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(s.name)}','${esc(s.artist)}')"><i class="ti ti-pencil"></i>创稿</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
 
-    if(!tracks.length){ el.innerHTML='<div class="empty"><i class="ti ti-music-off"></i><p>暂无数据</p></div>'; return; }
+    } else if(currentSongsTab === 'weibo') {
+      const r = await fetch('/api/weibo');
+      const data = await r.json();
+      const hot = data.hot || [];
+      if(!hot.length) throw new Error('暂无数据');
+      el.innerHTML = tabs + `<div class="tw"><table>
+        <thead><tr><th>#</th><th>热搜词</th><th>热度</th><th>类型</th><th></th></tr></thead>
+        <tbody>${hot.map((h,i)=>`<tr>
+          <td class="tdm" style="color:var(--t4)">${i+1}</td>
+          <td class="td1">${esc(h.word)}</td>
+          <td class="tdm">${parseInt(h.num||0).toLocaleString()}</td>
+          <td>${h.isMusic?'<span class="badge b-ok">音乐</span>':'<span class="badge b-def">其他</span>'}</td>
+          <td>${h.isMusic?`<button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(h.word)}','微博热搜')"><i class="ti ti-pencil"></i>创稿</button>`:'—'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
 
-    el.innerHTML = `
-      <div style="margin-bottom:16px">
-        <div class="sh"><div class="sh-t"><i class="ti ti-chart-bar"></i>Last.fm 本周热门歌曲</div><span style="font-family:var(--mono);font-size:9px;color:var(--t4)">实时数据</span></div>
-        <div class="tw"><table>
-          <thead><tr><th>#</th><th>歌曲</th><th>艺人</th><th>播放量</th><th></th></tr></thead>
-          <tbody>${tracks.map((t,i)=>`<tr>
-            <td class="tdm" style="color:var(--t4)">${i+1}</td>
-            <td class="td1">${esc(t.name)}</td>
-            <td style="color:var(--t3)">${esc(t.artist?.name||'')}</td>
-            <td class="tdm">${parseInt(t.playcount||0).toLocaleString()}</td>
-            <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(t.name)}','${esc(t.artist?.name||'')}')"><i class="ti ti-pencil"></i>创稿</button></td>
-          </tr>`).join('')}
-          </tbody>
-        </table></div>
-      </div>
-      <div>
-        <div class="sh"><div class="sh-t"><i class="ti ti-users"></i>热门艺人</div></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${artists.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;cursor:pointer" onclick="searchArtistSongs('${esc(a.name)}')">
-            <img src="${a.image?.find(i=>i.size==='small')?.['#text']||''}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--bg3)" onerror="this.style.display='none'">
-            <div>
-              <div style="font-size:12px;font-weight:500">${esc(a.name)}</div>
-              <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">${parseInt(a.listeners||0).toLocaleString()} 听众</div>
-            </div>
-          </div>`).join('')}
-        </div>
+    } else if(currentSongsTab === 'bilibili') {
+      const r = await fetch('/api/bilibili');
+      const data = await r.json();
+      const videos = data.videos || [];
+      if(!videos.length) throw new Error('暂无数据');
+      el.innerHTML = tabs + `<div style="display:flex;flex-direction:column;gap:8px">
+        ${videos.map((v,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:4px;transition:border-color .12s" onmouseover="this.style.borderColor='var(--t1)'" onmouseout="this.style.borderColor='var(--line)'">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t4);width:20px">${i+1}</div>
+          <img src="${esc(v.cover)}" style="width:80px;height:50px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500;color:var(--t1);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(v.title)}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t4)">UP: ${esc(v.author)} · 播放 ${parseInt(v.play).toLocaleString()}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <a href="${esc(v.url)}" target="_blank" class="ib" style="font-size:11px;height:24px;padding:0 8px"><i class="ti ti-external-link"></i>看视频</a>
+            <button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(v.title)}','B站')"><i class="ti ti-pencil"></i>创稿</button>
+          </div>
+        </div>`).join('')}
       </div>`;
+
+    } else if(currentSongsTab === 'lastfm') {
+      const r = await fetch(`https://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key=${LASTFM_KEY}&format=json&limit=20`);
+      const data = await r.json();
+      const tracks = data?.tracks?.track || [];
+      if(!tracks.length) throw new Error('暂无数据');
+      el.innerHTML = tabs + `<div class="tw"><table>
+        <thead><tr><th>#</th><th>歌曲</th><th>艺人</th><th>播放量</th><th></th></tr></thead>
+        <tbody>${tracks.map((t,i)=>`<tr>
+          <td class="tdm" style="color:var(--t4)">${i+1}</td>
+          <td class="td1">${esc(t.name)}</td>
+          <td style="color:var(--t3)">${esc(t.artist?.name||'')}</td>
+          <td class="tdm">${parseInt(t.playcount||0).toLocaleString()}</td>
+          <td><button class="ib" style="font-size:11px;height:24px;padding:0 8px" onclick="createArticleFromSong('${esc(t.name)}','${esc(t.artist?.name||'')}')"><i class="ti ti-pencil"></i>创稿</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    }
   } catch(e) {
-    el.innerHTML = `<div class="empty"><i class="ti ti-wifi-off"></i><p>加载失败：${esc(e.message)}</p></div>`;
+    el.innerHTML = tabs + `<div class="empty"><i class="ti ti-wifi-off"></i><p>加载失败：${esc(e.message)}</p><button class="ib" style="margin-top:8px" onclick="loadTopicsSongs()"><i class="ti ti-refresh"></i>重试</button></div>`;
   }
 }
 
@@ -1091,8 +1132,8 @@ async function searchArtistSongs(artist) {
   const el = document.getElementById('topics-fmi');
   el.innerHTML = '<div class="loading"><div class="spinner"></div>搜索中…</div>';
   try {
-    const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=${encodeURIComponent(artist)}&api_key=${LASTFM_KEY}&format=json&limit=10`);
-    const data = await res.json();
+    const r = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist=${encodeURIComponent(artist)}&api_key=${LASTFM_KEY}&format=json&limit=10`);
+    const data = await r.json();
     const tracks = data?.toptracks?.track || [];
     el.innerHTML = `
       <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px">
@@ -1500,4 +1541,3 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 </script>
 </body>
 </html>
-2026年 5月14日 星期四 19时47分13秒 +08
