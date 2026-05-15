@@ -60,6 +60,7 @@ function fallbackPlaylist(date) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') return send(res, 200, { ok: true });
   if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed' });
   const apiKey = getEnv('DEEPSEEK_API_KEY', res)?.trim();
   if (!apiKey) return;

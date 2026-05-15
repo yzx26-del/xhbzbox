@@ -1,6 +1,9 @@
 export function send(res, status, data) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (!res.getHeader('Cache-Control')) {
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
   }
