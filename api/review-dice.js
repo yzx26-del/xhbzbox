@@ -61,8 +61,18 @@ function fallbackPlaylist(date) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed' });
-  const apiKey = getEnv('DEEPSEEK_API_KEY', res);
+  const apiKey = getEnv('DEEPSEEK_API_KEY', res)?.trim();
   if (!apiKey) return;
+  if (!/^[\x20-\x7E]+$/.test(apiKey) || !apiKey.startsWith('sk-')) {
+    if (req.query?.debug === '1') {
+      return send(res, 500, {
+        error: 'DEEPSEEK_API_KEY is invalid. It should be a plain key starting with sk- and contain no Chinese text.',
+        status: 500,
+        details: null
+      });
+    }
+    return send(res, 200, fallbackPlaylist(String(req.query?.date || new Date().toISOString().slice(0, 10))));
+  }
 
   const date = String(req.query?.date || new Date().toISOString().slice(0, 10));
   const d = new Date(date);
