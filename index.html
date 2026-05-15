@@ -1506,6 +1506,30 @@ function setCachedDice(data){
   rememberDiceDate(data.date);
   currentDicePlaylist=data;
 }
+async function getSharedDice(date=todayKey()){
+  if(!db)return null;
+  const {data,error}=await db.from('daily_playlists').select('date,theme,theme_quote,theme_quote_source,songs_json,playlist_data').eq('date',date).maybeSingle();
+  if(error){console.warn('daily_playlists read failed',error);return null;}
+  if(!data)return null;
+  const playlist=data.playlist_data||{date:data.date,theme:data.theme,theme_quote:data.theme_quote,theme_quote_source:data.theme_quote_source,songs:data.songs_json};
+  playlist.date=playlist.date||date;
+  setCachedDice(playlist);
+  return enrichDicePlaylist(playlist);
+}
+async function setSharedDice(data){
+  if(!db||!data?.date)return;
+  const row={
+    date:data.date,
+    theme:data.theme||'',
+    theme_quote:data.theme_quote||data.quote||'',
+    theme_quote_source:data.theme_quote_source||data.quote_source||'',
+    songs_json:data.songs||[],
+    playlist_data:data,
+    updated_at:new Date().toISOString()
+  };
+  const {error}=await db.from('daily_playlists').upsert(row,{onConflict:'date'});
+  if(error)console.warn('daily_playlists write failed',error);
+}
 function enrichDicePlaylist(data){
   if(!data?.songs)return data;
   data.songs=data.songs.map((s,i)=>({
@@ -1526,18 +1550,22 @@ function loadReviewDiceHome(){
   const date=todayKey();
   const cached=enrichDicePlaylist(getCachedDice(date));
   const note=document.getElementById('dice-cache-note');
-  if(note) note.textContent=cached?'今日牌阵已缓存，继续打开不消耗 API':'今日未抽牌，点击后生成一次';
+  if(note) note.textContent=cached?'今日牌阵已缓存，继续打开不消耗 API':'今日未抽牌，会先查全站缓存';
   if(cached){currentDicePlaylist=cached;renderDiceCards(cached,false);}
+  else getSharedDice(date).then(shared=>{if(shared){currentDicePlaylist=shared;renderDiceCards(shared,false);if(note)note.textContent='已读取全站今日歌单，不消耗 API';}});
 }
 async function fetchDailyDice(date=todayKey(),force=false){
   const cached=force?null:enrichDicePlaylist(getCachedDice(date));
   if(cached){currentDicePlaylist=cached;return cached;}
+  const shared=force?null:await getSharedDice(date);
+  if(shared){currentDicePlaylist=shared;return shared;}
   const qs=new URLSearchParams({date,v:DICE_CACHE_VERSION});
   if(force)qs.set('refresh',String(Date.now()));
   const res=await fetch(API_ORIGIN+'/api/review-dice?'+qs.toString());
   if(!res.ok) throw new Error('生成失败');
   const data=enrichDicePlaylist(await res.json());
   setCachedDice(data);
+  await setSharedDice(data);
   return data;
 }
 async function regenerateTodayDice(){
@@ -1652,20 +1680,22 @@ function jumpToPlaylistSong(i,e){
   closeDiceDetail();
   go('dailyplaylist',null);
 }
-function loadDailyPlaylist(){
+async function loadDailyPlaylist(){
   const select=document.getElementById('playlist-date-select');
   const hist=diceHistory();
   const today=todayKey();
   const dates=[today,...hist.filter(x=>x!==today)];
   if(select) select.innerHTML=dates.map(d=>`<option value="${d}">${d}${d===today?' · 今日':''}</option>`).join('');
   const date=select?.value||today;
-  const cached=enrichDicePlaylist(getCachedDice(date));
+  let cached=enrichDicePlaylist(getCachedDice(date));
+  if(!cached)cached=await getSharedDice(date);
   if(cached&&isDiceUnlocked(date)) renderDailyPlaylist(cached);
   else renderPlaylistLocked(date,cached);
 }
-function loadPlaylistFromHistory(){
+async function loadPlaylistFromHistory(){
   const date=val('playlist-date-select')||todayKey();
-  const cached=enrichDicePlaylist(getCachedDice(date));
+  let cached=enrichDicePlaylist(getCachedDice(date));
+  if(!cached)cached=await getSharedDice(date);
   if(cached&&isDiceUnlocked(date)) renderDailyPlaylist(cached);
   else renderPlaylistLocked(date,cached);
 }
