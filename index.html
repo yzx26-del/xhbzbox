@@ -217,6 +217,9 @@ select.fi{cursor:pointer}
 .nc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .nc{background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:14px;position:relative;transition:border-color .12s}
 .nc:hover{border-color:var(--t1)}
+.nc-source{font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:3px}
+.nc-source-link{color:var(--t3);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.nc-source-link:hover{color:var(--t1)}
 /* ── 听感速记浮窗 ── */
 .qnote-fab{position:fixed;bottom:28px;right:28px;z-index:400;width:44px;height:44px;border-radius:50%;background:var(--t1);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 12px rgba(0,0,0,.18);transition:all .2s}
 .qnote-fab:hover{transform:scale(1.08);background:#333}
@@ -1445,13 +1448,22 @@ async function loadNotes(type='') {
   let q=db.from('note_cards').select('*').order('created_at',{ascending:false});
   if(type&&type!=='song_review') q=q.eq('card_type',type);
   if(type==='song_review') q=q.contains('tags',['歌曲点评']);
-  const {data}=await q;
+  const [{data},{data:links}]=await Promise.all([
+    q,
+    db.from('article_projects').select('project_id,article_id,articles(id,title,updated_at)').limit(300)
+  ]);
+  const docMap={};
+  (links||[]).forEach(l=>{
+    const title=l.articles?.title;
+    const articleId=l.article_id||l.articles?.id;
+    if(l.project_id&&title&&!docMap[l.project_id])docMap[l.project_id]={id:articleId,title};
+  });
   const count=(data||[]).length;
   document.getElementById('nb-notes').textContent=count;
   const el=document.getElementById('notes-grid');
   if(!data?.length){el.innerHTML='<div class="empty"><i class="ti ti-cards"></i><p>暂无笔记卡片，可通过智能导入自动生成</p></div>';return;}
   const typeLabel={analysis:'分析观点',fact:'史实引用',technique:'技法记录',reusable_module:'可复用模块',quote:'原文摘录'};
-  el.innerHTML=`<div class="nc-grid">${data.map(n=>{const label=(n.tags||[]).includes('歌曲点评')?'歌曲点评':(typeLabel[n.card_type]||n.card_type);return`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${label}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div style="font-family:var(--mono);font-size:9px;color:var(--t4);border-top:1px solid var(--line);padding-top:8px">${esc(n.source_desc||'')}</div></div>`;}).join('')}</div>`;
+  el.innerHTML=`<div class="nc-grid">${data.map(n=>{const label=(n.tags||[]).includes('歌曲点评')?'歌曲点评':(typeLabel[n.card_type]||n.card_type);const doc=docMap[n.project_id]||null;return`<div class="nc"><button onclick="deleteNote('${n.id}')" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--danger);font-size:12px;display:flex;align-items:center;justify-content:center"><i class="ti ti-trash"></i></button><div style="font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--t4);margin-bottom:8px">${label}${n.card_type==='reusable_module'?' 📌':''}</div><div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding-right:24px">${esc(n.content||'')}</div><div class="nc-source"><span>来源：${esc(n.source_desc||'暂无')}</span>${doc?`<span>关联文档：<span class="nc-source-link" onclick="openArticleInEditor('${doc.id}')">${esc(doc.title)}</span></span>`:'<span>关联文档：暂无</span>'}</div></div>`;}).join('')}</div>`;
 }
 async function createNote() {
   const typeEl=document.querySelector('#note-type-sel .sel');
