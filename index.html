@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>声轨档案 · 音乐史CMS</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap"></noscript>
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"></noscript>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--line:#e0e0e0;--line2:#c8c8c8;--t1:#0a0a0a;--t2:#444;--t3:#888;--t4:#bbb;--ok:#1a7a3c;--warn:#b7860b;--danger:#c0392b;--info:#1a5fa0;--sw:220px;--th:48px;--serif:'Noto Serif SC',serif;--sans:'Noto Sans SC',sans-serif;--mono:'IBM Plex Mono',monospace}
+:root{--bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--line:#e0e0e0;--line2:#c8c8c8;--t1:#0a0a0a;--t2:#444;--t3:#888;--t4:#bbb;--ok:#1a7a3c;--warn:#b7860b;--danger:#c0392b;--info:#1a5fa0;--sw:220px;--th:48px;--serif:'Noto Serif SC','Songti SC','STSong',serif;--sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',Arial,sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Menlo,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--t1);font-size:13px;line-height:1.5}
 .topbar{height:var(--th);position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:12px}
@@ -890,8 +891,17 @@ async function bootDatabase(){
   }
   const { createClient } = window.supabase;
   db = createClient(SUPABASE_URL, SUPABASE_KEY);
-  status.textContent='已连接 Supabase';
-  idle(()=>loadAll());
+  status.textContent='已连接 Supabase · 按需加载';
+  document.getElementById('dash-projects').innerHTML='<div class="empty"><i class="ti ti-bolt"></i><p>页面已就绪。点击右上角“刷新”再加载统计。</p></div>';
+  document.getElementById('dash-articles').innerHTML='<div class="empty"><i class="ti ti-clock"></i><p>稿件流水线已暂停自动加载，减少卡顿。</p></div>';
+  document.getElementById('dash-risk').innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--t4);padding:8px 0">版权提醒将在点击刷新后加载</div>';
+}
+function needDb(targetId){
+  if(db) return true;
+  const el=document.getElementById(targetId);
+  if(el) el.innerHTML='<div class="empty"><i class="ti ti-database-off"></i><p>数据库还在连接，请稍后再点一次。</p></div>';
+  toast('数据库还在连接，页面没有卡住');
+  return false;
 }
 
 // ══ NAV ══
@@ -901,7 +911,7 @@ function go(id, el) {
   document.getElementById('pg-'+id)?.classList.add('on');
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
-  const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamemap:gmInit,knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
+  const loaders={projects:loadProjects,timeline:()=>{if(!needDb('tl-body'))return;loadProjectSelects();loadTimeline();},gamemap:gmInit,knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) later(()=>Promise.resolve(loaders[id]()).catch(e=>toast('加载慢或失败：'+e.message)),20);
 }
 
@@ -1101,6 +1111,9 @@ function openGameModal(btn){
 // ══ LOAD ALL ══
 async function loadAll() {
   if(!db) return;
+  document.getElementById('dash-projects').innerHTML='<div class="loading"><div class="spinner"></div>加载近期项目…</div>';
+  document.getElementById('dash-articles').innerHTML='<div class="loading"><div class="spinner"></div>加载稿件…</div>';
+  document.getElementById('dash-risk').innerHTML='<div class="loading"><div class="spinner"></div>加载版权提醒…</div>';
   await Promise.allSettled([
     withTimeout(loadDashProjects(),3500,'近期项目'),
     withTimeout(loadDashArticles(),3500,'稿件流水线'),
