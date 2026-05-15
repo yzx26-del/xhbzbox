@@ -102,13 +102,17 @@ tbody tr:hover{background:var(--bg2)}
 .pcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .pc{background:var(--bg);padding:16px;cursor:pointer;transition:background .12s;position:relative}
 .pc:hover{background:var(--bg2)}
-.pc-mark{position:absolute;top:0;left:0;bottom:0;width:2px}
-.pm-film{background:var(--t1)}.pm-game{background:var(--t3)}.pm-album{background:var(--t4)}.pm-tv{background:#888}
-.pc-type{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:8px}
+.pc-mark{position:absolute;top:0;left:0;bottom:0;width:3px}
+.pm-film{background:#f28c28}.pm-game{background:#d94a45}.pm-album{background:#e3b436}.pm-tv{background:#2f9b58}.pm-stage{background:#2f80d0}.pm-documentary{background:#7aa7c7}
+.pc-type{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:3px;padding:2px 6px;background:var(--bg2)}
+.pct-film{border-color:#f28c28;color:#b45d0e;background:#fff6ec}.pct-game{border-color:#d94a45;color:#a12622;background:#fff0ef}.pct-album{border-color:#e3b436;color:#8b6800;background:#fff9df}.pct-tv{border-color:#2f9b58;color:#176a36;background:#edf8f1}.pct-stage{border-color:#2f80d0;color:#155ea3;background:#eef6ff}.pct-documentary{border-color:#7aa7c7;color:#356f91;background:#edf7fb}
 .pc-name{font-family:var(--serif);font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px}
 .pc-meta{font-size:11px;color:var(--t4);margin-bottom:12px}
-.pc-stats{display:flex;gap:12px;padding-top:10px;border-top:1px solid var(--line)}
+.pc-stats{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
 .pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
+.pc-tag{font-family:var(--mono);font-size:10px;color:var(--t3);background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:2px 6px}
+.pc-source{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px;display:flex;align-items:center;gap:4px}
+.pc-edit-tags{font-family:var(--mono);font-size:10px;color:var(--t3);border:1px solid var(--line);background:var(--bg);border-radius:3px;height:22px;padding:0 7px;cursor:pointer}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
 .mwrap::-webkit-scrollbar-thumb{background:var(--line)}
@@ -172,6 +176,11 @@ select.fi{cursor:pointer}
 .typsel{display:flex;gap:6px;flex-wrap:wrap}
 .to{padding:5px 12px;border-radius:3px;border:1px solid var(--line);cursor:pointer;font-size:11px;color:var(--t3);transition:all .12s;font-family:var(--mono)}
 .to.sel{border-color:var(--t1);background:var(--t1);color:#fff}
+.typsel .to.pt-film{border-color:#f28c28;color:#b45d0e;background:#fff6ec}.typsel .to.pt-film.sel{background:#f28c28;color:#fff}
+.typsel .to.pt-game{border-color:#d94a45;color:#a12622;background:#fff0ef}.typsel .to.pt-game.sel{background:#d94a45;color:#fff}
+.typsel .to.pt-tv{border-color:#2f9b58;color:#176a36;background:#edf8f1}.typsel .to.pt-tv.sel{background:#2f9b58;color:#fff}
+.typsel .to.pt-album{border-color:#e3b436;color:#8b6800;background:#fff9df}.typsel .to.pt-album.sel{background:#e3b436;color:#fff}
+.typsel .to.pt-stage{border-color:#2f80d0;color:#155ea3;background:#eef6ff}.typsel .to.pt-stage.sel{background:#2f80d0;color:#fff}
 .mfoot{display:flex;justify-content:flex-end;gap:6px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;right:24px;z-index:500;background:var(--t1);color:#fff;padding:10px 16px;border-radius:4px;font-size:12px;font-family:var(--mono);opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -710,7 +719,7 @@ select.fi{cursor:pointer}
 <div class="overlay" id="modal-project" onclick="closeModal('project',event)">
   <div class="modal"><button class="ib ib-sq modal-close" onclick="closeModal('project')"><i class="ti ti-x"></i></button>
     <div class="modal-title">新建项目母本</div>
-    <div class="fg"><label class="fl">媒介类型</label><div class="typsel" id="proj-type-sel"><div class="to sel" data-val="film">🎬 电影</div><div class="to" data-val="game">🎮 游戏</div><div class="to" data-val="tv">📺 电视剧</div><div class="to" data-val="album">🎵 专辑</div><div class="to" data-val="documentary">📻 纪录片</div></div></div>
+    <div class="fg"><label class="fl">媒介类型</label><div class="typsel" id="proj-type-sel"><div class="to pt-film sel" data-val="film">🎬 电影</div><div class="to pt-game" data-val="game">🎮 游戏</div><div class="to pt-tv" data-val="tv">📺 电视剧</div><div class="to pt-album" data-val="album">🎤 综艺</div><div class="to pt-stage" data-val="stage">🎭 舞台剧</div></div></div>
     <div class="fg"><label class="fl">作品名称（中文）</label><input class="fi" id="p-name" placeholder="如：星际穿越"></div>
     <div class="fg"><label class="fl">英文名</label><input class="fi" id="p-name-en" placeholder="Interstellar"></div>
     <div class="fr2"><div class="fg"><label class="fl">作曲家</label><input class="fi" id="p-composer" placeholder="汉斯·季默"></div><div class="fg"><label class="fl">导演/开发商</label><input class="fi" id="p-director" placeholder="克里斯托弗·诺兰"></div></div>
@@ -1223,13 +1232,30 @@ async function loadDashRisk() {
 // ══ PROJECTS ══
 async function loadProjects() {
   if(!db){document.getElementById('projects-grid').innerHTML='<div class="empty"><i class="ti ti-database-off"></i><p>数据库还在连接，稍后再点一次</p></div>';return;}
-  const {data}=await db.from('projects').select('*').order('created_at',{ascending:false});
-  projectsCache=data||[]; renderProjects(projectsCache);
+  const [{data},{data:assets},{data:links}]=await Promise.all([
+    db.from('projects').select('*').order('created_at',{ascending:false}),
+    db.from('assets').select('project_id,name,created_at').not('project_id','is',null).order('created_at',{ascending:false}).limit(200),
+    db.from('article_projects').select('project_id,articles(title,updated_at)').limit(200)
+  ]);
+  const sourceMap={};
+  (assets||[]).forEach(a=>{if(a.project_id&&!sourceMap[a.project_id])sourceMap[a.project_id]=a.name;});
+  (links||[]).forEach(l=>{const title=l.articles?.title;if(l.project_id&&title&&!sourceMap[l.project_id])sourceMap[l.project_id]=title;});
+  projectsCache=(data||[]).map(p=>({...p,source_name:sourceMap[p.id]||''}));
+  renderProjects(projectsCache);
 }
 function renderProjects(list) {
   const el=document.getElementById('projects-grid');
   if(!list.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>';return;}
-  el.innerHTML=`<div class="pcgrid">${list.map(p=>`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats"><span class="pc-stat"><i class="ti ti-tag"></i>${(p.tags||[]).join('·')||'—'}</span></div></div></div>`).join('')}</div>`;
+  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const tags=p.tags||[];return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${tags.length?tags.map(t=>`<span class="pc-tag">${esc(t)}</span>`).join(''):'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>'}<button class="pc-edit-tags" onclick="event.stopPropagation();editProjectTags('${p.id}')"><i class="ti ti-pencil"></i> 编辑</button></div><div class="pc-source"><i class="ti ti-file-text"></i>${esc(p.source_name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
+}
+async function editProjectTags(id){
+  const p=projectsCache.find(x=>x.id===id); if(!p)return;
+  const input=prompt('编辑标签，用中文逗号或英文逗号分隔', (p.tags||[]).join('，'));
+  if(input===null)return;
+  const tags=input.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  const {error}=await db.from('projects').update({tags}).eq('id',id);
+  if(error){toast('标签保存失败：'+error.message);return;}
+  p.tags=tags; renderProjects(projectsCache); toast('标签已更新');
 }
 function selectProject(id,type){if(type==='game'){pendingGameProjectId=id;go('gamemap',null);}else go('timeline',null);}
 async function createProject() {
@@ -2384,8 +2410,8 @@ function closeModal(name,e){if(!e||e.target===document.getElementById('modal-'+n
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function val(id){return(document.getElementById(id)?.value||'').trim();}
 function clearInputs(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
-function typeIcon(t){return{film:'🎬',game:'🎮',tv:'📺',album:'🎵',documentary:'📻'}[t]||'📁';}
-function typeName(t){return{film:'电影',game:'游戏',tv:'电视剧',album:'专辑',documentary:'纪录片'}[t]||t;}
+function typeIcon(t){return{film:'🎬',game:'🎮',tv:'📺',album:'🎤',stage:'🎭',documentary:'📻'}[t]||'📁';}
+function typeName(t){return{film:'电影',game:'游戏',tv:'电视剧',album:'综艺',stage:'舞台剧',documentary:'纪录片'}[t]||t;}
 function entityTypeName(t){return{composer:'作曲家',technique:'技法',period:'历史时期',instrument:'乐器',motif:'母题'}[t]||t;}
 function assetTypeName(t){return{audio:'音频',video:'视频',image:'图片',document:'文档',score:'乐谱',link:'链接'}[t]||t;}
 function statusText(s){return{topic:'选题',collecting:'资料收集',writing:'撰写中',review:'事实核查',layout:'排版',published:'已发布',archived:'归档'}[s]||s;}
