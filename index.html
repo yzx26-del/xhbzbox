@@ -355,6 +355,7 @@ select.fi{cursor:pointer}
       <button class="ib" onclick="gmAddChar()"><i class="ti ti-user-plus"></i>加角色</button>
       <div style="width:1px;height:18px;background:var(--line)"></div>
       <button class="ib" onclick="gmOpenAI()" style="border-color:#7F77DD;color:#534AB7"><i class="ti ti-sparkles"></i>AI智能导入</button>
+      <button class="ib" onclick="gmExportJson()"><i class="ti ti-download"></i>导出JSON</button>
       <select class="fi" id="gm-project-select" style="width:180px;height:28px;padding:0 9px;font-size:11px" onchange="gmLoadProject()"></select>
       <span id="gm-hint" style="font-size:10px;color:var(--t4);margin-left:auto">点击区域选中编辑</span>
     </div>
@@ -932,11 +933,54 @@ window.go=go;
 let gmMode='select', gmTab='area', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null;
 const gmColors=['#87A96B','#D6A15D','#7AA7C7','#B7838D','#9A87B8','#C2B280','#77A99A','#B77F55'];
 function gmMetaKey(pid){return `gameMapMeta:${pid}`;}
+function gmSnapshotKey(pid){return `gameMapSnapshot:${pid}`;}
 function gmMeta(pid){
   try{return JSON.parse(localStorage.getItem(gmMetaKey(pid))||'{}');}catch{return{};}
 }
 function gmSaveMeta(pid,meta){localStorage.setItem(gmMetaKey(pid),JSON.stringify(meta||{}));}
+function gmLocalSnapshot(pid){
+  try{return JSON.parse(localStorage.getItem(gmSnapshotKey(pid))||'null');}catch{return null;}
+}
 function gmProjectId(){return document.getElementById('gm-project-select')?.value||'';}
+function gmSnapshot(){
+  return {
+    version:1,
+    project_id:gmProjectId(),
+    selected_id:gmSelectedId,
+    updated_at:new Date().toISOString(),
+    areas:gmRows.map(a=>({
+      id:a.id, area:a.area, x:+a.x||0, y:+a.y||0, w:+a.w||120, h:+a.h||70, color:a.color||gmColors[0],
+      state_explore:a.state_explore||'', state_combat:a.state_combat||'', state_boss:a.state_boss||'', state_low_hp:a.state_low_hp||'', state_night:a.state_night||'', state_clear:a.state_clear||'',
+      world:a.world||'', chars:a.chars||[], timeline:a.timeline||[]
+    }))
+  };
+}
+function gmApplySnapshot(snapshot){
+  if(!snapshot?.areas?.length)return false;
+  gmRows=snapshot.areas.map((a,i)=>({ ...gmDefaultArea(a,i), ...a }));
+  gmSelectedId=snapshot.selected_id||gmRows[0]?.id||null;
+  const meta={};
+  gmRows.forEach(a=>{meta[a.id]={x:a.x,y:a.y,w:a.w,h:a.h,color:a.color,world:a.world||'',chars:a.chars||[],timeline:a.timeline||[]};});
+  if(snapshot.project_id)gmSaveMeta(snapshot.project_id,meta);
+  return true;
+}
+async function gmCloudPull(pid){
+  if(!db||!pid)return null;
+  try{
+    const {data,error}=await db.from('game_maps').select('map_data').eq('project_id',pid).maybeSingle();
+    if(error)return null;
+    return data?.map_data||null;
+  }catch{return null;}
+}
+async function gmPersistMap(){
+  const pid=gmProjectId(); if(!pid)return;
+  const snap=gmSnapshot();
+  localStorage.setItem(gmSnapshotKey(pid),JSON.stringify(snap));
+  if(!db)return;
+  try{
+    await db.from('game_maps').upsert({project_id:pid,map_data:snap,updated_at:new Date().toISOString()},{onConflict:'project_id'});
+  }catch{}
+}
 async function gmInit(){
   await loadProjectSelects();
   const sel=document.getElementById('gm-project-select');
@@ -948,6 +992,8 @@ async function gmInit(){
 async function gmLoadProject(){
   const pid=gmProjectId();
   if(!pid||!db){gmRows=[];gmRender();return;}
+  const cloud=await gmCloudPull(pid);
+  if(gmApplySnapshot(cloud||gmLocalSnapshot(pid))){gmRender();return;}
   const {data,error}=await db.from('game_matrix_entries').select('*').eq('project_id',pid).order('created_at');
   if(error){toast('游戏地图读取失败：'+error.message);return;}
   const meta=gmMeta(pid);
@@ -966,6 +1012,7 @@ function gmPersistSelectedMeta(){
   const meta=gmMeta(pid);
   meta[area.id]={x:+area.x||0,y:+area.y||0,w:+area.w||120,h:+area.h||70,color:area.color||gmColors[0],world:area.world||'',chars:area.chars||[],timeline:area.timeline||[]};
   gmSaveMeta(pid,meta);
+  gmPersistMap();
 }
 function gmRender(){
   gmRenderMap();
@@ -1001,7 +1048,7 @@ async function gmHandleMapClick(e){
   if(error){toast('新增失败：'+error.message);return;}
   const meta=gmMeta(pid);
   meta[data.id]={x:Math.max(12,Math.min(430,p.x-64)),y:Math.max(12,Math.min(292,p.y-36)),w:128,h:72,color:gmColors[gmRows.length%gmColors.length],world:'',chars:[],timeline:[]};
-  gmSaveMeta(pid,meta); gmSelectedId=data.id; gmSetMode('select'); await gmLoadProject(); toast('区域已添加');
+  gmSaveMeta(pid,meta); gmSelectedId=data.id; gmSetMode('select'); await gmLoadProject(); gmPersistMap(); toast('区域已添加');
 }
 function gmSetMode(mode){
   gmMode=mode;
@@ -1043,7 +1090,7 @@ async function gmSaveMusicPanel(){
   Object.assign(a,patch);
   const {error}=await db.from('game_matrix_entries').update(patch).eq('id',a.id);
   if(error){toast('保存失败：'+error.message);return;}
-  gmRender(); toast('音乐信息已保存');
+  gmPersistMap(); gmRender(); toast('音乐信息已保存');
 }
 function gmSaveWorldPanel(){const a=gmSelected(); if(!a)return; a.world=val('gm-edit-world'); gmPersistSelectedMeta(); gmRender(); toast('世界观已保存');}
 function gmSaveCharsPanel(){const a=gmSelected(); if(!a)return; a.chars=val('gm-edit-chars').split('\n').map(s=>s.trim()).filter(Boolean); gmPersistSelectedMeta(); gmRender(); toast('角色BGM已保存');}
@@ -1051,7 +1098,7 @@ async function gmDeleteArea(){
   const a=gmSelected(); if(!a||!confirm(`删除区域「${a.area}」？`))return;
   const {error}=await db.from('game_matrix_entries').delete().eq('id',a.id);
   if(error){toast('删除失败：'+error.message);return;}
-  const meta=gmMeta(gmProjectId()); delete meta[a.id]; gmSaveMeta(gmProjectId(),meta); gmSelectedId=null; await gmLoadProject(); toast('区域已删除');
+  const meta=gmMeta(gmProjectId()); delete meta[a.id]; gmSaveMeta(gmProjectId(),meta); gmSelectedId=null; await gmLoadProject(); gmPersistMap(); toast('区域已删除');
 }
 function gmAddVertex(){const a=gmSelected(); if(!a){toast('请先选择区域');return;} a.w=(+a.w||120)+14; a.h=(+a.h||70)+8; gmPersistSelectedMeta(); gmRender();}
 function gmRemoveVertex(){const a=gmSelected(); if(!a){toast('请先选择区域');return;} a.w=Math.max(72,(+a.w||120)-14); a.h=Math.max(44,(+a.h||70)-8); gmPersistSelectedMeta(); gmRender();}
@@ -1105,7 +1152,7 @@ async function gmApplyAI(){
   if(error){toast('生成失败：'+error.message);return;}
   const meta=gmMeta(pid);
   (data||[]).forEach((r,i)=>{const src=gmAiDraft[i]||{};meta[r.id]={...gmDefaultArea(r,gmRows.length+i),world:src.world||'',chars:src.chars||[],timeline:src.timeline||[]};});
-  gmSaveMeta(pid,meta); gmCloseAI(); await gmLoadProject(); toast(`已生成 ${rows.length} 个区域`);
+  gmSaveMeta(pid,meta); gmCloseAI(); await gmLoadProject(); gmPersistMap(); toast(`已生成 ${rows.length} 个区域`);
 }
 function openArticleModal(btn){
   const title=btn?.dataset?.title||'';
@@ -2539,3 +2586,19 @@ async function loadAlert() {
 
   el.innerHTML = html;
 }
+function gmExportJson(){
+  const data=gmSnapshot();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`game-map-${data.project_id||'draft'}-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('地图 JSON 已导出');
+}
+</script>
+</body>
+</html>
