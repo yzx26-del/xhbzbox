@@ -108,10 +108,14 @@ tbody tr:hover{background:var(--bg2)}
 .pct-film{border-color:#f28c28;color:#b45d0e;background:#fff6ec}.pct-game{border-color:#d94a45;color:#a12622;background:#fff0ef}.pct-album{border-color:#e3b436;color:#8b6800;background:#fff9df}.pct-tv{border-color:#2f9b58;color:#176a36;background:#edf8f1}.pct-stage{border-color:#2f80d0;color:#155ea3;background:#eef6ff}.pct-documentary{border-color:#7aa7c7;color:#356f91;background:#edf7fb}
 .pc-name{font-family:var(--serif);font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px}
 .pc-meta{font-size:11px;color:var(--t4);margin-bottom:12px}
-.pc-stats{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
+.pc-stats{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
 .pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
-.pc-tag{font-family:var(--mono);font-size:10px;color:var(--t3);background:var(--bg2);border:1px solid var(--line);border-radius:2px;padding:2px 6px}
+.pc-tag-group{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.pc-tag-label{font-family:var(--mono);font-size:9px;color:var(--t4);margin-right:1px}
+.pc-tag{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:2px;padding:2px 6px}
 .pc-source{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px;display:flex;align-items:center;gap:4px}
+.pc-source.clickable{cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.pc-source.clickable:hover{color:var(--t1)}
 .pc-edit-tags{font-family:var(--mono);font-size:10px;color:var(--t3);border:1px solid var(--line);background:var(--bg);border-radius:3px;height:22px;padding:0 7px;cursor:pointer}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
@@ -724,7 +728,7 @@ select.fi{cursor:pointer}
     <div class="fg"><label class="fl">英文名</label><input class="fi" id="p-name-en" placeholder="Interstellar"></div>
     <div class="fr2"><div class="fg"><label class="fl">作曲家</label><input class="fi" id="p-composer" placeholder="汉斯·季默"></div><div class="fg"><label class="fl">导演/开发商</label><input class="fi" id="p-director" placeholder="克里斯托弗·诺兰"></div></div>
     <div class="fr2"><div class="fg"><label class="fl">年份</label><input class="fi" id="p-year" type="number" placeholder="2014"></div><div class="fg"><label class="fl">发行方</label><input class="fi" id="p-publisher" placeholder="Warner Bros."></div></div>
-    <div class="fg"><label class="fl">标签（逗号分隔）</label><input class="fi" id="p-tags" placeholder="科幻,管风琴,Leitmotif"></div>
+    <div class="fg"><label class="fl">品类与情绪标签（第一个会作为品类，后面作为情绪）</label><input class="fi" id="p-tags" placeholder="科幻,孤独,史诗"></div>
     <div class="mfoot"><button class="ib" onclick="closeModal('project')">取消</button><button class="ib solid" onclick="createProject()"><i class="ti ti-check"></i>创建项目</button></div>
   </div>
 </div>
@@ -1235,33 +1239,88 @@ async function loadProjects() {
   const [{data},{data:assets},{data:links}]=await Promise.all([
     db.from('projects').select('*').order('created_at',{ascending:false}),
     db.from('assets').select('project_id,name,created_at').not('project_id','is',null).order('created_at',{ascending:false}).limit(200),
-    db.from('article_projects').select('project_id,articles(title,updated_at)').limit(200)
+    db.from('article_projects').select('project_id,article_id,articles(id,title,updated_at)').limit(200)
   ]);
   const sourceMap={};
-  (assets||[]).forEach(a=>{if(a.project_id&&!sourceMap[a.project_id])sourceMap[a.project_id]=a.name;});
-  (links||[]).forEach(l=>{const title=l.articles?.title;if(l.project_id&&title&&!sourceMap[l.project_id])sourceMap[l.project_id]=title;});
-  projectsCache=(data||[]).map(p=>({...p,source_name:sourceMap[p.id]||''}));
+  (assets||[]).forEach(a=>{if(a.project_id&&!sourceMap[a.project_id])sourceMap[a.project_id]={name:a.name,type:'asset'};});
+  (links||[]).forEach(l=>{
+    const title=l.articles?.title;
+    const articleId=l.article_id||l.articles?.id;
+    if(l.project_id&&title)sourceMap[l.project_id]={name:title,type:'article',article_id:articleId};
+  });
+  projectsCache=(data||[]).map(p=>({...p,source:sourceMap[p.id]||null,source_name:sourceMap[p.id]?.name||''}));
   renderProjects(projectsCache);
 }
 function renderProjects(list) {
   const el=document.getElementById('projects-grid');
   if(!list.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>';return;}
-  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const tags=p.tags||[];return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${tags.length?tags.map(t=>`<span class="pc-tag">${esc(t)}</span>`).join(''):'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>'}<button class="pc-edit-tags" onclick="event.stopPropagation();editProjectTags('${p.id}')"><i class="ti ti-pencil"></i> 编辑</button></div><div class="pc-source"><i class="ti ti-file-text"></i>${esc(p.source_name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
+  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const source=p.source||null;return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${renderProjectTagGroups(p)}<button class="pc-edit-tags" onclick="event.stopPropagation();editProjectTags('${p.id}')"><i class="ti ti-pencil"></i> 编辑</button></div><div class="pc-source ${source?.article_id?'clickable':''}" onclick="event.stopPropagation();openProjectSource('${source?.article_id||''}')"><i class="ti ti-file-text"></i>${esc(source?.name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
 }
 async function editProjectTags(id){
   const p=projectsCache.find(x=>x.id===id); if(!p)return;
-  const input=prompt('编辑标签，用中文逗号或英文逗号分隔', (p.tags||[]).join('，'));
-  if(input===null)return;
-  const tags=input.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  const groups=getProjectTagGroups(p);
+  const theme=prompt('题材类别（如：动画电影、游戏配乐、行业悼词）', groups.theme.join('，'));
+  if(theme===null)return;
+  const composers=prompt('涉及作曲家（可多个，用逗号分隔）', groups.composer.join('，'));
+  if(composers===null)return;
+  const genre=prompt('作品具体品类（如：爱情、科幻、竞技）', groups.genre.join('，'));
+  if(genre===null)return;
+  const mood=prompt('情绪词（如：喜剧、悲伤、孤独）', groups.mood.join('，'));
+  if(mood===null)return;
+  const tags=[
+    ...splitTags(theme).map(t=>'题材:'+t),
+    ...splitTags(composers).map(t=>'作曲家:'+t),
+    ...splitTags(genre).map(t=>'品类:'+t),
+    ...splitTags(mood).map(t=>'情绪:'+t)
+  ];
   const {error}=await db.from('projects').update({tags}).eq('id',id);
   if(error){toast('标签保存失败：'+error.message);return;}
   p.tags=tags; renderProjects(projectsCache); toast('标签已更新');
+}
+function openProjectSource(articleId){
+  if(!articleId){toast('这个项目还没有关联稿件原文');return;}
+  openArticleInEditor(articleId);
+}
+function splitTags(v){return String(v||'').split(/[,，、/|；;]/).map(s=>s.trim()).filter(Boolean);}
+function stripProjectTag(tag){return String(tag||'').replace(/^(题材|作曲家|品类|情绪)[:：]/,'').trim();}
+function getProjectTagGroups(p){
+  const groups={theme:[],composer:[],genre:[],mood:[]};
+  const raw=(p.tags||[]).map(t=>String(t||'').trim()).filter(Boolean);
+  const loose=[];
+  raw.forEach(t=>{
+    const m=t.match(/^(题材|作曲家|品类|情绪)[:：](.+)$/);
+    if(m){
+      const key={题材:'theme',作曲家:'composer',品类:'genre',情绪:'mood'}[m[1]];
+      splitTags(m[2]).forEach(x=>groups[key].push(x));
+    }else loose.push(t);
+  });
+  splitTags(p.composer||'').forEach(x=>groups.composer.push(x));
+  const moodWords='喜剧 悲伤 孤独 热血 治愈 浪漫 悬疑 史诗 温柔 黑暗 青春 怀旧 燃 忧伤 压抑 荒凉 诡异 明亮'.split(' ');
+  const genreWords='爱情 科幻 奇幻 动画 犯罪 战争 冒险 武侠 竞技 恐怖 悬疑 灾难 音乐 青春 家庭 历史 史诗 民谣 电子 管弦 管风琴'.split(' ');
+  loose.forEach(t=>{
+    if(moodWords.some(w=>t.includes(w))) groups.mood.push(t);
+    else if(genreWords.some(w=>t.includes(w))) groups.genre.push(t);
+    else if(!groups.theme.length) groups.theme.push(t);
+    else groups.genre.push(t);
+  });
+  if(!groups.theme.length) groups.theme.push(typeName(p.type));
+  ['theme','composer','genre','mood'].forEach(k=>groups[k]=[...new Set(groups[k].map(stripProjectTag).filter(Boolean))]);
+  return groups;
+}
+function renderProjectTagGroups(p){
+  const groups=getProjectTagGroups(p);
+  const labels=[['题材',groups.theme],['作曲家',groups.composer],['品类',groups.genre],['情绪',groups.mood]];
+  return labels.filter(([,items])=>items.length).map(([label,items])=>`<span class="pc-tag-group"><span class="pc-tag-label">${label}</span>${items.map(t=>`<span class="pc-tag pct-${p.type}">${esc(t)}</span>`).join('')}</span>`).join('')||'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>';
 }
 function selectProject(id,type){if(type==='game'){pendingGameProjectId=id;go('gamemap',null);}else go('timeline',null);}
 async function createProject() {
   const typeEl=document.querySelector('#proj-type-sel .sel');
   const name=val('p-name'); if(!name){toast('请填写作品名称');return;}
-  const tags=val('p-tags').split(',').map(s=>s.trim()).filter(Boolean);
+  const tags=[
+    '题材:'+typeName(typeEl?.dataset.val||'film'),
+    ...splitTags(val('p-composer')).map(t=>'作曲家:'+t),
+    ...splitTags(val('p-tags')).map((t,i)=>(i===0?'品类:':'情绪:')+t)
+  ];
   const {error}=await db.from('projects').insert({name,name_en:val('p-name-en'),type:typeEl?.dataset.val||'film',composer:val('p-composer'),director:val('p-director'),year:parseInt(val('p-year'))||null,publisher:val('p-publisher'),tags});
   if(error){toast('创建失败：'+error.message);return;}
   toast('项目已创建'); closeModal('project'); loadProjects(); loadDashStats();
@@ -1703,7 +1762,7 @@ async function deleteArticle(id,title) {
 }
 function openArticleInEditor(id) {
   go('editor',null);
-  setTimeout(()=>{const sel=document.getElementById('editor-article-select');if(sel){sel.value=id;loadArticleContent();}},100);
+  setTimeout(async()=>{await loadEditorSelects();const sel=document.getElementById('editor-article-select');if(sel){if(![...sel.options].some(o=>o.value===id)){const opt=document.createElement('option');opt.value=id;opt.textContent='关联稿件';sel.appendChild(opt);}sel.value=id;loadArticleContent();}},100);
 }
 
 // ══ EDITOR ══
