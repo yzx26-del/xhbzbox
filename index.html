@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>声轨档案 · 音乐史CMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"></noscript>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--line:#e0e0e0;--line2:#c8c8c8;--t1:#0a0a0a;--t2:#444;--t3:#888;--t4:#bbb;--ok:#1a7a3c;--warn:#b7860b;--danger:#c0392b;--info:#1a5fa0;--sw:220px;--th:48px;--serif:'Noto Serif SC',serif;--sans:'Noto Sans SC',sans-serif;--mono:'IBM Plex Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -831,20 +832,22 @@ const TMDB_KEY   = '0dd710f4c84c0ef8252d8cb3332b2a90';
 const RAWG_KEY   = '75d8d7aa7a724b84a7c3c560efbf64fd';
 const LASTFM_KEY = '92282476874fb4eb82b58d13d129bfdc';
 let db = null, projectsCache = [], articlesCache = [];
-const API_ORIGIN = location.hostname === 'cms.gracehe.cn' ? 'https://xhbzbox.vercel.app' : '';
+const API_ORIGIN = location.protocol === 'file:' || location.hostname === 'cms.gracehe.cn' ? 'https://xhbzbox.vercel.app' : '';
 let currentDicePlaylist = null;
 let pendingPlaylistSongIndex = null;
 const DICE_CACHE_VERSION = '20260515-regenerate-1';
 function resetConfig(){localStorage.clear();location.reload();}
+function idle(fn){(window.requestIdleCallback||function(cb){return setTimeout(cb,120)})(fn);}
+function later(fn,ms=0){setTimeout(fn,ms);}
+function withTimeout(promise,ms=4500,label='操作'){
+  return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+'超时')),ms))]);
+}
 
 // ══ STARTUP ══
 window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   document.getElementById('dash-date').textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · 你的音乐史研究工作台`;
-  const { createClient } = supabase;
-  db = createClient(SUPABASE_URL, SUPABASE_KEY);
-  document.getElementById('conn-status').textContent = '已连接 Supabase';
-  loadAll();
+  bootDatabase();
 
   // Filters
   document.getElementById('proj-filter').addEventListener('click', e => {
@@ -875,6 +878,22 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+async function bootDatabase(){
+  const status=document.getElementById('conn-status');
+  status.textContent='正在连接数据库…';
+  const start=Date.now();
+  while(!window.supabase&&Date.now()-start<3500) await new Promise(r=>setTimeout(r,80));
+  if(!window.supabase){
+    status.textContent='本地预览模式';
+    toast('数据库脚本加载较慢，页面已先进入本地预览');
+    return;
+  }
+  const { createClient } = window.supabase;
+  db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  status.textContent='已连接 Supabase';
+  idle(()=>loadAll());
+}
+
 // ══ NAV ══
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
@@ -883,7 +902,7 @@ function go(id, el) {
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
   const loaders={projects:loadProjects,timeline:()=>{loadProjectSelects();loadTimeline();},gamemap:gmInit,knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
-  if(loaders[id]) loaders[id]();
+  if(loaders[id]) later(()=>Promise.resolve(loaders[id]()).catch(e=>toast('加载慢或失败：'+e.message)),20);
 }
 
 // ══ GAME MAP EDITOR ══
@@ -1082,26 +1101,32 @@ function openGameModal(btn){
 // ══ LOAD ALL ══
 async function loadAll() {
   if(!db) return;
-  await Promise.all([loadDashProjects(),loadDashArticles(),loadDashStats(),loadDashRisk()]);
+  await Promise.allSettled([
+    withTimeout(loadDashProjects(),3500,'近期项目'),
+    withTimeout(loadDashArticles(),3500,'稿件流水线'),
+    withTimeout(loadDashStats(),3500,'统计数据'),
+    withTimeout(loadDashRisk(),3500,'版权提醒')
+  ]);
 }
 async function loadDashStats() {
-  const [pr,en,ar,ri] = await Promise.all([
+  const [pr,en,ar,ri] = await Promise.allSettled([
     db.from('projects').select('type',{count:'exact'}),
     db.from('knowledge_entities').select('type',{count:'exact'}),
     db.from('articles').select('status',{count:'exact'}),
     db.from('assets').select('copyright_status').eq('copyright_status','risk')
   ]);
-  const projects=pr.data||[],arts=ar.data||[];
-  document.getElementById('st-projects').textContent=pr.count||0;
-  document.getElementById('st-entities').textContent=en.count||0;
+  const prd=pr.value||{}, end=en.value||{}, ard=ar.value||{}, rid=ri.value||{};
+  const projects=prd.data||[],arts=ard.data||[];
+  document.getElementById('st-projects').textContent=prd.count||0;
+  document.getElementById('st-entities').textContent=end.count||0;
   document.getElementById('st-published').textContent=arts.filter(a=>a.status==='published').length;
-  document.getElementById('st-risk').textContent=(ri.data||[]).length;
-  document.getElementById('nb-projects').textContent=pr.count||0;
-  document.getElementById('nb-entities').textContent=en.count||0;
-  document.getElementById('nb-articles').textContent=ar.count||0;
-  document.getElementById('nb-risk').textContent=(ri.data||[]).length;
-  document.getElementById('st-projects-sub').textContent=`电影 ${projects.filter(p=>p.type==='film').length} · 游戏 ${projects.filter(p=>p.type==='game').length} · 专辑 ${projects.filter(p=>p.type==='album').length}`;
-  document.getElementById('st-articles-sub').textContent=`共 ${ar.count||0} 篇稿件`;
+  document.getElementById('st-risk').textContent=(rid.data||[]).length;
+  document.getElementById('nb-projects').textContent=prd.count||0;
+  document.getElementById('nb-entities').textContent=end.count||0;
+  document.getElementById('nb-articles').textContent=ard.count||0;
+  document.getElementById('nb-risk').textContent=(rid.data||[]).length;
+  document.getElementById('st-projects-sub').textContent=`电影 ${projects.filter(p=>p.type==='film').length} · 游戏 ${projects.filter(p=>p.type==='game').length} · 综艺 ${projects.filter(p=>p.type==='album').length}`;
+  document.getElementById('st-articles-sub').textContent=`共 ${ard.count||0} 篇稿件`;
 }
 async function loadDashProjects() {
   const {data}=await db.from('projects').select('*').order('created_at',{ascending:false}).limit(4);
@@ -1124,6 +1149,7 @@ async function loadDashRisk() {
 
 // ══ PROJECTS ══
 async function loadProjects() {
+  if(!db){document.getElementById('projects-grid').innerHTML='<div class="empty"><i class="ti ti-database-off"></i><p>数据库还在连接，稍后再点一次</p></div>';return;}
   const {data}=await db.from('projects').select('*').order('created_at',{ascending:false});
   projectsCache=data||[]; renderProjects(projectsCache);
 }
@@ -1152,7 +1178,7 @@ async function deleteProject(id,name) {
 // ══ PROJECT SELECTS ══
 async function loadProjectSelects() {
   if(!db) return;
-  if(!projectsCache.length){const {data}=await db.from('projects').select('id,name,type').order('name');projectsCache=data||[];}
+  if(!projectsCache.length){const {data}=await withTimeout(db.from('projects').select('id,name,type').order('name'),3500,'项目列表');projectsCache=data||[];}
   const film=projectsCache.filter(p=>p.type!=='game');
   const game=projectsCache.filter(p=>p.type==='game');
   setSelectOptions('tl-project-select',film.length?film:projectsCache);
