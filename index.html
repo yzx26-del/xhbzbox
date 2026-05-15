@@ -115,7 +115,6 @@ tbody tr:hover{background:var(--bg2)}
 .pc-source{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px;display:flex;align-items:center;gap:4px}
 .pc-source.clickable{cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .pc-source.clickable:hover{color:var(--t1)}
-.pc-edit-tags{font-family:var(--mono);font-size:10px;color:var(--t3);border:1px solid var(--line);background:var(--bg);border-radius:3px;width:22px;height:22px;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
 .mwrap::-webkit-scrollbar-thumb{background:var(--line)}
@@ -254,7 +253,7 @@ select.fi{cursor:pointer}
     <button class="ib ib-sq" onclick="resetConfig()" title="重置连接"><i class="ti ti-settings"></i></button>
     <div class="vl"></div>
     <button class="ib" onclick="openModal('import')"><i class="ti ti-sparkles"></i>智能导入</button>
-    <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建项目</button>
+      <button class="ib solid" onclick="openProjectModal()"><i class="ti ti-plus"></i>新建项目</button>
   </div>
 </header>
 <div class="shell">
@@ -311,7 +310,7 @@ select.fi{cursor:pointer}
       <div class="sec"><div class="sh"><div class="sh-t"><i class="ti ti-sparkles"></i>快速操作</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="ib solid" onclick="openModal('import')" style="height:36px;font-size:13px"><i class="ti ti-sparkles"></i>智能导入文章</button>
-          <button class="ib" onclick="openModal('project')" style="height:36px"><i class="ti ti-plus"></i>新建项目</button>
+          <button class="ib" onclick="openProjectModal()" style="height:36px"><i class="ti ti-plus"></i>新建项目</button>
           <button class="ib" onclick="openModal('article')" style="height:36px"><i class="ti ti-pencil"></i>新建稿件</button>
           <button class="ib" onclick="openModal('note')" style="height:36px"><i class="ti ti-cards"></i>新建笔记</button>
         </div>
@@ -329,7 +328,7 @@ select.fi{cursor:pointer}
   <div class="ph"><div><div class="ptitle">项目母本库</div><div class="psub">以媒介作品为中心的资料聚合节点</div></div>
     <div class="ph-r">
       <div style="display:flex;gap:5px;flex-wrap:wrap" id="proj-filter"><span class="tag on" data-type="">全部</span><span class="tag" data-type="film">电影</span><span class="tag" data-type="game">游戏</span><span class="tag" data-type="album">综艺</span><span class="tag" data-type="tv">电视剧</span></div>
-      <button class="ib solid" onclick="openModal('project')"><i class="ti ti-plus"></i>新建</button>
+      <button class="ib solid" onclick="openProjectModal()"><i class="ti ti-plus"></i>新建</button>
     </div>
   </div>
   <div id="projects-grid"><div class="loading"><div class="spinner"></div>加载中…</div></div>
@@ -721,14 +720,14 @@ select.fi{cursor:pointer}
 <!-- 新建项目 -->
 <div class="overlay" id="modal-project" onclick="closeModal('project',event)">
   <div class="modal"><button class="ib ib-sq modal-close" onclick="closeModal('project')"><i class="ti ti-x"></i></button>
-    <div class="modal-title">新建项目母本</div>
+    <div class="modal-title" id="project-modal-title">新建项目母本</div>
     <div class="fg"><label class="fl">媒介类型</label><div class="typsel" id="proj-type-sel"><div class="to pt-film sel" data-val="film">🎬 电影</div><div class="to pt-game" data-val="game">🎮 游戏</div><div class="to pt-tv" data-val="tv">📺 电视剧</div><div class="to pt-album" data-val="album">🎤 综艺</div><div class="to pt-stage" data-val="stage">🎭 舞台剧</div></div></div>
     <div class="fg"><label class="fl">作品名称（中文）</label><input class="fi" id="p-name" placeholder="如：星际穿越"></div>
     <div class="fg"><label class="fl">英文名</label><input class="fi" id="p-name-en" placeholder="Interstellar"></div>
     <div class="fr2"><div class="fg"><label class="fl">作曲家</label><input class="fi" id="p-composer" placeholder="汉斯·季默"></div><div class="fg"><label class="fl">导演/开发商</label><input class="fi" id="p-director" placeholder="克里斯托弗·诺兰"></div></div>
     <div class="fr2"><div class="fg"><label class="fl">年份</label><input class="fi" id="p-year" type="number" placeholder="2014"></div><div class="fg"><label class="fl">发行方</label><input class="fi" id="p-publisher" placeholder="Warner Bros."></div></div>
     <div class="fg"><label class="fl">品类与情绪标签（第一个会作为品类，后面作为情绪）</label><input class="fi" id="p-tags" placeholder="科幻,孤独,史诗"></div>
-    <div class="mfoot"><button class="ib" onclick="closeModal('project')">取消</button><button class="ib solid" onclick="createProject()"><i class="ti ti-check"></i>创建项目</button></div>
+    <div class="mfoot"><button class="ib" onclick="closeModal('project')">取消</button><button class="ib solid" id="project-submit-btn" onclick="saveProject()"><i class="ti ti-check"></i>创建项目</button></div>
   </div>
 </div>
 
@@ -1174,10 +1173,7 @@ function openArticleModal(btn){
 function openGameModal(btn){
   const name=btn?.dataset?.name||'';
   const year=(btn?.dataset?.date||'').slice(0,4);
-  document.querySelectorAll('#proj-type-sel .to').forEach(x=>x.classList.toggle('sel',x.dataset.val==='game'));
-  if(name) document.getElementById('p-name').value=name;
-  if(year) document.getElementById('p-year').value=year;
-  openModal('project');
+  openProjectModal(null,{type:'game',name,year});
 }
 
 // ══ LOAD ALL ══
@@ -1253,7 +1249,7 @@ async function loadProjects() {
 function renderProjects(list) {
   const el=document.getElementById('projects-grid');
   if(!list.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>';return;}
-  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const source=p.source||null;return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${renderProjectTagGroups(p)}<button class="pc-edit-tags" title="编辑标签" onclick="editProjectTags(event,'${p.id}')"><i class="ti ti-pencil"></i></button></div><div class="pc-source ${source?.article_id?'clickable':''}" onclick="event.stopPropagation();openProjectSource('${source?.article_id||''}')"><i class="ti ti-file-text"></i>${esc(source?.name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
+  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const source=p.source||null;return`<div class="pc" id="pc-${p.id}" onclick="openProjectModal('${p.id}')"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${renderProjectTagGroups(p)}</div><div class="pc-source ${source?.article_id?'clickable':''}" onclick="event.stopPropagation();openProjectSource('${source?.article_id||''}')"><i class="ti ti-file-text"></i>${esc(source?.name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
 }
 async function editProjectTags(e,id){
   e?.preventDefault?.();
@@ -1315,17 +1311,41 @@ function renderProjectTagGroups(p){
   return all.length?`<span class="pc-tag-group">${all.map(t=>`<span class="pc-tag pct-${p.type}">${esc(t)}</span>`).join('')}</span>`:'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>';
 }
 function selectProject(id,type){if(type==='game'){pendingGameProjectId=id;go('gamemap',null);}else go('timeline',null);}
-async function createProject() {
+let editingProjectId=null;
+function setProjectType(type){
+  document.querySelectorAll('#proj-type-sel .to').forEach(x=>x.classList.toggle('sel',x.dataset.val===type));
+}
+function openProjectModal(id=null,preset={}){
+  editingProjectId=id;
+  const p=id?projectsCache.find(x=>x.id===id):null;
+  const groups=p?getProjectTagGroups(p):{genre:[],mood:[]};
+  document.getElementById('project-modal-title').textContent=p?'编辑项目母本':'新建项目母本';
+  document.getElementById('project-submit-btn').innerHTML=p?'<i class="ti ti-check"></i>保存修改':'<i class="ti ti-check"></i>创建项目';
+  setProjectType(p?.type||preset.type||'film');
+  document.getElementById('p-name').value=p?.name||preset.name||'';
+  document.getElementById('p-name-en').value=p?.name_en||preset.name_en||'';
+  document.getElementById('p-composer').value=p?.composer||preset.composer||'';
+  document.getElementById('p-director').value=p?.director||preset.director||'';
+  document.getElementById('p-year').value=p?.year||preset.year||'';
+  document.getElementById('p-publisher').value=p?.publisher||preset.publisher||'';
+  document.getElementById('p-tags').value=p?[...groups.genre,...groups.mood].join('，'):(preset.tags||'');
+  openModal('project');
+}
+async function saveProject() {
   const typeEl=document.querySelector('#proj-type-sel .sel');
   const name=val('p-name'); if(!name){toast('请填写作品名称');return;}
+  const type=typeEl?.dataset.val||'film';
   const tags=[
-    '题材:'+typeName(typeEl?.dataset.val||'film'),
+    '题材:'+typeName(type),
     ...splitTags(val('p-composer')).map(t=>'作曲家:'+t),
     ...splitTags(val('p-tags')).map((t,i)=>(i===0?'品类:':'情绪:')+t)
   ];
-  const {error}=await db.from('projects').insert({name,name_en:val('p-name-en'),type:typeEl?.dataset.val||'film',composer:val('p-composer'),director:val('p-director'),year:parseInt(val('p-year'))||null,publisher:val('p-publisher'),tags});
-  if(error){toast('创建失败：'+error.message);return;}
-  toast('项目已创建'); closeModal('project'); loadProjects(); loadDashStats();
+  const payload={name,name_en:val('p-name-en'),type,composer:val('p-composer'),director:val('p-director'),year:parseInt(val('p-year'))||null,publisher:val('p-publisher'),tags};
+  const {error}=editingProjectId
+    ? await db.from('projects').update(payload).eq('id',editingProjectId)
+    : await db.from('projects').insert(payload);
+  if(error){toast((editingProjectId?'保存':'创建')+'失败：'+error.message);return;}
+  toast(editingProjectId?'项目已更新':'项目已创建'); closeModal('project'); editingProjectId=null; loadProjects(); loadDashStats();
   clearInputs(['p-name','p-name-en','p-composer','p-director','p-year','p-publisher','p-tags']);
 }
 async function deleteProject(id,name) {
