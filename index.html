@@ -108,15 +108,14 @@ tbody tr:hover{background:var(--bg2)}
 .pct-film{border-color:#f28c28;color:#b45d0e;background:#fff6ec}.pct-game{border-color:#d94a45;color:#a12622;background:#fff0ef}.pct-album{border-color:#e3b436;color:#8b6800;background:#fff9df}.pct-tv{border-color:#2f9b58;color:#176a36;background:#edf8f1}.pct-stage{border-color:#2f80d0;color:#155ea3;background:#eef6ff}.pct-documentary{border-color:#7aa7c7;color:#356f91;background:#edf7fb}
 .pc-name{font-family:var(--serif);font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px}
 .pc-meta{font-size:11px;color:var(--t4);margin-bottom:12px}
-.pc-stats{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
+.pc-stats{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
 .pc-stat{font-family:var(--mono);font-size:10px;color:var(--t4);display:flex;align-items:center;gap:3px}
 .pc-tag-group{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.pc-tag-label{font-family:var(--mono);font-size:9px;color:var(--t4);margin-right:1px}
 .pc-tag{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:2px;padding:2px 6px}
 .pc-source{font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px;display:flex;align-items:center;gap:4px}
 .pc-source.clickable{cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .pc-source.clickable:hover{color:var(--t1)}
-.pc-edit-tags{font-family:var(--mono);font-size:10px;color:var(--t3);border:1px solid var(--line);background:var(--bg);border-radius:3px;height:22px;padding:0 7px;cursor:pointer}
+.pc-edit-tags{font-family:var(--mono);font-size:10px;color:var(--t3);border:1px solid var(--line);background:var(--bg);border-radius:3px;width:22px;height:22px;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .mwrap{overflow-x:auto}
 .mwrap::-webkit-scrollbar{height:4px}
 .mwrap::-webkit-scrollbar-thumb{background:var(--line)}
@@ -1254,9 +1253,11 @@ async function loadProjects() {
 function renderProjects(list) {
   const el=document.getElementById('projects-grid');
   if(!list.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i><p>暂无项目</p></div>';return;}
-  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const source=p.source||null;return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${renderProjectTagGroups(p)}<button class="pc-edit-tags" onclick="event.stopPropagation();editProjectTags('${p.id}')"><i class="ti ti-pencil"></i> 编辑</button></div><div class="pc-source ${source?.article_id?'clickable':''}" onclick="event.stopPropagation();openProjectSource('${source?.article_id||''}')"><i class="ti ti-file-text"></i>${esc(source?.name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
+  el.innerHTML=`<div class="pcgrid">${list.map(p=>{const source=p.source||null;return`<div class="pc" id="pc-${p.id}"><div class="pc-mark pm-${p.type}"></div><div style="position:absolute;top:8px;right:8px"><button onclick="event.stopPropagation();deleteProject('${p.id}','${esc(p.name)}')" style="width:24px;height:24px;border-radius:3px;border:1px solid var(--line);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:13px"><i class="ti ti-trash"></i></button></div><div onclick="selectProject('${p.id}','${p.type}')"><div class="pc-type pct-${p.type}">${typeIcon(p.type)} ${typeName(p.type)}</div><div class="pc-name">${esc(p.name)}${p.name_en?` <span style="font-weight:400;font-size:12px;color:var(--t4)">${esc(p.name_en)}</span>`:''}</div><div class="pc-meta">${esc(p.composer||'')}${p.year?' · '+p.year:''}${p.publisher?' · '+esc(p.publisher):''}</div><div class="pc-stats">${renderProjectTagGroups(p)}<button class="pc-edit-tags" title="编辑标签" onclick="editProjectTags(event,'${p.id}')"><i class="ti ti-pencil"></i></button></div><div class="pc-source ${source?.article_id?'clickable':''}" onclick="event.stopPropagation();openProjectSource('${source?.article_id||''}')"><i class="ti ti-file-text"></i>${esc(source?.name||'来源文档：暂无')}</div></div></div>`;}).join('')}</div>`;
 }
-async function editProjectTags(id){
+async function editProjectTags(e,id){
+  e?.preventDefault?.();
+  e?.stopPropagation?.();
   const p=projectsCache.find(x=>x.id===id); if(!p)return;
   const groups=getProjectTagGroups(p);
   const theme=prompt('题材类别（如：动画电影、游戏配乐、行业悼词）', groups.theme.join('，'));
@@ -1273,9 +1274,10 @@ async function editProjectTags(id){
     ...splitTags(genre).map(t=>'品类:'+t),
     ...splitTags(mood).map(t=>'情绪:'+t)
   ];
-  const {error}=await db.from('projects').update({tags}).eq('id',id);
+  const composerText=splitTags(composers).join('，');
+  const {error}=await db.from('projects').update({tags,composer:composerText}).eq('id',id);
   if(error){toast('标签保存失败：'+error.message);return;}
-  p.tags=tags; renderProjects(projectsCache); toast('标签已更新');
+  p.tags=tags; p.composer=composerText; renderProjects(projectsCache); toast('标签已更新');
 }
 function openProjectSource(articleId){
   if(!articleId){toast('这个项目还没有关联稿件原文');return;}
@@ -1309,8 +1311,8 @@ function getProjectTagGroups(p){
 }
 function renderProjectTagGroups(p){
   const groups=getProjectTagGroups(p);
-  const labels=[['题材',groups.theme],['作曲家',groups.composer],['品类',groups.genre],['情绪',groups.mood]];
-  return labels.filter(([,items])=>items.length).map(([label,items])=>`<span class="pc-tag-group"><span class="pc-tag-label">${label}</span>${items.map(t=>`<span class="pc-tag pct-${p.type}">${esc(t)}</span>`).join('')}</span>`).join('')||'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>';
+  const all=[...groups.theme,...groups.composer,...groups.genre,...groups.mood];
+  return all.length?`<span class="pc-tag-group">${all.map(t=>`<span class="pc-tag pct-${p.type}">${esc(t)}</span>`).join('')}</span>`:'<span class="pc-stat"><i class="ti ti-tag"></i>—</span>';
 }
 function selectProject(id,type){if(type==='game'){pendingGameProjectId=id;go('gamemap',null);}else go('timeline',null);}
 async function createProject() {
