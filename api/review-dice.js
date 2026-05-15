@@ -7,6 +7,23 @@ function cleanJson(text) {
   return start >= 0 && end > start ? raw.slice(start, end + 1) : raw;
 }
 
+function normalizePlaylist(input, date, month) {
+  const playlist = input || {};
+  playlist.date = playlist.date || date;
+  playlist.month = playlist.month || month;
+  playlist.theme = playlist.theme || '回响';
+  playlist.subtitle = playlist.subtitle || `${month}月发行的12首品质歌曲`;
+  playlist.theme_quote = playlist.theme_quote || '所有过往，皆为序章。';
+  playlist.theme_quote_source = playlist.theme_quote_source || '莎士比亚《暴风雨》';
+  playlist.songs = (playlist.songs || []).slice(0, 12).map((s, i) => ({
+    ...s,
+    card_no: s.card_no || i + 1,
+    story_summary: s.story_summary || String(s.story || s.award_or_buzz || s.tarot_message || '值得细听').slice(0, 15),
+    story: s.story || `${s.title || '这首歌'}具有鲜明的音乐记忆点和讨论价值，适合作为今天的乐评入口。`
+  }));
+  return playlist;
+}
+
 function fallbackPlaylist(date) {
   const d = new Date(date);
   const month = d.getMonth() + 1;
@@ -104,14 +121,18 @@ export default async function handler(req, res) {
     });
 
     const content = data?.choices?.[0]?.message?.content || '';
-    let playlist = JSON.parse(cleanJson(content));
-    playlist.date = playlist.date || date;
-    playlist.month = playlist.month || month;
-    playlist.songs = (playlist.songs || []).slice(0, 12).map((s, i) => ({ ...s, card_no: s.card_no || i + 1 }));
+    let playlist = normalizePlaylist(JSON.parse(cleanJson(content)), date, month);
     if (playlist.songs.length !== 12) playlist = fallbackPlaylist(date);
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
     return send(res, 200, playlist);
   } catch (error) {
+    if (req.query?.debug === '1') {
+      return send(res, 500, {
+        error: error.message,
+        status: error.status || 500,
+        details: error.data || null
+      });
+    }
     res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=1800');
     return send(res, 200, fallbackPlaylist(date));
   }
