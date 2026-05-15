@@ -9,6 +9,18 @@
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"></noscript>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.__loaders={};
+window.go=function(id,el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
+  var page=document.getElementById('pg-'+id);
+  if(page) page.classList.add('on');
+  if(el) el.classList.add('on');
+  else document.querySelectorAll('.ni').forEach(function(n){if((n.getAttribute('onclick')||'').indexOf("'"+id+"'")>-1)n.classList.add('on');});
+  if(window.__loaders&&window.__loaders[id]) setTimeout(function(){Promise.resolve(window.__loaders[id]()).catch(function(e){window.toast?toast('加载失败：'+e.message):console.warn(e);});},20);
+};
+</script>
 <style>
 :root{--bg:#fff;--bg2:#f7f7f7;--bg3:#f0f0f0;--line:#e0e0e0;--line2:#c8c8c8;--t1:#0a0a0a;--t2:#444;--t3:#888;--t4:#bbb;--ok:#1a7a3c;--warn:#b7860b;--danger:#c0392b;--info:#1a5fa0;--sw:220px;--th:48px;--serif:'Noto Serif SC','Songti SC','STSong',serif;--sans:'Noto Sans SC','PingFang SC','Microsoft YaHei',Arial,sans-serif;--mono:'IBM Plex Mono','SFMono-Regular',Menlo,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -911,9 +923,10 @@ function go(id, el) {
   document.getElementById('pg-'+id)?.classList.add('on');
   if(el) el.classList.add('on');
   else document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('on');});
-  const loaders={projects:loadProjects,timeline:()=>{if(!needDb('tl-body'))return;loadProjectSelects();loadTimeline();},gamemap:gmInit,knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
+  const loaders=window.__loaders={projects:loadProjects,timeline:()=>{if(!needDb('tl-body'))return;loadProjectSelects();loadTimeline();},gamemap:gmInit,knowledge:()=>loadEntities(''),notes:()=>loadNotes(''),graph:loadGraph,articles:loadArticles,editor:loadEditorSelects,reviewdice:loadReviewDiceHome,dailyplaylist:loadDailyPlaylist,assets:()=>loadAssets(''),topics:()=>{loadTopics();loadTopicsSongs();},alert:loadAlert,heatmap:loadHeatmap,calendar:loadCalendar,mydata:loadMyData,copyright:loadCopyright};
   if(loaders[id]) later(()=>Promise.resolve(loaders[id]()).catch(e=>toast('加载慢或失败：'+e.message)),20);
 }
+window.go=go;
 
 // ══ GAME MAP EDITOR ══
 let gmMode='select', gmTab='area', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null;
