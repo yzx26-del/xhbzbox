@@ -208,6 +208,26 @@ select.fi{cursor:pointer}
 .review-edit{width:100%;min-height:58px;border:1px solid var(--line);border-radius:3px;background:var(--bg2);padding:7px 8px;font-size:12px;color:var(--t2);font-family:var(--sans);resize:vertical;outline:none;margin-top:7px}.review-edit:focus{border-color:var(--t1);background:var(--bg)}.song-tags-edit{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.song-tag-input{width:92px;border:1px solid var(--line);border-radius:3px;background:var(--bg2);height:24px;padding:0 7px;font-family:var(--mono);font-size:10px;color:var(--t2);outline:none}.song-tag-input:focus{border-color:var(--t1);background:var(--bg)}.playlist-quote{margin:12px 0 14px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-family:var(--serif);font-size:13px;line-height:1.8;color:var(--t2)}.playlist-quote span{display:block;margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--t4)}
 .dice-detail{position:fixed;inset:0;z-index:500;background:rgba(8,8,10,.48);display:none;align-items:center;justify-content:center;padding:24px}.dice-detail.open{display:flex}.dice-detail-card{width:min(520px,92vw);border:1px solid var(--line);border-radius:10px;background:var(--bg);box-shadow:0 24px 70px rgba(0,0,0,.28);overflow:hidden}.dice-detail-head{min-height:130px;padding:20px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.dice-detail-title{font-family:var(--serif);font-size:24px;font-weight:700}.dice-detail-body{padding:18px 20px;font-size:13px;line-height:1.9;color:var(--t2)}.dice-detail-meta{font-family:var(--mono);font-size:10px;color:var(--t4);margin-top:10px}
 @media(max-width:900px){.dice-grid{grid-template-columns:repeat(2,1fr)}.playlist-layout{grid-template-columns:1fr}.dice-stage{padding:18px}}
+.gm-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.gm-panel{background:var(--bg);padding:12px;min-height:142px}
+.gm-panel-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.gm-world-text{width:100%;height:92px;border:1px solid var(--line);border-radius:3px;background:var(--bg2);padding:8px;font-size:12px;line-height:1.7;color:var(--t2);resize:vertical;outline:none}
+.gm-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--bg2);overflow-x:auto}
+.gm-tab{flex-shrink:0;padding:9px 14px;font-size:12px;cursor:pointer;color:var(--t4);border-bottom:2px solid transparent}
+.gm-tab.on{color:var(--t1);border-bottom-color:var(--t1);background:var(--bg)}
+.gm-chart{flex:1;overflow:auto;padding:12px;background:var(--bg)}
+.gm-cardgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.gm-card{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:12px;cursor:pointer;transition:border-color .12s}
+.gm-card:hover,.gm-card.on{border-color:var(--t1)}
+.gm-card-title{font-family:var(--serif);font-size:14px;font-weight:700;margin-bottom:5px;padding-right:24px}
+.gm-card-meta{font-family:var(--mono);font-size:9px;color:var(--t4);line-height:1.7}
+.gm-track-row{display:grid;grid-template-columns:82px minmax(0,1fr);gap:8px;border-top:1px solid var(--line);padding-top:8px;margin-top:8px;font-size:12px}
+.gm-track-label{font-family:var(--mono);font-size:9px;color:var(--t4)}
+.gm-track-name{color:var(--t2);line-height:1.6}
+.gm-timeline-list{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
+.gm-tl-node{min-width:112px;border:1px solid var(--line);border-radius:4px;background:var(--bg2);padding:8px;font-size:11px;color:var(--t2);line-height:1.6;cursor:pointer}
+.gm-tl-node.on{border-color:var(--t1);background:var(--bg)}
+@media(max-width:900px){.gm-top{grid-template-columns:1fr}.gm-cardgrid{grid-template-columns:1fr}}
 .loading{display:flex;align-items:center;gap:8px;color:var(--t4);font-family:var(--mono);font-size:11px;padding:24px}
 .spinner{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--t1);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -266,7 +286,7 @@ select.fi{cursor:pointer}
     <div class="ni on" onclick="go('dashboard',this)"><i class="ti ti-layout-dashboard"></i>总览</div>
     <div class="ni" onclick="go('projects',this)"><i class="ti ti-folder"></i>项目母本<span class="nb" id="nb-projects">—</span></div>
     <div class="ni" onclick="go('timeline',this)"><i class="ti ti-timeline"></i>时间轴矩阵</div>
-    <div class="ni" onclick="go('gamemap',this)"><i class="ti ti-map"></i>游戏地图</div>
+    <div class="ni" onclick="go('gamemap',this)"><i class="ti ti-chart-bar"></i>游戏图表</div>
   </div>
   <div class="ns">
     <div class="nl">知识网络</div>
@@ -352,42 +372,44 @@ select.fi{cursor:pointer}
 <!-- 游戏地图 -->
 <div class="page" id="pg-gamemap">
   <div class="ph">
-    <div><div class="ptitle">游戏地图编辑器</div><div class="psub">可视化空间音乐矩阵 · AI智能导入 · 区域/音乐/世界观/角色BGM全编辑</div></div>
+    <div><div class="ptitle">游戏音乐图表设计</div><div class="psub">智能识别游戏设计文档 · 氛围/战斗/过场/角色音乐归类</div></div>
   </div>
   <div id="gamemap-root" style="height:700px;border:0.5px solid var(--line);border-radius:4px;overflow:hidden;display:flex;flex-direction:column">
     <!-- Toolbar -->
     <div id="gm-toolbar" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--bg2);flex-shrink:0;flex-wrap:wrap">
-      <button class="ib" id="gm-btn-select" onclick="gmSetMode('select')" style="background:var(--t1);color:#fff;border-color:var(--t1)"><i class="ti ti-cursor-text"></i>选择</button>
-      <button class="ib" id="gm-btn-add" onclick="gmSetMode('add')"><i class="ti ti-plus"></i>新增区域</button>
-      <div style="width:1px;height:18px;background:var(--line)"></div>
-      <button class="ib" onclick="gmAddVertex()"><i class="ti ti-vector-triangle"></i>+顶点</button>
-      <button class="ib" onclick="gmRemoveVertex()"><i class="ti ti-vector-triangle"></i>-顶点</button>
-      <div style="width:1px;height:18px;background:var(--line)"></div>
+      <button class="ib" onclick="gmAddEntry()"><i class="ti ti-plus"></i>新增条目</button>
       <button class="ib" onclick="gmAddTlNode()"><i class="ti ti-clock-plus"></i>加节点</button>
       <button class="ib" onclick="gmDelTlNode()"><i class="ti ti-clock-minus"></i>删节点</button>
-      <div style="width:1px;height:18px;background:var(--line)"></div>
-      <button class="ib" onclick="gmAddChar()"><i class="ti ti-user-plus"></i>加角色</button>
       <div style="width:1px;height:18px;background:var(--line)"></div>
       <button class="ib" onclick="gmOpenAI()" style="border-color:#7F77DD;color:#534AB7"><i class="ti ti-sparkles"></i>AI智能导入</button>
       <button class="ib" onclick="gmExportJson()"><i class="ti ti-download"></i>导出JSON</button>
       <select class="fi" id="gm-project-select" style="width:180px;height:28px;padding:0 9px;font-size:11px" onchange="gmLoadProject()"></select>
-      <span id="gm-hint" style="font-size:10px;color:var(--t4);margin-left:auto">点击区域选中编辑</span>
+      <span id="gm-hint" style="font-size:10px;color:var(--t4);margin-left:auto">点击条目后可编辑世界观、时间轴和音乐归类</span>
     </div>
-    <!-- Body -->
-    <div style="display:flex;flex:1;overflow:hidden;position:relative">
-      <!-- Map -->
-      <div style="flex:1;position:relative;overflow:hidden;background:var(--bg2)" id="gm-map-wrap">
-        <svg id="gm-svg" viewBox="0 0 580 380" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%">
-          <defs><pattern id="gm-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0L0 0 0 20" fill="none" stroke="var(--line)" stroke-width="0.4"/></pattern></defs>
-          <rect width="580" height="380" fill="url(#gm-grid)"/>
-          <g id="gm-rg"></g><g id="gm-hg"></g>
-        </svg>
-        <!-- AI Overlay -->
-        <div id="gm-ai-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center">
+    <div style="flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column">
+      <div class="gm-top">
+        <div class="gm-panel">
+          <div class="gm-panel-title"><i class="ti ti-world"></i>世界观介绍</div>
+          <textarea class="gm-world-text" id="gm-world-top" placeholder="选择一个条目后，可在这里补充世界观、区域气质、玩法目标。" oninput="gmSaveWorldTop(this.value)"></textarea>
+        </div>
+        <div class="gm-panel">
+          <div class="gm-panel-title"><i class="ti ti-timeline"></i>剧情时间轴</div>
+          <div class="gm-timeline-list" id="gm-tl-inner"></div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-top:8px" id="gm-tl-hint">点击节点查看，顶部按钮可新增/删除节点</div>
+        </div>
+      </div>
+      <div class="gm-tabs" id="gm-sb-tabs">
+        <div class="gm-tab on" onclick="gmSwitchTab('music',this)">音乐分类</div>
+        <div class="gm-tab" onclick="gmSwitchTab('cutscene',this)">过场动画音乐</div>
+        <div class="gm-tab" onclick="gmSwitchTab('chars',this)">角色音乐</div>
+      </div>
+      <div class="gm-chart" id="gm-chart"></div>
+      <!-- AI Overlay -->
+      <div id="gm-ai-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center">
           <div style="background:var(--bg);border:0.5px solid var(--line2);border-radius:6px;width:500px;max-height:82%;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px">
-            <div style="font-size:15px;font-weight:500;color:var(--t1);display:flex;align-items:center;gap:8px"><i class="ti ti-sparkles" style="color:#534AB7"></i>AI 智能导入地图</div>
-            <div style="font-size:11px;color:var(--t3);line-height:1.7">粘贴游戏世界观文档、设定集或区域描述，DeepSeek 自动识别区域、音乐、世界观、角色信息并生成地图。</div>
-            <textarea id="gm-ai-input" rows="8" style="width:100%;padding:10px;border:0.5px solid var(--line);border-radius:6px;font-size:12px;font-family:var(--sans);color:var(--t1);background:var(--bg2);resize:vertical;outline:none;line-height:1.6" placeholder="示例：银月草原是地图西北部的开阔平原，守护者艾达的主题曲融合口琴与弦乐…&#10;&#10;粘贴你的文字后点击「AI解析」"></textarea>
+            <div style="font-size:15px;font-weight:500;color:var(--t1);display:flex;align-items:center;gap:8px"><i class="ti ti-sparkles" style="color:#534AB7"></i>AI 智能归类游戏音乐</div>
+            <div style="font-size:11px;color:var(--t3);line-height:1.7">粘贴游戏设计文档、剧情说明、关卡描述或曲目表，DeepSeek 会把曲目归入氛围音乐、战斗音乐、过场动画音乐和角色音乐。</div>
+            <textarea id="gm-ai-input" rows="8" style="width:100%;padding:10px;border:0.5px solid var(--line);border-radius:6px;font-size:12px;font-family:var(--sans);color:var(--t1);background:var(--bg2);resize:vertical;outline:none;line-height:1.6" placeholder="示例：银月草原用于开放探索，主题曲以口琴和弦乐构成；Boss战使用重鼓与铜管；艾达有独立角色主题…&#10;&#10;粘贴你的文字后点击「AI解析」"></textarea>
             <div id="gm-ai-status" style="display:none">
               <div style="display:flex;align-items:center;gap:8px;color:var(--t4);font-size:11px"><div class="spinner"></div><span id="gm-ai-status-text">DeepSeek 解析中…</span></div>
               <div style="background:var(--bg2);border-radius:3px;height:3px;overflow:hidden;margin-top:6px"><div id="gm-ai-pbar" style="height:100%;border-radius:3px;background:#534AB7;transition:width .4s;width:5%"></div></div>
@@ -400,36 +422,10 @@ select.fi{cursor:pointer}
             <div style="display:flex;gap:8px;justify-content:flex-end">
               <button class="ib" onclick="gmCloseAI()">取消</button>
               <button class="ib" id="gm-ai-parse-btn" onclick="gmRunAI()"><i class="ti ti-sparkles"></i>AI解析</button>
-              <button class="ib solid" id="gm-ai-apply-btn" style="display:none;background:#534AB7;border-color:#534AB7" onclick="gmApplyAI()"><i class="ti ti-map-pin"></i>生成地图</button>
+              <button class="ib solid" id="gm-ai-apply-btn" style="display:none;background:#534AB7;border-color:#534AB7" onclick="gmApplyAI()"><i class="ti ti-chart-bar"></i>生成图表</button>
             </div>
           </div>
         </div>
-      </div>
-      <!-- Sidebar -->
-      <div style="width:280px;flex-shrink:0;border-left:0.5px solid var(--line);display:flex;flex-direction:column;overflow:hidden">
-        <div style="display:flex;border-bottom:0.5px solid var(--line);flex-shrink:0;overflow-x:auto" id="gm-sb-tabs">
-          <div class="gm-sbt on" onclick="gmSwitchTab('area',this)" style="flex-shrink:0;padding:7px 9px;font-size:11px;cursor:pointer;color:var(--t2);border-bottom:2px solid var(--t1)">区域</div>
-          <div class="gm-sbt" onclick="gmSwitchTab('music',this)" style="flex-shrink:0;padding:7px 9px;font-size:11px;cursor:pointer;color:var(--t4);border-bottom:2px solid transparent">音乐</div>
-          <div class="gm-sbt" onclick="gmSwitchTab('world',this)" style="flex-shrink:0;padding:7px 9px;font-size:11px;cursor:pointer;color:var(--t4);border-bottom:2px solid transparent">世界观</div>
-          <div class="gm-sbt" onclick="gmSwitchTab('chars',this)" style="flex-shrink:0;padding:7px 9px;font-size:11px;cursor:pointer;color:var(--t4);border-bottom:2px solid transparent">角色BGM</div>
-        </div>
-        <div id="gm-sb-body" style="flex:1;overflow-y:auto;padding:10px;font-size:12px">
-          <div style="color:var(--t4);font-size:11px;text-align:center;padding:32px 0;line-height:1.9">点击地图区域或时间轴节点<br>开始编辑<br><br>或点击<span style="color:#534AB7;font-weight:500"> AI智能导入 </span>从文档生成</div>
-        </div>
-      </div>
-    </div>
-    <!-- Timeline -->
-    <div style="flex-shrink:0;border-top:0.5px solid var(--line);background:var(--bg2)">
-      <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:0.5px solid var(--line)">
-        <i class="ti ti-timeline" style="font-size:13px;color:var(--t4)"></i>
-        <span style="font-size:11px;font-weight:500;color:var(--t2)">剧情时间轴</span>
-        <span style="font-size:10px;color:var(--t4);margin-left:2px" id="gm-tl-hint">点击节点查看</span>
-      </div>
-      <div style="overflow-x:auto;padding:8px 12px 4px">
-        <div style="position:relative;height:56px;min-width:700px" id="gm-tl-inner">
-          <div style="position:absolute;top:13px;left:0;right:0;height:1px;background:var(--line)"></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -944,7 +940,7 @@ function go(id, el) {
 window.go=go;
 
 // ══ GAME MAP EDITOR ══
-let gmMode='select', gmTab='area', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null;
+let gmMode='select', gmTab='music', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null;
 const gmColors=['#87A96B','#D6A15D','#7AA7C7','#B7838D','#9A87B8','#C2B280','#77A99A','#B77F55'];
 function gmMetaKey(pid){return `gameMapMeta:${pid}`;}
 function gmSnapshotKey(pid){return `gameMapSnapshot:${pid}`;}
@@ -999,8 +995,6 @@ async function gmInit(){
   await loadProjectSelects();
   const sel=document.getElementById('gm-project-select');
   if(sel&&pendingGameProjectId){sel.value=pendingGameProjectId;pendingGameProjectId=null;}
-  const wrap=document.getElementById('gm-map-wrap');
-  if(wrap&&!wrap.dataset.bound){wrap.dataset.bound='1';wrap.addEventListener('click',gmHandleMapClick);}
   await gmLoadProject();
 }
 async function gmLoadProject(){
@@ -1029,40 +1023,57 @@ function gmPersistSelectedMeta(){
   gmPersistMap();
 }
 function gmRender(){
-  gmRenderMap();
-  gmRenderSidebar();
+  gmRenderTop();
+  gmRenderChart();
   gmRenderTimeline();
 }
-function gmRenderMap(){
-  const rg=document.getElementById('gm-rg'), hg=document.getElementById('gm-hg');
-  if(!rg||!hg)return;
+function gmRenderTop(){
+  const a=gmSelected();
+  const world=document.getElementById('gm-world-top');
+  if(world)world.value=a?.world||'';
+}
+function gmRenderChart(){
+  const el=document.getElementById('gm-chart');
+  if(!el)return;
+  if(!gmProjectId()){el.innerHTML='<div class="empty"><i class="ti ti-device-gamepad"></i><p>请先选择一个游戏项目。</p></div>';return;}
   if(!gmRows.length){
-    rg.innerHTML='<text x="290" y="180" text-anchor="middle" fill="#999" font-size="12">选择游戏项目后，点击“新增区域”开始画地图</text>';
-    hg.innerHTML=''; gmRenderSidebar(); gmRenderTimeline(); return;
+    el.innerHTML='<div class="empty"><i class="ti ti-chart-bar"></i><p>暂无音乐条目。可以点击“AI智能导入”或“新增条目”。</p></div>';return;
   }
-  rg.innerHTML=gmRows.map((a,i)=>`<g class="gm-area" data-id="${a.id}" style="cursor:pointer" onclick="gmSelectArea('${a.id}',event)">
-    <rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="14" fill="${a.color}" fill-opacity="${a.id===gmSelectedId?'.28':'.16'}" stroke="${a.color}" stroke-width="${a.id===gmSelectedId?'3':'1.5'}"/>
-    <text x="${+a.x+(+a.w/2)}" y="${+a.y+28}" text-anchor="middle" fill="var(--t1)" font-size="13" font-weight="600">${esc(a.area)}</text>
-    <text x="${+a.x+(+a.w/2)}" y="${+a.y+48}" text-anchor="middle" fill="var(--t4)" font-size="9">${esc(a.state_explore||a.state_boss||'待补音乐')}</text>
-  </g>`).join('');
-  hg.innerHTML=gmRows.slice(1).map((a,i)=>{const b=gmRows[i];return`<line x1="${+b.x+(+b.w/2)}" y1="${+b.y+(+b.h/2)}" x2="${+a.x+(+a.w/2)}" y2="${+a.y+(+a.h/2)}" stroke="#d8d3c8" stroke-width="1" stroke-dasharray="4 5"/>`;}).join('');
+  if(gmTab==='music')el.innerHTML=`<div class="gm-cardgrid">${gmRows.map(a=>gmMusicCard(a)).join('')}</div>`;
+  if(gmTab==='cutscene')el.innerHTML=`<div class="gm-cardgrid">${gmRows.map(a=>gmCutsceneCard(a)).join('')}</div>`;
+  if(gmTab==='chars')el.innerHTML=`<div class="gm-cardgrid">${gmRows.map(a=>gmCharCard(a)).join('')}</div>`;
+}
+function gmCardShell(a,body){
+  return `<div class="gm-card ${a.id===gmSelectedId?'on':''}" onclick="gmSelectArea('${a.id}',event)"><div class="gm-card-title">${esc(a.area||'未命名条目')}</div><div class="gm-card-meta">${esc(a.world||'暂无世界观说明').slice(0,46)}${(a.world||'').length>46?'…':''}</div>${body}<div style="display:flex;gap:6px;margin-top:10px"><button class="ib solid" style="height:26px;font-size:11px;padding:0 9px" onclick="gmSaveCard(event,'${a.id}')"><i class="ti ti-device-floppy"></i>保存</button><button class="ib danger" style="height:26px;font-size:11px;padding:0 9px" onclick="gmDeleteArea(event,'${a.id}')"><i class="ti ti-trash"></i></button></div></div>`;
+}
+function gmTrackInput(label,id,value){
+  return `<div class="gm-track-row"><div class="gm-track-label">${label}</div><input class="fi gm-track-input" data-field="${id}" value="${esc(value||'')}" style="height:26px;padding:0 8px;font-size:12px"></div>`;
+}
+function gmMusicCard(a){
+  return gmCardShell(a,`${gmTrackInput('场景/关卡','area',a.area)}${gmTrackInput('氛围音乐','state_explore',a.state_explore)}${gmTrackInput('战斗音乐','state_combat',a.state_combat||a.state_boss)}${gmTrackInput('过场音乐','state_clear',a.state_clear)}`);
+}
+function gmCutsceneCard(a){
+  return gmCardShell(a,`${gmTrackInput('过场名称','area',a.area)}${gmTrackInput('过场动画音乐','state_clear',a.state_clear)}${gmTrackInput('情绪/转场说明','state_night',a.state_night)}${gmTrackInput('对应剧情节点','state_low_hp',a.state_low_hp)}`);
+}
+function gmCharCard(a){
+  return gmCardShell(a,`<div class="gm-track-row" style="grid-template-columns:1fr"><div class="gm-track-label">角色音乐（每行一个：角色 - 曲名 - 说明）</div><textarea class="fi gm-track-input" data-field="chars" rows="7" style="padding:8px;font-size:12px;line-height:1.7">${esc((a.chars||[]).join('\n'))}</textarea></div>`);
 }
 function gmSelectArea(id,e){
   if(e)e.stopPropagation();
   gmSelectedId=id; gmSetMode('select'); gmRender();
 }
 async function gmHandleMapClick(e){
-  if(gmMode!=='add')return;
-  const svg=document.getElementById('gm-svg'), pid=gmProjectId();
-  if(!svg||!pid){toast('请先选择游戏项目');return;}
-  const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
-  const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+  return;
+}
+async function gmAddEntry(){
+  const pid=gmProjectId();
+  if(!pid){toast('请先选择游戏项目');return;}
   const area=prompt('区域名称，例如：银月草原'); if(!area)return;
   const {data,error}=await db.from('game_matrix_entries').insert({project_id:pid,area,state_explore:'',state_combat:'',state_boss:'',state_low_hp:'',state_night:'',state_clear:''}).select('*').single();
   if(error){toast('新增失败：'+error.message);return;}
   const meta=gmMeta(pid);
-  meta[data.id]={x:Math.max(12,Math.min(430,p.x-64)),y:Math.max(12,Math.min(292,p.y-36)),w:128,h:72,color:gmColors[gmRows.length%gmColors.length],world:'',chars:[],timeline:[]};
-  gmSaveMeta(pid,meta); gmSelectedId=data.id; gmSetMode('select'); await gmLoadProject(); gmPersistMap(); toast('区域已添加');
+  meta[data.id]={...gmDefaultArea(data,gmRows.length),world:'',chars:[],timeline:[]};
+  gmSaveMeta(pid,meta); gmSelectedId=data.id; await gmLoadProject(); gmPersistMap(); toast('条目已添加');
 }
 function gmSetMode(mode){
   gmMode=mode;
@@ -1074,22 +1085,15 @@ function gmSetMode(mode){
 }
 function gmSwitchTab(tab,el){
   gmTab=tab;
-  document.querySelectorAll('#gm-sb-tabs .gm-sbt').forEach(x=>{x.classList.remove('on');x.style.color='var(--t4)';x.style.borderBottomColor='transparent';});
-  if(el){el.classList.add('on');el.style.color='var(--t2)';el.style.borderBottomColor='var(--t1)';}
-  gmRenderSidebar();
+  document.querySelectorAll('#gm-sb-tabs .gm-tab').forEach(x=>x.classList.remove('on'));
+  if(el)el.classList.add('on');
+  gmRenderChart();
 }
 function gmField(label,id,value,type='text'){
   return `<div style="margin-bottom:9px"><div class="fl" style="margin-bottom:4px">${label}</div><input class="fi" id="${id}" type="${type}" value="${esc(value??'')}" style="height:28px;padding:0 8px;font-size:12px"></div>`;
 }
 function gmRenderSidebar(){
-  const body=document.getElementById('gm-sb-body'); if(!body)return;
-  const a=gmSelected();
-  if(!gmProjectId()){body.innerHTML='<div style="color:var(--t4);font-size:11px;text-align:center;padding:32px 0;line-height:1.9">请先在顶部选择一个游戏项目。</div>';return;}
-  if(!a){body.innerHTML='<div style="color:var(--t4);font-size:11px;text-align:center;padding:32px 0;line-height:1.9">暂无区域。点击“新增区域”，再在地图上点一下。</div>';return;}
-  if(gmTab==='area')body.innerHTML=`${gmField('区域名称','gm-edit-area',a.area)}<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${gmField('X','gm-edit-x',Math.round(a.x),'number')}${gmField('Y','gm-edit-y',Math.round(a.y),'number')}${gmField('宽','gm-edit-w',Math.round(a.w),'number')}${gmField('高','gm-edit-h',Math.round(a.h),'number')}</div><div style="margin-bottom:10px"><div class="fl" style="margin-bottom:4px">颜色</div><input id="gm-edit-color" type="color" value="${esc(a.color||gmColors[0])}" style="width:100%;height:30px;border:1px solid var(--line);border-radius:3px;background:var(--bg)"></div><button class="ib solid" onclick="gmSaveAreaPanel()"><i class="ti ti-device-floppy"></i>保存区域</button><button class="ib danger" style="margin-left:6px" onclick="gmDeleteArea()"><i class="ti ti-trash"></i>删除</button>`;
-  if(gmTab==='music')body.innerHTML=`${gmField('探索音乐','gm-edit-explore',a.state_explore)}${gmField('普通战斗','gm-edit-combat',a.state_combat)}${gmField('Boss战','gm-edit-boss',a.state_boss)}${gmField('低血量叠加层','gm-edit-low',a.state_low_hp)}${gmField('夜间/环境','gm-edit-night',a.state_night)}${gmField('任务完成/安全区','gm-edit-clear',a.state_clear)}<button class="ib solid" onclick="gmSaveMusicPanel()"><i class="ti ti-device-floppy"></i>保存音乐</button>`;
-  if(gmTab==='world')body.innerHTML=`<div class="fl" style="margin-bottom:4px">世界观 / 区域说明</div><textarea class="fi" id="gm-edit-world" rows="12" style="padding:8px;font-size:12px;line-height:1.7">${esc(a.world||'')}</textarea><button class="ib solid" style="margin-top:10px" onclick="gmSaveWorldPanel()"><i class="ti ti-device-floppy"></i>保存说明</button>`;
-  if(gmTab==='chars')body.innerHTML=`<div class="fl" style="margin-bottom:4px">角色BGM（每行一个：角色 - 曲名 - 说明）</div><textarea class="fi" id="gm-edit-chars" rows="12" style="padding:8px;font-size:12px;line-height:1.7">${esc((a.chars||[]).join('\n'))}</textarea><button class="ib solid" style="margin-top:10px" onclick="gmSaveCharsPanel()"><i class="ti ti-device-floppy"></i>保存角色BGM</button>`;
+  gmRenderChart();
 }
 async function gmSaveAreaPanel(){
   const a=gmSelected(); if(!a)return;
@@ -1106,13 +1110,29 @@ async function gmSaveMusicPanel(){
   if(error){toast('保存失败：'+error.message);return;}
   gmPersistMap(); gmRender(); toast('音乐信息已保存');
 }
+function gmSaveWorldTop(text){const a=gmSelected(); if(!a)return; a.world=text; gmPersistSelectedMeta();}
 function gmSaveWorldPanel(){const a=gmSelected(); if(!a)return; a.world=val('gm-edit-world'); gmPersistSelectedMeta(); gmRender(); toast('世界观已保存');}
 function gmSaveCharsPanel(){const a=gmSelected(); if(!a)return; a.chars=val('gm-edit-chars').split('\n').map(s=>s.trim()).filter(Boolean); gmPersistSelectedMeta(); gmRender(); toast('角色BGM已保存');}
-async function gmDeleteArea(){
-  const a=gmSelected(); if(!a||!confirm(`删除区域「${a.area}」？`))return;
+async function gmSaveCard(e,id){
+  if(e)e.stopPropagation();
+  const card=e?.target?.closest('.gm-card');
+  const a=gmRows.find(x=>x.id===id); if(!a||!card)return;
+  card.querySelectorAll('.gm-track-input').forEach(input=>{
+    const field=input.dataset.field;
+    if(field==='chars')a.chars=input.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    else a[field]=input.value.trim();
+  });
+  const patch={area:a.area,state_explore:a.state_explore||'',state_combat:a.state_combat||'',state_boss:a.state_boss||'',state_low_hp:a.state_low_hp||'',state_night:a.state_night||'',state_clear:a.state_clear||''};
+  const {error}=await db.from('game_matrix_entries').update(patch).eq('id',a.id);
+  if(error){toast('保存失败：'+error.message);return;}
+  gmSelectedId=a.id; gmPersistSelectedMeta(); gmRender(); toast('音乐条目已保存');
+}
+async function gmDeleteArea(e,id){
+  if(e)e.stopPropagation();
+  const a=id?gmRows.find(x=>x.id===id):gmSelected(); if(!a||!confirm(`删除条目「${a.area}」？`))return;
   const {error}=await db.from('game_matrix_entries').delete().eq('id',a.id);
   if(error){toast('删除失败：'+error.message);return;}
-  const meta=gmMeta(gmProjectId()); delete meta[a.id]; gmSaveMeta(gmProjectId(),meta); gmSelectedId=null; await gmLoadProject(); gmPersistMap(); toast('区域已删除');
+  const meta=gmMeta(gmProjectId()); delete meta[a.id]; gmSaveMeta(gmProjectId(),meta); gmSelectedId=null; await gmLoadProject(); gmPersistMap(); toast('条目已删除');
 }
 function gmAddVertex(){const a=gmSelected(); if(!a){toast('请先选择区域');return;} a.w=(+a.w||120)+14; a.h=(+a.h||70)+8; gmPersistSelectedMeta(); gmRender();}
 function gmRemoveVertex(){const a=gmSelected(); if(!a){toast('请先选择区域');return;} a.w=Math.max(72,(+a.w||120)-14); a.h=Math.max(44,(+a.h||70)-8); gmPersistSelectedMeta(); gmRender();}
@@ -1129,20 +1149,31 @@ function gmAddChar(){gmTab='chars';gmRenderSidebar();setTimeout(()=>document.get
 function gmRenderTimeline(){
   const el=document.getElementById('gm-tl-inner'), a=gmSelected(); if(!el)return;
   const items=a?.timeline||[];
-  el.innerHTML='<div style="position:absolute;top:13px;left:0;right:0;height:1px;background:var(--line)"></div>'+items.map((t,i)=>`<div title="${esc(t)}" style="position:absolute;left:${30+i*130}px;top:4px;width:94px;text-align:center;cursor:pointer" onclick="gmTimelineClick(${i})"><div style="width:18px;height:18px;border-radius:50%;border:2px solid ${a.color||'#999'};background:var(--bg);margin:0 auto 5px"></div><div style="font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t)}</div></div>`).join('');
-  const hint=document.getElementById('gm-tl-hint'); if(hint)hint.textContent=a?`${a.area} · ${items.length}个节点`:'点击节点查看';
+  el.innerHTML=items.length?items.map((t,i)=>`<div class="gm-tl-node" title="${esc(t)}" onclick="gmTimelineClick(${i})"><strong>${String(i+1).padStart(2,'0')}</strong><br>${esc(t)}</div>`).join(''):'<div style="font-size:11px;color:var(--t4);padding:10px 0">暂无剧情节点，点击“加节点”补充。</div>';
+  const hint=document.getElementById('gm-tl-hint'); if(hint)hint.textContent=a?`${a.area} · ${items.length} 个节点`:'选择下方条目后编辑时间轴';
 }
 function gmTimelineClick(i){const a=gmSelected(); if(a?.timeline?.[i])alert(a.timeline[i]);}
 function gmOpenAI(){document.getElementById('gm-ai-overlay').style.display='flex';}
 function gmCloseAI(){document.getElementById('gm-ai-overlay').style.display='none';}
 function gmLocalParse(text){
-  const names=[...text.matchAll(/([\u4e00-\u9fa5A-Za-z0-9·]{2,18})(?:是|位于|区域|地图|草原|森林|城|港|谷|山|湖|塔|遗迹)/g)].map(m=>m[1]);
-  return [...new Set(names)].slice(0,6).map((name,i)=>({area:name,state_explore:'',state_combat:'',state_boss:'',world:text.slice(0,120),chars:[],timeline:[]}));
+  const names=[...text.matchAll(/([\u4e00-\u9fa5A-Za-z0-9·]{2,18})(?:是|位于|区域|关卡|章节|草原|森林|城|港|谷|山|湖|塔|遗迹|Boss|角色)/g)].map(m=>m[1]);
+  const base=[...new Set(names)].slice(0,6);
+  return (base.length?base:['主线探索','战斗段落','过场动画']).map(name=>({
+    area:name,
+    state_explore:/探索|草原|森林|城|湖|世界|环境/.test(text)?'氛围音乐待命名':'',
+    state_combat:/战斗|Boss|敌人|追逐/.test(text)?'战斗音乐待命名':'',
+    state_clear:/过场|动画|剧情|回忆|结局/.test(text)?'过场音乐待命名':'',
+    state_night:'',
+    state_low_hp:'',
+    world:text.slice(0,140),
+    chars:[],
+    timeline:[]
+  }));
 }
 async function gmRunAI(){
   const text=val('gm-ai-input'); if(!text){toast('请先粘贴设定文字');return;}
   document.getElementById('gm-ai-status').style.display='block'; document.getElementById('gm-ai-result').style.display='none'; document.getElementById('gm-ai-apply-btn').style.display='none';
-  const prompt=`把下面游戏设定解析成地图区域 JSON。只输出JSON，不要Markdown。格式：{"areas":[{"area":"区域名","state_explore":"探索音乐","state_combat":"普通战斗音乐","state_boss":"Boss音乐","state_low_hp":"低血量/二阶段","state_night":"夜间/环境","state_clear":"安全区/任务完成","world":"100字内区域说明","chars":["角色 - BGM - 说明"],"timeline":["剧情节点"]}]}。文本：${text}`;
+  const prompt=`把下面游戏设计文档解析成“游戏音乐图表”JSON。重点是把曲目合理归类，不要画地图。只输出JSON，不要Markdown。格式：{"areas":[{"area":"场景/关卡/剧情段落名","state_explore":"氛围音乐/探索音乐曲目或设计说明","state_combat":"战斗音乐曲目或设计说明","state_boss":"Boss/高压战斗音乐，可为空","state_clear":"过场动画音乐/剧情演出音乐","state_night":"过场情绪或转场说明","state_low_hp":"对应剧情节点或触发条件","world":"100字内世界观/玩法说明","chars":["角色名 - 角色主题曲 - 说明"],"timeline":["剧情节点"]}]}。文本：${text}`;
   try{
     const res=await fetch(API_ORIGIN+'/api/analyze-import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
     const data=await res.json();
@@ -1156,7 +1187,7 @@ async function gmRunAI(){
   document.getElementById('gm-ai-result').style.display='block';
   document.getElementById('gm-ai-apply-btn').style.display='inline-flex';
   document.getElementById('gm-ai-chips').innerHTML=(gmAiDraft||[]).map(a=>`<span class="tag">${esc(a.area)}</span>`).join('');
-  document.getElementById('gm-ai-summary').textContent=(gmAiDraft||[]).map(a=>`${a.area}：${a.world||a.state_explore||'待补充'}`).join('\n');
+  document.getElementById('gm-ai-summary').textContent=(gmAiDraft||[]).map(a=>`${a.area}\n氛围：${a.state_explore||'—'}\n战斗：${a.state_combat||a.state_boss||'—'}\n过场：${a.state_clear||'—'}\n角色：${(a.chars||[]).join('；')||'—'}`).join('\n\n');
 }
 async function gmApplyAI(){
   const pid=gmProjectId(); if(!pid){toast('请先选择游戏项目');return;}
@@ -1166,7 +1197,7 @@ async function gmApplyAI(){
   if(error){toast('生成失败：'+error.message);return;}
   const meta=gmMeta(pid);
   (data||[]).forEach((r,i)=>{const src=gmAiDraft[i]||{};meta[r.id]={...gmDefaultArea(r,gmRows.length+i),world:src.world||'',chars:src.chars||[],timeline:src.timeline||[]};});
-  gmSaveMeta(pid,meta); gmCloseAI(); await gmLoadProject(); gmPersistMap(); toast(`已生成 ${rows.length} 个区域`);
+  gmSaveMeta(pid,meta); gmCloseAI(); await gmLoadProject(); gmPersistMap(); toast(`已生成 ${rows.length} 个音乐图表条目`);
 }
 function openArticleModal(btn){
   const title=btn?.dataset?.title||'';
@@ -2746,7 +2777,7 @@ function gmExportJson(){
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  toast('地图 JSON 已导出');
+  toast('游戏音乐图表 JSON 已导出');
 }
 </script>
 </body>
