@@ -885,6 +885,54 @@ function go(id, el) {
   if(loaders[id]) loaders[id]();
 }
 
+// Claude 的游戏地图页面先提供安全启动器，避免缺失函数拖垮整站导航。
+let gmMode='select', gmTab='area';
+function gmInit(){
+  const body=document.getElementById('gm-sb-body');
+  if(body&&!body.dataset.ready){
+    body.dataset.ready='1';
+    body.innerHTML='<div style="color:var(--t4);font-size:11px;text-align:center;padding:32px 0;line-height:1.9">游戏地图编辑器已恢复入口。<br>完整编辑逻辑会在下一步继续补齐。<br><br>现在其他页面导航不会再被它卡住。</div>';
+  }
+}
+function gmSetMode(mode){
+  gmMode=mode;
+  document.querySelectorAll('#gm-toolbar .ib').forEach(b=>{if(b.id?.startsWith('gm-btn-')){b.style.background='var(--bg)';b.style.color='var(--t2)';b.style.borderColor='var(--line)';}});
+  const btn=document.getElementById('gm-btn-'+mode);
+  if(btn){btn.style.background='var(--t1)';btn.style.color='#fff';btn.style.borderColor='var(--t1)';}
+  const hint=document.getElementById('gm-hint');
+  if(hint) hint.textContent=mode==='add'?'点击地图空白处新增区域':'点击区域选中编辑';
+}
+function gmSwitchTab(tab,el){
+  gmTab=tab;
+  document.querySelectorAll('#gm-sb-tabs .gm-sbt').forEach(x=>{x.classList.remove('on');x.style.color='var(--t4)';x.style.borderBottomColor='transparent';});
+  if(el){el.classList.add('on');el.style.color='var(--t2)';el.style.borderBottomColor='var(--t1)';}
+  const names={area:'区域',music:'音乐',world:'世界观',chars:'角色BGM'};
+  const body=document.getElementById('gm-sb-body');
+  if(body) body.innerHTML=`<div style="color:var(--t4);font-size:11px;text-align:center;padding:32px 0;line-height:1.9">${names[tab]||'编辑'}面板已切换。<br>请选择地图节点后编辑。</div>`;
+}
+function gmOpenAI(){document.getElementById('gm-ai-overlay').style.display='flex';}
+function gmCloseAI(){document.getElementById('gm-ai-overlay').style.display='none';}
+function gmAddVertex(){toast('请先选择一个区域');}
+function gmRemoveVertex(){toast('请先选择一个区域');}
+function gmAddTlNode(){toast('请先选择一个区域');}
+function gmDelTlNode(){toast('请先选择一个时间轴节点');}
+function gmAddChar(){toast('请先选择一个区域');}
+async function gmRunAI(){toast('游戏地图 AI 导入下一步补齐，当前先保证整站可用');}
+function gmApplyAI(){gmCloseAI();toast('游戏地图生成逻辑待补齐');}
+function openArticleModal(btn){
+  const title=btn?.dataset?.title||'';
+  if(title) document.getElementById('a-title').value=title;
+  openModal('article');
+}
+function openGameModal(btn){
+  const name=btn?.dataset?.name||'';
+  const year=(btn?.dataset?.date||'').slice(0,4);
+  document.querySelectorAll('#proj-type-sel .to').forEach(x=>x.classList.toggle('sel',x.dataset.val==='game'));
+  if(name) document.getElementById('p-name').value=name;
+  if(year) document.getElementById('p-year').value=year;
+  openModal('project');
+}
+
 // ══ LOAD ALL ══
 async function loadAll() {
   if(!db) return;
