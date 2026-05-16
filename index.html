@@ -1633,9 +1633,22 @@ function letterImpactNote(agent,card,letter,reply){
   const hit=words.find(k=>String(letter||'').includes(k))||words[0]||card?.period||'这一页';
   const future=/未来|结局|死亡|后来|会不会|最后|剧透/.test(letter||'');
   const comfort=/陪|别怕|理解|原谅|辛苦|难过|遗憾/.test(letter||'');
-  if(future)return `${agent.name}没有真正知道未来，但他开始把“${hit}”当作一枚预感收好。后续同一时间线里，他会更警惕命运靠近的声音。`;
-  if(comfort)return `${agent.name}没有改变${card?.year||'这一年'}年的大事，只是在“${hit}”旁边多停了一会儿。那封信让他少把自己逼到绝处。`;
-  return `${agent.name}没有改写历史。他只是记住了你在${card?.year||'这一页'}年递来的这句话，并把它折进“${hit}”的阴影里。`;
+  const seed=String(card?.year||'')+String(card?.period||'')+String(letter||'');
+  const n=[...seed].reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+  const place=card?.year?`${card.year}年的那天`:'那天';
+  const base=[
+    `${place}，${agent.name}把信纸压在乐谱下面。晚些时候，他少改掉了一个原本想划去的小节。`,
+    `${place}，窗边的蜡烛烧短了一截。${agent.name}没有立刻回到钢琴前，而是把你的那句话抄在账单背面。`,
+    `${place}，他出门前又折回房间，把一枚零钱从口袋里取出，夹进写着“${hit}”的草稿页。`,
+    `${place}，他本来要和人争辩，话到嘴边停住了。那一天，房间里少了一句尖刻的话。`,
+    `${place}，他把已经封好的信重新拆开，在末尾多添了一句不肯承认的软话。`,
+    `${place}，他没有改变行程，只是在路过琴凳时停了一下，用两根手指敲出一段更轻的节奏。`
+  ];
+  const futureLine=`${place}，${agent.name}把你的信当成梦醒前的预感。第二天清晨，他把一张空白谱纸留在桌上，没有立刻写下第一个音。`;
+  const comfortLine=`${place}，${agent.name}把你的信读了两遍。那晚他仍然疲惫，但没有把那页草稿揉掉。`;
+  if(future)return futureLine;
+  if(comfort)return comfortLine;
+  return base[n%base.length];
 }
 function manuscriptLine(agent,card,letter,reply){
   const text=String(reply||letter||'').replace(/\s+/g,' ').trim();
