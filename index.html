@@ -99,6 +99,42 @@ tbody tr:hover{background:var(--bg2)}
 .tag{display:inline-flex;background:var(--bg2);border:1px solid var(--line);color:var(--t3);font-size:11px;padding:2px 8px;border-radius:2px;cursor:pointer;transition:all .12s;font-family:var(--mono)}
 .tag:hover,.tag.on{background:var(--t1);color:#fff;border-color:var(--t1)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.letter-workbench{display:grid;grid-template-columns:minmax(360px,0.95fr) minmax(420px,1.05fr);gap:22px;align-items:stretch}
+.agent-panel{border-top:1px solid var(--line);min-height:560px;display:flex;flex-direction:column}
+.agent-kicker{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);margin-bottom:8px}
+.agent-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--t1);line-height:1.25}
+.agent-desc{font-size:12px;color:var(--t3);line-height:1.8;margin-top:8px;max-width:560px}
+.agent-chat{margin-top:18px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;min-height:390px;background:var(--bg)}
+.agent-feed{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:420px}
+.agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
+.msg{max-width:86%;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px}
+.msg.gr,.msg.musician{align-self:flex-start;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
+.msg.user{align-self:flex-end;background:var(--t1);color:#fff}
+.msg-meta{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t4);margin-bottom:4px}
+.msg.user .msg-meta{color:rgba(255,255,255,.56)}
+.agent-input{border-top:1px solid var(--line);display:flex;gap:8px;padding:10px;background:var(--bg)}
+.agent-input input{flex:1;border:1px solid var(--line);border-radius:3px;height:34px;padding:0 10px;font-family:var(--sans);font-size:12px;outline:none;color:var(--t1);background:var(--bg)}
+.agent-input input:focus{border-color:var(--t1)}
+.agent-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.musician-list{margin-top:18px;border-top:1px solid var(--line)}
+.musician-card{border-bottom:1px solid var(--line)}
+.musician-head{display:flex;align-items:center;gap:12px;padding:13px 0;cursor:pointer}
+.musician-avatar{width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:13px;flex-shrink:0;background:var(--bg);color:var(--t1)}
+.musician-main{flex:1;min-width:0}
+.musician-name{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--t1);line-height:1.3}
+.musician-sub{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musician-state{font-family:var(--mono);font-size:9px;color:var(--t3);border:1px solid var(--line);padding:2px 6px;border-radius:2px}
+.musician-toggle{font-family:var(--mono);font-size:16px;color:var(--t3);width:18px;text-align:center}
+.musician-body{display:none;padding:0 0 16px 46px}
+.musician-card.open .musician-body{display:block}
+.musician-card.open .musician-toggle{color:var(--t1)}
+.musician-tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.mini-chat{border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.mini-feed{padding:10px;display:flex;flex-direction:column;gap:8px;max-height:210px;overflow:auto}
+.mini-input{display:flex;gap:6px;border-top:1px solid var(--line);padding:8px}
+.mini-input input{flex:1;height:30px;border:1px solid var(--line);border-radius:3px;padding:0 8px;font-size:12px;outline:none}
+.mini-input input:focus{border-color:var(--t1)}
+@media(max-width:900px){.letter-workbench{grid-template-columns:1fr}.agent-panel{min-height:auto}.agent-chat{min-height:320px}.musician-body{padding-left:0}}
 .pcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .pc{background:var(--bg);padding:16px;cursor:pointer;transition:background .12s;position:relative}
 .pc:hover{background:var(--bg2)}
@@ -476,28 +512,37 @@ select.fi{cursor:pointer}
     <div><div class="ptitle">音乐信札</div><div class="psub">智能体工作台 · 音乐旅行游戏入口 · 未来接入音频与 DeepSeek</div></div>
     <div class="ph-r"><button class="ib solid" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>打开音乐旅行</button></div>
   </div>
-  <div class="g2">
-    <div class="sec">
-      <div class="sh"><div class="sh-t"><i class="ti ti-robot"></i>智能体</div></div>
-      <div style="padding:16px;color:var(--t2);line-height:1.8;font-size:13px">
-        <strong style="font-family:var(--serif);font-size:18px;color:var(--t1)">音乐写作与资料助理</strong>
-        <p style="margin:10px 0 0">这里先作为未来智能体入口：可以接入 DeepSeek，帮助整理音乐家资料、生成旅行信札、分析作品背景，并把结果同步到资料库和笔记卡片。</p>
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px">
-          <div class="sc"><div class="sc-label">资料整理</div><div class="sc-sub">音乐家、城市、作品、年代</div></div>
-          <div class="sc"><div class="sc-label">信札生成</div><div class="sc-sub">根据地点生成故事文本</div></div>
-          <div class="sc"><div class="sc-label">音频解说</div><div class="sc-sub">未来关联曲目与播放链接</div></div>
-          <div class="sc"><div class="sc-label">卡片沉淀</div><div class="sc-sub">一键并入笔记卡片库</div></div>
+  <div class="letter-workbench">
+    <section class="agent-panel">
+      <div>
+        <div class="agent-kicker">GR. MISS · CONTROL DESK</div>
+        <div class="agent-title">和 Gr 小姐调试音乐家智能体</div>
+        <div class="agent-desc">左侧先作为主控聊天入口。现在使用本地模拟回复，之后再把发送按钮接入 DeepSeek，并把整理结果同步到资料库、笔记卡片和音乐旅行。</div>
+      </div>
+      <div class="agent-chat">
+        <div class="agent-feed" id="gr-chat-feed">
+          <div class="msg gr"><span class="msg-meta">Gr 小姐</span>你来了。先选一位音乐家，或者直接告诉我：你想调试作品背景、人生节点、旅行信札，还是游戏剧情里的音乐线索？</div>
+        </div>
+        <div class="agent-input">
+          <input id="gr-chat-input" placeholder="问 Gr 小姐：帮我调试莫扎特的旅行信札…" onkeydown="if(event.key==='Enter')sendGrMessage()">
+          <button class="ib solid" onclick="sendGrMessage()">发送</button>
         </div>
       </div>
-    </div>
-    <div class="sec">
-      <div class="sh"><div class="sh-t"><i class="ti ti-map-pin"></i>音乐旅行</div><span class="sh-a" onclick="openMusicTravel()">进入 →</span></div>
-      <div style="padding:16px;color:var(--t2);line-height:1.8;font-size:13px">
-        <strong style="font-family:var(--serif);font-size:18px;color:var(--t1)">音乐家的旅行游戏网站</strong>
-        <p style="margin:10px 0 0">独立页面已预留成游戏式体验：选择音乐家，进入城市与时代地图，解锁作品、故事、音频入口和 AI 生成的旅行信札。</p>
-        <button class="ib solid" style="margin-top:14px;height:34px" onclick="openMusicTravel()"><i class="ti ti-door-enter"></i>打开 music-travel.html</button>
+      <div class="agent-tools">
+        <button class="ib" onclick="quickGr('帮我选择适合做音乐旅行游戏的音乐家')">选择音乐家</button>
+        <button class="ib" onclick="quickGr('把莫扎特的故事拆成可抽卡的节点')">抽卡节点</button>
+        <button class="ib" onclick="quickGr('生成一段维也纳车厢里的旅行信札')">旅行信札</button>
       </div>
-    </div>
+    </section>
+
+    <section class="agent-panel">
+      <div>
+        <div class="agent-kicker">MUSICIAN AGENTS · DEBUG LIST</div>
+        <div class="agent-title">音乐家聊天列表</div>
+        <div class="agent-desc">每位音乐家都是一个可折叠智能体。先用本地聊天框调试语气和资料结构，后续再单独接 DeepSeek，避免每次打开页面都消耗 API。</div>
+      </div>
+      <div class="musician-list" id="musician-agent-list"></div>
+    </section>
   </div>
 </div>
 
@@ -997,6 +1042,119 @@ function go(id, el) {
 window.go=go;
 function openMusicTravel(){window.location.href='music-travel.html';}
 window.openMusicTravel=openMusicTravel;
+
+// ══ MUSIC LETTER AGENTS ══
+const musicianAgents=[
+  {id:'mozart',name:'莫扎特',mark:'M',era:'古典主义 · 维也纳',state:'调试中',intro:'适合调试旅行信札、神童时期、维也纳时期与作品故事。',tags:['作品背景','人生节点','旅行信札']},
+  {id:'beethoven',name:'贝多芬',mark:'B',era:'古典主义到浪漫主义 · 波恩/维也纳',state:'待接入',intro:'适合调试命运主题、听觉危机、英雄叙事与交响曲分析。',tags:['命运主题','交响曲','人物冲突']},
+  {id:'chopin',name:'肖邦',mark:'C',era:'浪漫主义 · 华沙/巴黎',state:'待接入',intro:'适合调试钢琴小品、流亡情绪、沙龙文化与私人信件语气。',tags:['钢琴','流亡','沙龙']},
+  {id:'debussy',name:'德彪西',mark:'D',era:'印象主义 · 巴黎',state:'待接入',intro:'适合调试色彩和声、象征主义文本、城市夜色与水的意象。',tags:['印象主义','和声色彩','文学意象']},
+  {id:'hisaishi',name:'久石让',mark:'H',era:'电影音乐 · 日本',state:'待接入',intro:'适合调试旋律动机、动画场景、童话感和极简主义织体。',tags:['动画','旋律动机','极简']},
+  {id:'zimmer',name:'汉斯·季默',mark:'Z',era:'电影音乐 · 好莱坞',state:'待接入',intro:'适合调试科幻史诗、合成器音色、低频推进和大片叙事。',tags:['电影配乐','合成器','史诗']},
+  {id:'kajiura',name:'梶浦由记',mark:'K',era:'动画/游戏音乐 · 日本',state:'待接入',intro:'适合调试虚构语言、人声织体、战斗音乐和角色命运线。',tags:['人声织体','战斗音乐','角色命运']}
+];
+const musicianChats={};
+function ensureMusicianChats(){
+  musicianAgents.forEach(a=>{
+    if(!musicianChats[a.id]){
+      musicianChats[a.id]=[{role:'musician',text:`我是${a.name}。现在先用本地调试模式，你可以问我作品、城市、年代，或让我生成一段旅行信札。`}];
+    }
+  });
+}
+function renderMusicianAgents(openId='mozart'){
+  ensureMusicianChats();
+  const box=document.getElementById('musician-agent-list');
+  if(!box)return;
+  box.innerHTML=musicianAgents.map(a=>{
+    const msgs=musicianChats[a.id].map(m=>`<div class="msg ${m.role==='user'?'user':'musician'}"><span class="msg-meta">${m.role==='user'?'你':a.name}</span>${escHtml(m.text)}</div>`).join('');
+    return `<div class="musician-card ${a.id===openId?'open':''}" id="musician-card-${a.id}">
+      <div class="musician-head" onclick="toggleMusicianAgent('${a.id}')">
+        <div class="musician-avatar">${a.mark}</div>
+        <div class="musician-main">
+          <div class="musician-name">${a.name}</div>
+          <div class="musician-sub">${a.era} · ${a.intro}</div>
+        </div>
+        <div class="musician-state">${a.state}</div>
+        <div class="musician-toggle">${a.id===openId?'−':'+'}</div>
+      </div>
+      <div class="musician-body">
+        <div class="musician-tags">${a.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="mini-chat">
+          <div class="mini-feed" id="mini-feed-${a.id}">${msgs}</div>
+          <div class="mini-input">
+            <input id="mini-input-${a.id}" placeholder="问${a.name}一个问题…" onkeydown="if(event.key==='Enter')sendMusicianMessage('${a.id}')">
+            <button class="ib" onclick="selectMusicianForGr('${a.id}')">交给 Gr 小姐</button>
+            <button class="ib solid" onclick="sendMusicianMessage('${a.id}')">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleMusicianAgent(id){
+  document.querySelectorAll('.musician-card').forEach(card=>{
+    const on=card.id==='musician-card-'+id&&!card.classList.contains('open');
+    card.classList.toggle('open',on);
+    const t=card.querySelector('.musician-toggle');
+    if(t)t.textContent=on?'−':'+';
+  });
+}
+function addMsg(feedId,role,text,name){
+  const feed=document.getElementById(feedId);
+  if(!feed)return;
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML=`<span class="msg-meta">${escHtml(name||'')}</span>${escHtml(text)}`;
+  feed.appendChild(div);
+  feed.scrollTop=feed.scrollHeight;
+}
+function grReply(text){
+  const lower=text.toLowerCase();
+  if(text.includes('莫扎特'))return '我会先把莫扎特拆成三个调试层：人生节点、作品线索、旅行场景。你可以在右侧展开“莫扎特”，先测试他的语气。';
+  if(text.includes('信札'))return '信札建议先固定格式：地点、时间、音乐家状态、一个隐秘问题。等 DeepSeek 接入后，只让 API 生成正文，结构由本地控制。';
+  if(text.includes('抽卡')||text.includes('节点'))return '抽卡节点可以按年份切开：神童巡演、萨尔茨堡冲突、维也纳自由职业、晚期歌剧。每张卡都要绑定一首作品和一句故事。';
+  if(lower.includes('deepseek')||text.includes('API'))return '为了省 API，建议默认本地模板回复；只有点击“调用 DeepSeek”时才请求，并把同一问题缓存 24 小时。';
+  return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
+}
+function sendGrMessage(){
+  const input=document.getElementById('gr-chat-input');
+  const text=(input?.value||'').trim();
+  if(!text)return;
+  input.value='';
+  addMsg('gr-chat-feed','user',text,'你');
+  setTimeout(()=>addMsg('gr-chat-feed','gr',grReply(text),'Gr 小姐'),180);
+}
+function quickGr(text){
+  const input=document.getElementById('gr-chat-input');
+  if(input)input.value=text;
+  sendGrMessage();
+}
+function selectMusicianForGr(id){
+  const a=musicianAgents.find(x=>x.id===id);
+  if(!a)return;
+  toggleMusicianAgent(id);
+  addMsg('gr-chat-feed','gr',`已切换到${a.name}。你可以在右侧直接和他聊，也可以让我把你的问题整理后再交给他。`,'Gr 小姐');
+}
+function musicianReply(agent,text){
+  if(text.includes('信札'))return `如果以我为主角，信札应该从一个具体地点开始。比如“${agent.era.split('·').pop().trim()}的夜里”，再让一首作品成为门钥匙。`;
+  if(text.includes('作品')||text.includes('曲'))return `先不要列太多作品。调试阶段建议挑 3 首：一首代表少年/早期，一首代表转折，一首代表晚期或成熟风格。`;
+  if(text.includes('故事')||text.includes('人生'))return `我的故事最好不要写成年表。请把它写成选择：离开、留下、写信、演奏。这样更像游戏。`;
+  return `我听见了。这个问题可以转成三个字段：背景、音乐线索、可交互动作。以后接入 API 时，我会按这个结构回答。`;
+}
+function sendMusicianMessage(id){
+  ensureMusicianChats();
+  const agent=musicianAgents.find(a=>a.id===id);
+  const input=document.getElementById('mini-input-'+id);
+  const text=(input?.value||'').trim();
+  if(!agent||!text)return;
+  input.value='';
+  musicianChats[id].push({role:'user',text});
+  addMsg('mini-feed-'+id,'user',text,'你');
+  const reply=musicianReply(agent,text);
+  musicianChats[id].push({role:'musician',text:reply});
+  setTimeout(()=>addMsg('mini-feed-'+id,'musician',reply,agent.name),160);
+}
+document.addEventListener('DOMContentLoaded',()=>renderMusicianAgents('mozart'));
 
 // ══ GAME MAP EDITOR ══
 let gmMode='select', gmTab='music', gmView='timeline', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null, gmEditingCards=new Set(), gmCurrentGameId=null, gmGames=[], gmGameStats={};
