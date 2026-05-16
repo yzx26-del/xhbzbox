@@ -1375,6 +1375,27 @@ body::before,body::after{opacity:.78;}
 }
 #dlg .dsb:active{transform:translateY(1px)!important;}
 
+/* ==========================================================================
+   主界面维护边界
+   以后只在对应补丁区优化对应模块，避免便签、书架、GR 小姐、按钮互相影响。
+   1. 便签框：.tm-note-zone
+   2. 书架框：.tm-shelf-zone
+   3. GR 小姐：.tm-gr-zone
+   4. 三个功能按钮：.tm-action-zone
+   ========================================================================== */
+
+/* === PATCH ONLY: 1. 便签框 .tm-note-zone === */
+.tm-note-zone{}
+
+/* === PATCH ONLY: 2. 书架框 .tm-shelf-zone === */
+.tm-shelf-zone{}
+
+/* === PATCH ONLY: 3. GR小姐 .tm-gr-zone === */
+.tm-gr-zone{}
+
+/* === PATCH ONLY: 4. 三个功能按钮 .tm-action-zone === */
+.tm-action-zone{}
+
 </style>
 </head>
 <body>
@@ -1434,7 +1455,7 @@ body::before,body::after{opacity:.78;}
 </div>
 
 <!-- ══ 修改一：GR小姐 — 黑白漫画风，风衣+眼镜+雨伞 ══ -->
-<div id="gr-zone">
+<div id="gr-zone" class="tm-gr-zone">
   <div id="gr-fig">
     <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" fill="none">
       <!-- 座椅靠背（深酒红皮革） -->
@@ -1547,7 +1568,7 @@ body::before,body::after{opacity:.78;}
     <div class="lbl">GR. — TEMPORAL ARCHIVIST</div>
     <div class="rl"></div>
   </div>
-  <div id="dlg">
+  <div id="dlg" class="tm-note-zone">
     <div class="dp">
       <div class="dlg-titlebar">
         <span class="dlg-tname">GR. 小姐</span>
@@ -1571,7 +1592,7 @@ body::before,body::after{opacity:.78;}
     <div class="zh">月影摇弦</div>
     <div class="rl"></div>
   </div>
-  <div id="shelf"><div class="sc">
+  <div id="shelf" class="tm-shelf-zone"><div class="sc">
     <div class="sr" id="r1"></div>
     <div class="sr" id="r2"></div>
     <div class="sr" id="r3"></div>
@@ -1636,7 +1657,7 @@ body::before,body::after{opacity:.78;}
 
 </div><!-- end #scene -->
 
-<div id="nav">
+<div id="nav" class="tm-action-zone">
   <button class="nb" onclick="openTravelPanel('cards')"><span>📚</span> 命运卡牌</button>
   <button class="nb" onclick="openTravelPanel('music')"><span>🎵</span> 作品典藏</button>
   <button class="nb" onclick="openTravelPanel('axis')"><span>⏳</span> 人生年表</button>
