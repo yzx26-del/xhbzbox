@@ -1632,10 +1632,14 @@ function letterImpactNote(agent,card,letter,reply){
     `${place}，他出门前又折回房间，把一枚零钱从口袋里取出，夹进写着“${hit}”的草稿页。`,
     `${place}，他本来要和人争辩，话到嘴边停住了。那一天，房间里少了一句尖刻的话。`,
     `${place}，他把已经封好的信重新拆开，在末尾多添了一句不肯承认的软话。`,
-    `${place}，他没有改变行程，只是在路过琴凳时停了一下，用两根手指敲出一段更轻的节奏。`
+    `${place}，他没有改变行程，只是在路过琴凳时停了一下，用两根手指敲出一段更轻的节奏。`,
+    `${place}，一个原本要离开的抄谱员多留了半小时，替他补齐了漏掉的声部。`,
+    `${place}，旁边的人少传了一句闲话。那场误会没有消失，只是晚了一天才抵达。`,
+    `${place}，一位听众把请柬折进口袋，没有当场离开；多年后，他仍记得那次停顿。`,
+    `${place}，一封本该被随手搁置的回信被送了出去，改变的只是收信人那晚的睡意。`
   ];
-  const futureLine=`${place}，${agent.name}把你的信当成梦醒前的预感。第二天清晨，他把一张空白谱纸留在桌上，没有立刻写下第一个音。`;
-  const comfortLine=`${place}，${agent.name}把你的信读了两遍。那晚他仍然疲惫，但没有把那页草稿揉掉。`;
+  const futureLine=`${place}，${agent.name}把你的信当成梦醒前的预感。第二天清晨，他把一张空白谱纸留在桌上，连带让送信人也放轻了敲门声。`;
+  const comfortLine=`${place}，${agent.name}把你的信读了两遍。那晚他仍然疲惫，但没有把那页草稿揉掉，旁人也少听见一次叹息。`;
   if(future)return futureLine;
   if(comfort)return comfortLine;
   return base[n%base.length];
@@ -1784,9 +1788,11 @@ async function sendFateLetter(){
 }
 function openCardLibrary(){
   const agent=currentAgent(),deck=getDeck(agent.id),unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
+  const allUnlocked=unlocked.size>=deck.length;
+  const left=Math.max(0,deck.length-unlocked.size);
   document.getElementById('fate-title').textContent=`${agent.name} · 卡牌曲库`;
   document.getElementById('fate-sub').textContent='已抽出的卡牌显示完整信息；未抽出的卡牌保持上锁。';
-  document.getElementById('fate-content').innerHTML=`<div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card"><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked"><div><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
+  document.getElementById('fate-content').innerHTML=`<div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card"><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked"><div><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px;display:flex;gap:10px;justify-content:space-between;align-items:center"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button><button class="ib ${allUnlocked?'solid':''}" onclick="${allUnlocked?`openAgentTool('ending','${agent.id}')`:`toast('还差 ${left} 张卡牌，才能查看人物结局')`}">${allUnlocked?'人物结局':`人物结局 · 还差 ${left} 张`}</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
 function openTravelLetter(id){
@@ -1801,7 +1807,7 @@ function openTravelLetter(id){
   document.getElementById('fate-overlay')?.classList.add('open');
 }
 function toolTitle(kind){
-  return kind==='transcript'?'滴答回溯':kind==='life'?'人生大事':'最后的来信';
+  return kind==='transcript'?'滴答回溯':kind==='life'?'人生大事':kind==='ending'?'人物结局':'最后的来信';
 }
 function localTranscript(agent,chat){
   if(!chat.length)return '还没有聊天记录。';
@@ -1817,6 +1823,12 @@ function localFinalLetter(agent,chat,letters){
   const last=letters[0]?.card||getActiveChapter(agent.id)?.card||{};
   return `给你：\n\n我不知道你从哪一节车厢来，也不知道你还会不会回来。\n但你问过的问题，像一枚夹在谱纸里的书签，让我在${last.year||'这一年'}停了一下。\n如果我的一生最后仍要照旧走完，那至少有一小段路，不再只有我一个人听见。`;
 }
+function localCharacterEnding(agent,letters,firstCard,lastCard){
+  const impacts=letters.map(x=>x.impact).filter(Boolean).slice(0,4);
+  const first=firstCard||letters[letters.length-1]?.card||{};
+  const last=lastCard||letters[0]?.card||{};
+  return `玩家第一次遇到${agent.name}，记录在${first.year||'某一年'}的${first.period||'一张未命名卡牌'}。那不是历史的起点，只是这条时间线第一次被看见的地方。\n\n已确认的变数没有改写作品和结局，只扩大到边缘：${impacts.length?impacts.join('；'):'一封信被多读了一遍，一个旁人少说了一句闲话，一张草稿没有被揉掉。'}\n\n你究竟是在安慰他，还是在借他安慰自己？\n\n本轮档案到此封存。下一次相遇，将发生在另一个时空。`;
+}
 function latestLetterCard(letters){
   const cards=letters.map(x=>x.card).filter(Boolean);
   return cards.sort((a,b)=>(Number(b.year)||0)-(Number(a.year)||0))[0]||null;
@@ -1830,9 +1842,9 @@ async function openAgentTool(kind,id=currentMusicianId){
   const firstCard=getPersonaAnchor(agent.id);
   const lastCard=latestLetterCard(letters)||chapter?.card||firstCard;
   const title=toolTitle(kind);
-  const fallback=kind==='transcript'?localTranscript(agent,chat):kind==='life'?localLifeSummary(agent,chat,letters):localFinalLetter(agent,chat,letters);
+  const fallback=kind==='transcript'?localTranscript(agent,chat):kind==='life'?localLifeSummary(agent,chat,letters):kind==='ending'?localCharacterEnding(agent,letters,firstCard,lastCard):localFinalLetter(agent,chat,letters);
   document.getElementById('fate-title').textContent=`${agent.name} · ${title}`;
-  document.getElementById('fate-sub').textContent=kind==='transcript'?'导出你和音乐家的全部聊天记录。':kind==='life'?'根据聊天与卡牌，总结你们共同经历过的人生节点。':'以音乐家最后一张卡牌的口吻，写给你最后的回信。';
+  document.getElementById('fate-sub').textContent=kind==='transcript'?'导出你和音乐家的全部聊天记录。':kind==='life'?'根据聊天与卡牌，总结你们共同经历过的人生节点。':kind==='ending'?'本轮时空档案结算。':'以音乐家最后一张卡牌的口吻，写给你最后的回信。';
   document.getElementById('fate-content').innerHTML=`<div class="travel-letter">正在请 DeepSeek 整理。若接口不可用，会自动使用本地版本。</div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
   try{
@@ -1841,17 +1853,18 @@ async function openAgentTool(kind,id=currentMusicianId){
       tool:title,
       musicianId:agent.id,
       musicianName:agent.name,
-      card:kind==='final'?lastCard:(chapter?.card||lastCard||null),
+      card:(kind==='final'||kind==='ending')?lastCard:(chapter?.card||lastCard||null),
       anchor:firstCard,
       message:`工具：${title}
 初见卡牌：${firstCard?`${firstCard.year} · ${firstCard.period} · ${firstCard.event}`:'暂无'}
 当前卡牌：${chapter?.card?`${chapter.card.year} · ${chapter.card.period} · ${chapter.card.event}`:'暂无'}
 最后参考卡牌：${lastCard?`${lastCard.year} · ${lastCard.period} · ${lastCard.event}`:'暂无'}
 正式信札：${letters.map(x=>`${x.card?.year||'—'} · ${x.card?.period||'—'}：玩家写“${x.letter||''}”；回信“${x.reply||''}”；注释“${x.impact||''}”`).join('\n')}
+已解锁卡牌：${getUnlockedFateCards(agent.id).map(x=>`${x.year} · ${x.period} · ${x.event}`).join('\n')}
 聊天摘录：${chat.slice(-16).map(m=>`${m.role}:${m.text}`).join('\n')}`,
       history:chat.slice(-8),
-      max_tokens:kind==='final'?680:620,
-      temperature:kind==='final'?.76:.68
+      max_tokens:kind==='final'?680:kind==='ending'?560:620,
+      temperature:kind==='final'?.76:kind==='ending'?.54:.68
     },fallback);
     const extra=kind==='transcript'?`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><pre style="white-space:pre-wrap;font-family:var(--sans);line-height:1.75">${esc(localTranscript(agent,chat))}</pre>`:'';
     document.getElementById('fate-content').innerHTML=`<div class="travel-letter">${esc(ai).replace(/\n/g,'<br>')}${extra}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回聊天</button></div>`;
