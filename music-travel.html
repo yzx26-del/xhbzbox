@@ -1111,23 +1111,133 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
 #tp-body{padding:18px;overflow:auto;max-height:calc(82vh - 76px);}
 .tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}.tp-card{border:1px solid rgba(184,144,32,.24);background:linear-gradient(160deg,#a89070,#8f7657);color:#160f08;padding:13px;min-height:150px;box-shadow:0 16px 44px rgba(0,0,0,.36)}.tp-card.locked{filter:saturate(.1);opacity:.38;background:linear-gradient(160deg,#4c463e,#2a2825);color:#b8b0a0}.tp-year{font-family:var(--D);font-size:20px}.tp-period{font-family:var(--M);font-size:8px;letter-spacing:.18em;margin:5px 0 9px}.tp-event{font-family:var(--S);font-style:italic;font-size:12px;line-height:1.65}.tp-music-group{margin-bottom:18px}.tp-music-title{font-family:var(--M);font-size:9px;letter-spacing:.24em;color:rgba(184,144,32,.7);margin-bottom:8px}.tp-track{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(184,144,32,.2);background:rgba(0,0,0,.22);padding:10px 12px;margin-bottom:7px}.tp-track strong{font-family:var(--S);font-style:italic;color:#e8d8b8}.tp-track span{font-family:var(--M);font-size:8px;color:rgba(200,196,184,.45)}.tp-play{height:24px;padding:0 9px;border:1px solid rgba(184,144,32,.45);background:rgba(6,8,12,.8);color:#e8d8b8;cursor:pointer}.tp-axis{position:relative;padding-left:20px}.tp-axis:before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--copper),transparent)}.tp-node{position:relative;border:1px solid rgba(184,144,32,.18);padding:10px 12px;margin-bottom:10px;background:rgba(0,0,0,.2);opacity:.45}.tp-node.unlocked{opacity:1;border-color:rgba(184,144,32,.55);box-shadow:0 0 18px rgba(184,144,32,.14)}.tp-node:before{content:'';position:absolute;left:-19px;top:16px;width:9px;height:9px;border-radius:50%;background:#4a4a44;border:1px solid rgba(184,144,32,.3)}.tp-node.unlocked:before{background:var(--lamp);box-shadow:0 0 14px rgba(184,144,32,.6)}
 
-/* 全局提亮：保留蒸汽时代暗调，但把可见度整体提高约 60% */
-#scene,#moz,#letter-screen,#incoming-letter,#travel-panel,#chronicle,#unlock-toast,#toast{
-  filter:brightness(1.6) saturate(1.08);
+/* 观感回调：昏暗车厢 + 局部可见，油灯仍是主要暖光源 */
+#scene{filter:brightness(1.18) saturate(1.04);}
+#moz,#letter-screen,#incoming-letter,#travel-panel,#chronicle,#unlock-toast,#toast{
+  filter:brightness(1.12) saturate(1.04);
 }
-#vig{opacity:.42;}
-body::before,body::after{opacity:.52;}
-#grain{opacity:.22;}
-#ca-r,#ca-b{opacity:.08;}
+#vig{
+  opacity:1;
+  background:radial-gradient(ellipse 70% 50% at 50% 50%,
+    transparent 16%,
+    rgba(2,4,10,.42) 42%,
+    rgba(1,2,6,.76) 68%,
+    rgba(0,0,3,.97) 100%);
+}
+body::before,body::after{opacity:.78;}
+#grain{opacity:.32;}
+#ca-r,#ca-b{opacity:.1;}
 #cabin{
-  background:linear-gradient(180deg,#1c130d 0%,#24170e 30%,#15100b 70%,#100c10 100%);
+  background:
+    radial-gradient(ellipse at 73% 18%,rgba(184,144,32,.16),transparent 31%),
+    radial-gradient(ellipse at 40% 60%,rgba(90,120,150,.05),transparent 42%),
+    linear-gradient(180deg,#14100c 0%,#17100a 36%,#0d0a07 72%,#070506 100%)!important;
 }
 #floor{
-  background:linear-gradient(180deg,#17100b 0%,#24170d 42%,#332112 100%);
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.68)),
+    repeating-linear-gradient(115deg,rgba(255,210,120,.032) 0 2px,transparent 2px 34px),
+    repeating-linear-gradient(28deg,#24170c 0 34px,#1c1108 34px 68px,#2a1a0e 68px 102px)!important;
 }
+#window-outer{background:linear-gradient(180deg,#03070e 0%,#05080d 50%,#030405 100%)!important;}
+#passing-world:before{opacity:.34;}
+#lamp-halo{opacity:.82;}
+#lamp-beam{opacity:.78;}
 #moz{
-  background:radial-gradient(ellipse at 50% 45%,#241209 0%,#130b06 100%);
+  background:radial-gradient(ellipse at 50% 45%,#160b06 0%,#080403 100%)!important;
 }
+
+/* GR 小姐：保留漫画感，但让肤色、五官和眼镜重新显现 */
+#gr-fig{
+  filter:
+    drop-shadow(0 26px 72px rgba(0,0,0,.96))
+    drop-shadow(-7px 0 20px rgba(120,160,210,.09))
+    drop-shadow(8px 0 28px rgba(232,184,72,.16))
+    contrast(1.08) saturate(.72) brightness(.96)!important;
+}
+#gr-fig:before{
+  background:
+    radial-gradient(ellipse at 47% 28%,rgba(232,200,160,.12),transparent 24%),
+    linear-gradient(110deg,rgba(90,120,150,.08),transparent 33%,rgba(232,184,72,.12) 86%)!important;
+  mix-blend-mode:soft-light!important;
+}
+#gr-fig:after{opacity:.42;}
+
+/* 便签：手抄本羊皮纸 + 烫金，降低塑料亮度 */
+#dlg .dp,.dp{
+  background:
+    radial-gradient(ellipse 80% 65% at 25% 28%,rgba(255,238,194,.26),transparent 54%),
+    linear-gradient(160deg,#d8c8a8 0%,#c8b898 48%,#b9a783 100%)!important;
+  border:1px solid rgba(184,144,32,.52)!important;
+  border-radius:2px 3px 1px 4px / 2px 3px 2px 4px!important;
+  box-shadow:
+    0 0 18px rgba(184,144,32,.24),
+    0 13px 44px rgba(0,0,0,.72),
+    inset 0 1px 0 rgba(255,246,210,.28)!important;
+}
+#dlg .dp:before,.dp:before{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23p)' opacity='.18'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(92deg,transparent 0 3px,rgba(90,60,20,.035) 3px 4px)!important;
+  opacity:.55!important;
+  mix-blend-mode:multiply!important;
+}
+.dlg-titlebar{
+  border-bottom:1px solid rgba(184,144,32,.34)!important;
+  background:linear-gradient(90deg,transparent,rgba(184,144,32,.16),transparent)!important;
+}
+.dlg-tname{
+  background:linear-gradient(135deg,#fff0a8 0%,#d4a52c 38%,#7c5014 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  color:transparent!important;
+}
+.dt{color:#1a1510!important;}
+
+/* 底部按钮：中文化，回到车厢风格 */
+#nav{
+  background:rgba(12,8,4,.72)!important;
+  border:1px solid rgba(184,144,32,.34)!important;
+  box-shadow:0 16px 48px rgba(0,0,0,.72),0 0 18px rgba(184,144,32,.1)!important;
+}
+.nb{
+  background:linear-gradient(180deg,rgba(40,25,8,.94),rgba(18,12,5,.98))!important;
+  border:1px solid rgba(184,144,32,.58)!important;
+  color:#e7d6a8!important;
+  font-family:var(--M)!important;
+  font-size:10px!important;
+  letter-spacing:.08em!important;
+  text-shadow:0 0 10px rgba(184,144,32,.28),0 1px 2px #000!important;
+}
+.nb:hover{
+  background:linear-gradient(180deg,rgba(76,48,14,.98),rgba(30,18,6,.99))!important;
+  border-color:#e7bd3d!important;
+  color:#fff2ba!important;
+  box-shadow:0 0 28px rgba(184,144,32,.46),0 9px 30px rgba(0,0,0,.64)!important;
+}
+
+/* 书架魔法感：书脊凸起、烫金、悬浮更明显 */
+.bk{
+  box-shadow:
+    inset 4px 0 8px rgba(255,255,255,.05),
+    inset -5px 0 12px rgba(0,0,0,.5),
+    0 5px 14px rgba(0,0,0,.7)!important;
+}
+.bk:before{width:5px!important;background:linear-gradient(90deg,rgba(0,0,0,.78),rgba(255,255,255,.05))!important;}
+.bk:after{
+  content:''!important;position:absolute!important;left:50%!important;top:6px!important;bottom:6px!important;
+  width:1px!important;background:linear-gradient(180deg,transparent,rgba(232,184,72,.38),transparent)!important;
+  box-shadow:3px 0 0 rgba(0,0,0,.2),-3px 0 0 rgba(0,0,0,.16)!important;
+}
+.bs{
+  color:rgba(255,232,170,.86)!important;
+  text-shadow:0 1px 5px #000,0 0 12px rgba(232,184,72,.28)!important;
+}
+.bk:hover{
+  transform:perspective(560px) rotateY(-11deg) translateX(-12px) translateY(-12px)!important;
+  filter:brightness(1.28) saturate(1.12)!important;
+  box-shadow:0 0 28px rgba(184,144,32,.46),0 15px 30px rgba(0,0,0,.78),inset 5px 0 9px rgba(255,255,255,.08),inset -8px 0 12px rgba(0,0,0,.5)!important;
+}
+.bk-mz{box-shadow:0 0 0 1.5px rgba(230,174,54,.76),0 0 34px rgba(184,55,36,.44),inset 0 0 18px rgba(0,0,0,.5)!important;}
 
 </style>
 </head>
@@ -1391,9 +1501,9 @@ body::before,body::after{opacity:.52;}
 </div><!-- end #scene -->
 
 <div id="nav">
-  <button class="nb" onclick="openTravelPanel('cards')"><span>📚</span> CARD LIBRARY</button>
-  <button class="nb" onclick="openTravelPanel('music')"><span>🎵</span> MUSIC ARCHIVE</button>
-  <button class="nb" onclick="openTravelPanel('axis')"><span>⏳</span> TRAVEL AXIS</button>
+  <button class="nb" onclick="openTravelPanel('cards')"><span>📚</span> 命运卡牌</button>
+  <button class="nb" onclick="openTravelPanel('music')"><span>🎵</span> 作品典藏</button>
+  <button class="nb" onclick="openTravelPanel('axis')"><span>⏳</span> 人生年表</button>
 </div>
 
 <!-- ══ 莫扎特世界 ══ -->
