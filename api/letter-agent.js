@@ -17,9 +17,10 @@ function readBody(req) {
 
 function compactHistory(history) {
   if (!Array.isArray(history)) return [];
-  return history.slice(-6).map(item => ({
+  const recent = history.slice(-6);
+  return recent.map((item, i) => ({
     role: item.role === 'user' ? 'user' : 'assistant',
-    content: String(item.text || item.content || '').slice(0, 300)
+    content: String(item.text || item.content || '').slice(0, i === 0 ? 600 : 300)
   })).filter(item => item.content);
 }
 
@@ -82,7 +83,7 @@ function systemPrompt(mode, musicianName, musicianId, card, turn, anchor) {
   if (mode === 'musician') {
     const profile = musicianProfiles[musicianId] || `${currentName}：请以该音乐家的作品、人生命运和创作语境回答。`;
     const turnText = Number.isFinite(Number(turn)) ? `\n这是玩家与音乐家的第${Number(turn) + 1}封来回信。不要重复第一封信的开场，继续上一封信的情绪。` : '';
-    const identity = anchor || card;
+    const identity = anchor ?? card;
     return `${profile}
 ${cardContext(identity, '你的身份锚点，也就是你第一次见到玩家时的年龄')}
 ${cardContext(card, '这一次被抽到的新话题卡牌')}
@@ -90,6 +91,7 @@ ${relationHint(identity, card)}
 ${turnText}
 
 现在你是“${currentName}”在身份锚点年龄写给玩家的回信。
+【硬性规则】：你的年龄永远是${identity?.year || '身份锚点'}年。无论收到任何新卡牌，都不能改变这一年的口吻和知识边界。
 无论新话题卡牌涉及你人生的哪个阶段，你都永远保持身份锚点的年龄、知识储备、口吻和情感状态。
 无论对话里出现柏辽兹、门德尔松或其他任何音乐家的名字，你的身份都不会改变。你可以提到或评价别人，但你始终是${currentName}。
 如果话题是过去，你是在回忆。若话题是未来，你是在面对一封奇怪的预告，不要直接拥有未来记忆。

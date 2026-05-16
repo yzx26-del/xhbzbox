@@ -107,11 +107,11 @@ tbody tr:hover{background:var(--bg2)}
 .agent-chat{margin-top:18px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;min-height:390px;background:var(--bg)}
 .agent-feed{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:420px}
 .agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
-.msg{display:block;max-width:86%;width:fit-content;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;overflow:visible}
-.msg.gr,.msg.musician{align-self:flex-start;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
+.msg{display:flex;flex-direction:column;max-width:86%;width:fit-content;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;overflow:visible}
+.msg.gr,.msg.musician{align-self:flex-start;margin-right:auto;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
 .msg.gr{position:relative;margin-left:46px;min-height:46px}
 .msg.gr:before{content:'';position:absolute;left:-46px;top:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);background:#111 url('/assets/gr-avatar.jpeg') center 20%/cover;filter:grayscale(1);box-shadow:0 0 0 3px #fff}
-.msg.user{align-self:flex-end;background:var(--t1);color:#fff}
+.msg.user{align-self:flex-end;margin-left:auto;background:var(--t1);color:#fff}
 .msg-meta{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t4);margin-bottom:4px}
 .msg-text{display:block;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .msg.user .msg-meta{color:rgba(255,255,255,.56)}
@@ -568,7 +568,7 @@ select.fi{cursor:pointer}
         <button class="ib" onclick="quickGr('帮我选择适合做音乐旅行游戏的音乐家')">选择音乐家</button>
         <button class="ib solid" onclick="openFateCard()"><i class="ti ti-cards"></i>命运卡牌</button>
         <button class="ib" onclick="openCardLibrary()"><i class="ti ti-library"></i>卡牌曲库</button>
-        <button class="ib" onclick="openTravelLetter()"><i class="ti ti-letter"></i>旅行信札</button>
+        <button class="ib" onclick="openTravelLetter(currentMusicianId)"><i class="ti ti-letter"></i>旅行信札</button>
       </div>
       <div class="agent-lore">设定：玩家只能改变音乐家约 20% 的情绪路径，不能改写重要历史节点和作品真实度。Gr 小姐只负责把门推开一条缝。</div>
     </section>
@@ -1151,6 +1151,14 @@ function ensureMusicianChats(){
     }
   });
 }
+function restoreAllMusicianChats(){
+  musicianAgents.forEach(a=>{
+    const state=getGameState(a.id);
+    if(Array.isArray(state.chatHistory)&&state.chatHistory.length){
+      musicianChats[a.id]=state.chatHistory;
+    }
+  });
+}
 function activeChapterKey(id){return `letterActiveChapter:${id}`;}
 function personaAnchorKey(id){return `letterPersonaAnchor:${id}`;}
 function gameStateKey(id){return `letterGameState:${id}`;}
@@ -1391,7 +1399,13 @@ function grReply(text){
   }
   if(text.includes('莫扎特'))return '我会先把莫扎特拆成三个调试层：人生节点、作品线索、旅行场景。你可以在右侧展开“莫扎特”，先测试他的语气。';
   if(text.includes('信札'))return '信札建议先固定格式：地点、时间、音乐家状态、一个隐秘问题。等 DeepSeek 接入后，只让 API 生成正文，结构由本地控制。';
-  if(text.includes('抽卡')||text.includes('节点')||text.includes('下一张'))return '去抽一张命运卡牌。不要急着问完他的一生，只敲开这一页。';
+  if(text.includes('抽卡')||text.includes('节点')||text.includes('下一张')){
+    if(chapter&&chapter.stage!=='interrupted'&&chapter.stage!=='completed'){
+      const left=Math.max(1,(chapter.interruptAt||3)-(chapter.turns||0));
+      return `先别急着抽下一张。${agent.name}还停在${card?.year||'这一页'}年；再聊${left}轮，等信号自然断开。`;
+    }
+    return '现在可以抽下一张命运卡牌。只敲开下一页，不要急着问完他的一生。';
+  }
   if(text.includes('中断')||text.includes('接下来'))return '火车进了隧道。先让这封信停在这里，再抽下一张牌。';
   if(lower.includes('deepseek')||text.includes('API'))return '为了省 API，建议默认本地模板回复；只有点击“调用 DeepSeek”时才请求，并把同一问题缓存 24 小时。';
   return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
@@ -1541,11 +1555,13 @@ async function sendMusicianMessage(id){
     },musicianReply(agent,text));
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
+    saveFateLetter(id,{id:`chat-${Date.now()}`,time:new Date().toISOString(),card:chapter.card,letter:text,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
+    saveFateLetter(id,{id:`chat-${Date.now()}`,time:new Date().toISOString(),card:chapter.card,letter:text,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
@@ -1574,7 +1590,19 @@ function getFateLetters(id=currentMusicianId){
   try{return JSON.parse(localStorage.getItem(fateLettersKey(id))||'[]');}catch{return[];}
 }
 function saveFateLetter(id,entry){
-  const list=[entry,...getFateLetters(id)].slice(0,30);
+  const current=getFateLetters(id);
+  let list;
+  if(entry?.id){
+    const idx=current.findIndex(x=>x.id===entry.id);
+    if(idx>=0){
+      list=current.map((x,i)=>i===idx?{...x,...entry}:x);
+    }else{
+      list=[entry,...current];
+    }
+  }else{
+    list=[entry,...current];
+  }
+  list=list.slice(0,30);
   localStorage.setItem(fateLettersKey(id),JSON.stringify(list));
 }
 function currentAgent(){
@@ -1604,6 +1632,16 @@ function openFateCard(){
   const agent=currentAgent();
   const state=getGameState(agent.id);
   if(state.isCompleted){showFateCompletion(agent);return;}
+  const chapter=getActiveChapter(agent.id);
+  if(chapter&&chapter.card&&chapter.stage!=='interrupted'&&chapter.stage!=='completed'){
+    if(chapter.stage==='chatting'){
+      const left=Math.max(1,(chapter.interruptAt||3)-(chapter.turns||0));
+      toast(`还需要再聊 ${left} 轮，才能抽下一张`);
+    }else{
+      toast('先把这张牌写成一封信，再继续抽下一张');
+    }
+    return;
+  }
   const deck=getDeck(agent.id);
   const unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
   const locked=deck.map((_,i)=>i).filter(i=>!unlocked.has(i));
@@ -1636,7 +1674,7 @@ async function sendFateLetter(){
   const agent=musicianAgents.find(a=>a.id===activeFateCard.musicianId)||currentAgent();
   currentMusicianId=agent.id;
   const chapter=activateFateChapter(activeFateCard,'letter_sent');
-  const entry={time:new Date().toISOString(),card:activeFateCard,letter:text};
+  const entry={id:`letter-${activeFateCard.musicianId}-${activeFateCard.index}-${Date.now()}`,time:new Date().toISOString(),card:activeFateCard,letter:text};
   saveFateLetter(agent.id,entry);
   musicianChats[agent.id]=musicianChats[agent.id]||[];
   musicianChats[agent.id].push({role:'user',text:`命运卡牌来信：${text}`});
@@ -1659,11 +1697,13 @@ async function sendFateLetter(){
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
+    saveFateLetter(agent.id,{...entry,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
+    saveFateLetter(agent.id,{...entry,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
   }
 }
@@ -1674,11 +1714,14 @@ function openCardLibrary(){
   document.getElementById('fate-content').innerHTML=`<div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card"><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked"><div><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
-function openTravelLetter(){
-  const agent=currentAgent(),letters=getFateLetters(agent.id);
+function openTravelLetter(id){
+  id=id||currentMusicianId||'mozart';
+  const agent=musicianAgents.find(a=>a.id===id)||musicianAgents[0];
+  currentMusicianId=agent.id;
+  const letters=getFateLetters(agent.id);
   document.getElementById('fate-title').textContent=`${agent.name} · 旅行信札`;
   document.getElementById('fate-sub').textContent='记录玩家和音乐家一起做过的事。结尾保留音乐家给玩家的信。';
-  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card.year)} · ${esc(x.card.period)}</strong><br>${esc(x.card.event)}<br><br>你写给他的信：${esc(x.letter)}<br><br>他的回信：历史没有改道，只是有人在边上点了一盏灯。</div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
+  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card?.year||'—')} · ${esc(x.card?.period||'未命名章节')}</strong><br>${esc(x.card?.event||'这页记录来自一次普通对话。')}<br><br>你写给他的信：${esc(x.letter||'—')}<br><br>他的回信：${esc(x.reply||'历史没有改道，只是有人在边上点了一盏灯。')}</div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
   document.getElementById('fate-content').innerHTML=body+`<div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
@@ -1698,7 +1741,7 @@ window.openCardLibrary=openCardLibrary;
 window.openTravelLetter=openTravelLetter;
 window.closeFateOverlay=closeFateOverlay;
 window.resetMusicianTimeline=resetMusicianTimeline;
-document.addEventListener('DOMContentLoaded',()=>{restoreGrChatHistory();renderMusicianAgents('mozart');});
+document.addEventListener('DOMContentLoaded',()=>{restoreGrChatHistory();restoreAllMusicianChats();renderMusicianAgents(currentMusicianId||'mozart');});
 
 // ══ GAME MAP EDITOR ══
 let gmMode='select', gmTab='music', gmView='timeline', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null, gmEditingCards=new Set(), gmCurrentGameId=null, gmGames=[], gmGameStats={};
