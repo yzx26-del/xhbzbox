@@ -1348,6 +1348,7 @@ function renderMusicianAgents(openId='mozart'){
           <div class="mini-input">
             <input id="mini-input-${a.id}" placeholder="问${a.name}一个问题…" onkeydown="if(event.key==='Enter')sendMusicianMessage('${a.id}')">
             <button class="ib" onclick="selectMusicianForGr('${a.id}')">交给 Gr 小姐</button>
+            <button class="ib" onclick="sendMusicianMessage('${a.id}','__silence')">沉默</button>
             <button class="ib solid" onclick="sendMusicianMessage('${a.id}')">发送</button>
           </div>
         </div>
@@ -1495,22 +1496,42 @@ function openMusicianId(){
   return open?.id?.replace('musician-card-','')||currentMusicianId;
 }
 function musicianReply(agent,text){
+  if(text.includes('信号另一端陪他'))return `${agent.name}没有立刻说话。沉默停了一会儿，他像是终于允许自己不必回答。`;
   if(text.includes('信札'))return `如果以我为主角，信札应该从一个具体地点开始。比如“${agent.era.split('·').pop().trim()}的夜里”，再让一首作品成为门钥匙。`;
   if(text.includes('作品')||text.includes('曲'))return `先不要列太多作品。调试阶段建议挑 3 首：一首代表少年/早期，一首代表转折，一首代表晚期或成熟风格。`;
   if(text.includes('故事')||text.includes('人生'))return `我的故事最好不要写成年表。请把它写成选择：离开、留下、写信、演奏。这样更像游戏。`;
   return `我听见了。这个问题可以转成三个字段：背景、音乐线索、可交互动作。以后接入 API 时，我会按这个结构回答。`;
 }
-async function sendMusicianMessage(id){
+function musicianQuestion(agent,card,turn){
+  const name=agent?.name||'他';
+  const topic=card?.period||'这一页';
+  const bank={
+    mozart:[`你们那个时代，还会有人为了现场演奏专门出门吗？`,`如果你知道一个人会输掉一些东西，还会劝他离开吗？`,`你听见“${topic}”这几个字时，想到的是自由，还是代价？`],
+    beethoven:[`你觉得失去一种听觉之后，人还能相信什么？`,`如果声音只剩下记忆，你会把它叫作音乐吗？`],
+    chopin:[`你离开过一个回不去的地方吗？`,`如果一首曲子只能寄给一个人，你会写给谁？`]
+  };
+  const list=bank[agent?.id]||[`你觉得${name}此刻最不愿承认的是什么？`,`如果你站在${card?.year||'这一年'}年门外，你会敲门，还是等他自己出来？`];
+  return list[Math.abs((turn||0)-1)%list.length];
+}
+function addMusicianQuestion(reply,agent,chapter){
+  const turn=chapter?.turns||0;
+  if(turn>0&&turn%3===0&&!/[？?]\s*$/.test(String(reply||''))){
+    return `${reply}\n\n${musicianQuestion(agent,chapter?.card,turn)}`;
+  }
+  return reply;
+}
+async function sendMusicianMessage(id,forcedText=''){
   ensureMusicianChats();
   const agent=musicianAgents.find(a=>a.id===id);
   const input=document.getElementById('mini-input-'+id);
-  const text=(input?.value||'').trim();
+  const isSilence=forcedText==='__silence';
+  const text=isSilence?'（你没有说话，只是在信号另一端陪他待了一会儿。）':(forcedText||input?.value||'').trim();
   if(!agent||!text)return;
   currentMusicianId=id;
-  input.value='';
+  if(input&&!forcedText)input.value='';
   musicianChats[id].push({role:'user',text});
   persistMusicianChat(id);
-  addMsg('mini-feed-'+id,'user',text,'你');
+  addMsg('mini-feed-'+id,'user',isSilence?'（沉默）':text,'你');
   const chapter=getActiveChapter(id);
   if(!chapter||!chapter.card){
     const hint='这边还没有被命运卡牌唤醒。先去抽一张牌，再给我写信。';
@@ -1544,7 +1565,7 @@ async function sendMusicianMessage(id){
   refreshChapterLine(id);
   const pending=addMsg('mini-feed-'+id,'musician','档案页正在展开。',agent.name);
   try{
-    const reply=await callLetterAgent({
+    const rawReply=await callLetterAgent({
       mode:'musician',
       musicianId:id,
       musicianName:agent.name,
@@ -1556,11 +1577,12 @@ async function sendMusicianMessage(id){
       max_tokens:420,
       temperature:.74
     },musicianReply(agent,text));
+    const reply=addMusicianQuestion(rawReply,agent,chapter);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
-    const reply=musicianReply(agent,text);
+    const reply=addMusicianQuestion(musicianReply(agent,text),agent,chapter);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
@@ -1614,6 +1636,12 @@ function letterImpactNote(agent,card,letter,reply){
   if(future)return `${agent.name}没有真正知道未来，但他开始把“${hit}”当作一枚预感收好。后续同一时间线里，他会更警惕命运靠近的声音。`;
   if(comfort)return `${agent.name}没有改变${card?.year||'这一年'}年的大事，只是在“${hit}”旁边多停了一会儿。那封信让他少把自己逼到绝处。`;
   return `${agent.name}没有改写历史。他只是记住了你在${card?.year||'这一页'}年递来的这句话，并把它折进“${hit}”的阴影里。`;
+}
+function manuscriptLine(agent,card,letter,reply){
+  const text=String(reply||letter||'').replace(/\s+/g,' ').trim();
+  const parts=text.split(/[。！？?]/).map(s=>s.trim()).filter(Boolean);
+  const picked=parts.find(s=>s.length>=8&&s.length<=34)||parts[0]||`${agent.name}在${card?.year||'这一页'}年停了一下。`;
+  return `页边手稿：${picked.replace(/^（[^）]*）/,'').slice(0,42)}。`;
 }
 function currentAgent(){
   currentMusicianId=openMusicianId();
@@ -1707,13 +1735,13 @@ async function sendFateLetter(){
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply)});
+    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply),manuscript:manuscriptLine(agent,activeFateCard,text,reply)});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply)});
+    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply),manuscript:manuscriptLine(agent,activeFateCard,text,reply)});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
   }
 }
@@ -1731,7 +1759,7 @@ function openTravelLetter(id){
   const letters=getFateLetters(agent.id).filter(x=>String(x.id||'').startsWith('letter-')||x.source==='fate-letter'||!x.id);
   document.getElementById('fate-title').textContent=`${agent.name} · 旅行信札`;
   document.getElementById('fate-sub').textContent='只保留你正式寄出的信。普通聊天不会进入这里。';
-  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card?.year||'—')} · ${esc(x.card?.period||'未命名章节')}</strong><br>${esc(x.card?.event||'这页记录来自一次寄信。')}<br><br>你写给他的信：${esc(x.letter||'—')}<br><br>他的回信：${esc(x.reply||'信还在路上。')}<br><br><span style="color:var(--t3)">注释：${esc(x.impact||letterImpactNote(agent,x.card,x.letter,x.reply))}</span></div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
+  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card?.year||'—')} · ${esc(x.card?.period||'未命名章节')}</strong><br>${esc(x.card?.event||'这页记录来自一次寄信。')}<br><br>你写给他的信：${esc(x.letter||'—')}<br><br>他的回信：${esc(x.reply||'信还在路上。')}<br><br><span style="color:var(--t3)">注释：${esc(x.impact||letterImpactNote(agent,x.card,x.letter,x.reply))}</span><br><br><em style="color:var(--t2);font-family:var(--serif)">${esc(x.manuscript||manuscriptLine(agent,x.card,x.letter,x.reply))}</em></div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
   document.getElementById('fate-content').innerHTML=body+`<div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
