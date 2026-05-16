@@ -517,7 +517,7 @@ select.fi{cursor:pointer}
       <div>
         <div class="agent-kicker">GR. MISS · CONTROL DESK</div>
         <div class="agent-title">和 Gr 小姐调试音乐家智能体</div>
-        <div class="agent-desc">左侧先作为主控聊天入口。现在使用本地模拟回复，之后再把发送按钮接入 DeepSeek，并把整理结果同步到资料库、笔记卡片和音乐旅行。</div>
+        <div class="agent-desc">左侧是主控聊天入口。现在已接入 DeepSeek，回复会按 Gr 小姐的人设生成；同一问题会缓存 24 小时，减少 API 消耗。</div>
       </div>
       <div class="agent-chat">
         <div class="agent-feed" id="gr-chat-feed">
@@ -539,7 +539,7 @@ select.fi{cursor:pointer}
       <div>
         <div class="agent-kicker">MUSICIAN AGENTS · DEBUG LIST</div>
         <div class="agent-title">音乐家聊天列表</div>
-        <div class="agent-desc">每位音乐家都是一个可折叠智能体。先用本地聊天框调试语气和资料结构，后续再单独接 DeepSeek，避免每次打开页面都消耗 API。</div>
+        <div class="agent-desc">每位音乐家都是一个可折叠智能体。展开后可以单独聊天，后端会带上音乐家档案提示词；失败时自动回到本地兜底。</div>
       </div>
       <div class="musician-list" id="musician-agent-list"></div>
     </section>
@@ -1053,6 +1053,7 @@ const musicianAgents=[
   {id:'zimmer',name:'汉斯·季默',mark:'Z',era:'电影音乐 · 好莱坞',state:'待接入',intro:'适合调试科幻史诗、合成器音色、低频推进和大片叙事。',tags:['电影配乐','合成器','史诗']},
   {id:'kajiura',name:'梶浦由记',mark:'K',era:'动画/游戏音乐 · 日本',state:'待接入',intro:'适合调试虚构语言、人声织体、战斗音乐和角色命运线。',tags:['人声织体','战斗音乐','角色命运']}
 ];
+const grChatHistory=[];
 const musicianChats={};
 function ensureMusicianChats(){
   musicianAgents.forEach(a=>{
@@ -1101,12 +1102,13 @@ function toggleMusicianAgent(id){
 }
 function addMsg(feedId,role,text,name){
   const feed=document.getElementById(feedId);
-  if(!feed)return;
+  if(!feed)return null;
   const div=document.createElement('div');
   div.className='msg '+role;
   div.innerHTML=`<span class="msg-meta">${escHtml(name||'')}</span>${escHtml(text)}`;
   feed.appendChild(div);
   feed.scrollTop=feed.scrollHeight;
+  return div;
 }
 function grReply(text){
   const lower=text.toLowerCase();
@@ -1116,13 +1118,59 @@ function grReply(text){
   if(lower.includes('deepseek')||text.includes('API'))return '为了省 API，建议默认本地模板回复；只有点击“调用 DeepSeek”时才请求，并把同一问题缓存 24 小时。';
   return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
 }
-function sendGrMessage(){
+function agentCacheKey(payload){
+  const raw=JSON.stringify({mode:payload.mode,musicianId:payload.musicianId||'',message:payload.message});
+  try{return 'letterAgentCache:'+btoa(unescape(encodeURIComponent(raw))).slice(0,160);}catch{return 'letterAgentCache:'+raw.length+':'+Date.now();}
+}
+function getAgentCache(payload){
+  try{
+    const item=JSON.parse(localStorage.getItem(agentCacheKey(payload))||'null');
+    if(item&&Date.now()-item.time<86400000&&item.reply)return item.reply;
+  }catch{}
+  return '';
+}
+function setAgentCache(payload,reply){
+  try{localStorage.setItem(agentCacheKey(payload),JSON.stringify({time:Date.now(),reply}));}catch{}
+}
+async function callLetterAgent(payload,fallback){
+  const cached=getAgentCache(payload);
+  if(cached)return cached;
+  const res=await fetch('/api/letter-agent',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  if(!res.ok)throw new Error('DeepSeek 暂时没有回信');
+  const data=await res.json();
+  const reply=(data.reply||'').trim();
+  if(!reply)throw new Error('DeepSeek 回信为空');
+  setAgentCache(payload,reply);
+  return reply;
+}
+async function sendGrMessage(){
   const input=document.getElementById('gr-chat-input');
   const text=(input?.value||'').trim();
   if(!text)return;
   input.value='';
   addMsg('gr-chat-feed','user',text,'你');
-  setTimeout(()=>addMsg('gr-chat-feed','gr',grReply(text),'Gr 小姐'),180);
+  grChatHistory.push({role:'user',text});
+  const pending=addMsg('gr-chat-feed','gr','壁炉旁有一页纸正在翻动。','Gr 小姐');
+  try{
+    const reply=await callLetterAgent({
+      mode:'gr',
+      message:text,
+      history:grChatHistory.slice(-8),
+      max_tokens:420,
+      temperature:.72
+    },grReply(text));
+    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐</span>${escHtml(reply)}`;
+    grChatHistory.push({role:'assistant',text:reply});
+  }catch(e){
+    const reply=grReply(text);
+    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐 · 本地兜底</span>${escHtml(reply)}`;
+    grChatHistory.push({role:'assistant',text:reply});
+    toast('DeepSeek 暂时不可用，已用本地回复');
+  }
 }
 function quickGr(text){
   const input=document.getElementById('gr-chat-input');
@@ -1141,7 +1189,7 @@ function musicianReply(agent,text){
   if(text.includes('故事')||text.includes('人生'))return `我的故事最好不要写成年表。请把它写成选择：离开、留下、写信、演奏。这样更像游戏。`;
   return `我听见了。这个问题可以转成三个字段：背景、音乐线索、可交互动作。以后接入 API 时，我会按这个结构回答。`;
 }
-function sendMusicianMessage(id){
+async function sendMusicianMessage(id){
   ensureMusicianChats();
   const agent=musicianAgents.find(a=>a.id===id);
   const input=document.getElementById('mini-input-'+id);
@@ -1150,9 +1198,25 @@ function sendMusicianMessage(id){
   input.value='';
   musicianChats[id].push({role:'user',text});
   addMsg('mini-feed-'+id,'user',text,'你');
-  const reply=musicianReply(agent,text);
-  musicianChats[id].push({role:'musician',text:reply});
-  setTimeout(()=>addMsg('mini-feed-'+id,'musician',reply,agent.name),160);
+  const pending=addMsg('mini-feed-'+id,'musician','档案页正在展开。',agent.name);
+  try{
+    const reply=await callLetterAgent({
+      mode:'musician',
+      musicianId:id,
+      musicianName:agent.name,
+      message:text,
+      history:musicianChats[id].slice(-8),
+      max_tokens:420,
+      temperature:.74
+    },musicianReply(agent,text));
+    musicianChats[id].push({role:'musician',text:reply});
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
+  }catch(e){
+    const reply=musicianReply(agent,text);
+    musicianChats[id].push({role:'musician',text:reply});
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
+    toast('DeepSeek 暂时不可用，已用本地回复');
+  }
 }
 document.addEventListener('DOMContentLoaded',()=>renderMusicianAgents('mozart'));
 
