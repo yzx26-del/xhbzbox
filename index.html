@@ -1446,6 +1446,7 @@ function agentCacheKey(payload){
   return `letterAgentCache:${payload.mode||'mode'}:${payload.tool||'plain'}:${payload.musicianId||'none'}:${hashText(raw)}`;
 }
 function getAgentCache(payload){
+  if(payload?.noCache)return '';
   try{
     const item=JSON.parse(localStorage.getItem(agentCacheKey(payload))||'null');
     if(item&&Date.now()-item.time<86400000&&item.reply)return item.reply;
@@ -1453,6 +1454,7 @@ function getAgentCache(payload){
   return '';
 }
 function setAgentCache(payload,reply){
+  if(payload?.noCache)return;
   try{localStorage.setItem(agentCacheKey(payload),JSON.stringify({time:Date.now(),reply}));}catch{}
 }
 async function callLetterAgent(payload,fallback){
@@ -1858,12 +1860,13 @@ function localTranscript(agent,chat){
 function localLifeSummary(agent,chat,letters){
   const years=[...new Set(letters.map(x=>x.card?.year).filter(Boolean))];
   const first=years[years.length-1]||'初见那年';
-  const latest=years[0]||'现在';
-  return `1. ${first} · 你们第一次把一张命运卡牌变成通信。\n2. ${latest} · ${agent.name}开始把你的问题当作一种旁听的声音。\n3. 这条时间线里，历史没有改写，但一些小事被留了下来：信纸、账单、停顿和没说出口的话。`;
+  const latest=years[0]||'后来某年';
+  const impacts=letters.map(x=>x.impact).filter(Boolean).slice(0,3);
+  return `旁观这段联系，最先被看见的是${first}年的一页纸。它没有把${agent.name}从历史里带走，只让他在人生的边角多停了一会儿。\n\n到${latest}，玩家留下的痕迹已经不只在信里：${impacts.length?impacts.join('；'):'一张草稿没有被揉掉，一句争辩被咽回去，一个旁人晚了一步离开。'}\n\n这些事太小，小到不会写进传记。可也正因为小，它们像灰尘落在琴键缝里，证明有人曾经靠近过他。`;
 }
 function localFinalLetter(agent,chat,letters){
   const last=letters[0]?.card||getActiveChapter(agent.id)?.card||{};
-  return `给你：\n\n我不知道你从哪一节车厢来，也不知道你还会不会回来。\n但你问过的问题，像一枚夹在谱纸里的书签，让我在${last.year||'这一年'}停了一下。\n如果我的一生最后仍要照旧走完，那至少有一小段路，不再只有我一个人听见。`;
+  return `我写这封信时，已经走到${last.year||'最后那一年'}的门口。\n\n我仍记得你。不是因为你改变了我的命运，而是因为你在那些命运最吵的时候，把一句话放得很轻。\n\n我这一生有太多没来得及解释的事。若你曾在某一页里看见我，请不要只记住结局。也记住我曾认真地活过，认真地听过你。`;
 }
 function localCharacterEnding(agent,letters,firstCard,lastCard){
   const impacts=letters.map(x=>x.impact).filter(Boolean).slice(0,4);
@@ -1890,6 +1893,7 @@ async function openAgentTool(kind,id=currentMusicianId){
   document.getElementById('fate-content').innerHTML=`<div class="travel-letter">正在请 DeepSeek 整理。若接口不可用，会自动使用本地版本。</div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
   try{
+    const formalMaterial=letters.map(x=>`${x.card?.year||'—'} · ${x.card?.period||'—'}：玩家写“${x.letter||''}”；卡牌时期回信“${x.reply||''}”；20%变数“${x.impact||''}”；页边手稿“${x.manuscript||''}”`).join('\n');
     const ai=await callLetterAgent({
       mode:'agent_tool',
       tool:title,
@@ -1901,10 +1905,11 @@ async function openAgentTool(kind,id=currentMusicianId){
 初见卡牌：${firstCard?`${firstCard.year} · ${firstCard.period} · ${firstCard.event}`:'暂无'}
 当前卡牌：${chapter?.card?`${chapter.card.year} · ${chapter.card.period} · ${chapter.card.event}`:'暂无'}
 最后参考卡牌：${lastCard?`${lastCard.year} · ${lastCard.period} · ${lastCard.event}`:'暂无'}
-正式信札：${letters.map(x=>`${x.card?.year||'—'} · ${x.card?.period||'—'}：玩家写“${x.letter||''}”；回信“${x.reply||''}”；注释“${x.impact||''}”`).join('\n')}
+正式信札材料：${formalMaterial}
 已解锁卡牌：${getUnlockedFateCards(agent.id).map(x=>`${x.year} · ${x.period} · ${x.event}`).join('\n')}
-聊天摘录：${chat.slice(-16).map(m=>`${m.role}:${m.text}`).join('\n')}`,
-      history:chat.slice(-8),
+注意：不要引用普通聊天框里的旧回复。只根据上面的正式信札材料重新生成全新内容。`,
+      history:[],
+      noCache:true,
       max_tokens:kind==='final'?680:kind==='ending'?560:620,
       temperature:kind==='final'?.76:kind==='ending'?.54:.68
     },fallback);
