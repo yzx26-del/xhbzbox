@@ -1141,19 +1141,77 @@ const fateDecks={
     {period:'刀光与人声',year:'2019',event:'战斗不是速度，是被命运追上。',work:'Demon Slayer',keywords:['鬼灭','战斗','人声','命运']}
   ]
 };
+function defaultMusicianChat(a){return [{role:'musician',text:`我是${a.name}。现在先用本地调试模式，你可以问我作品、城市、年代，或让我生成一段旅行信札。`}];}
 function ensureMusicianChats(){
   musicianAgents.forEach(a=>{
     if(!musicianChats[a.id]){
-      musicianChats[a.id]=[{role:'musician',text:`我是${a.name}。现在先用本地调试模式，你可以问我作品、城市、年代，或让我生成一段旅行信札。`}];
+      const state=getGameState(a.id);
+      musicianChats[a.id]=Array.isArray(state.chatHistory)&&state.chatHistory.length?state.chatHistory:defaultMusicianChat(a);
     }
   });
 }
 function activeChapterKey(id){return `letterActiveChapter:${id}`;}
 function personaAnchorKey(id){return `letterPersonaAnchor:${id}`;}
+function gameStateKey(id){return `letterGameState:${id}`;}
 function normalizeFateCard(card,id=currentMusicianId,index=null){
   if(!card)return null;
   const agent=musicianAgents.find(a=>a.id===id);
   return {...card,index:index??card.index,musicianId:id,musicianName:card.musicianName||agent?.name||id};
+}
+function readStoredJson(key,fallback=null){try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
+function unlockedIndexes(id){
+  const raw=readStoredJson(fateKey(id),[]);
+  return Array.isArray(raw)?raw.filter(n=>Number.isInteger(Number(n))).map(Number):[];
+}
+function buildGameStateFromLegacy(id){
+  const deck=getDeck(id);
+  const unlocked=unlockedIndexes(id);
+  const anchor=getPersonaAnchor(id);
+  const chapter=readStoredJson(activeChapterKey(id),null);
+  const currentIndex=chapter?.card?.index??unlocked[unlocked.length-1]??null;
+  const currentCard=chapter?.card||normalizeFateCard(deck[currentIndex],id,currentIndex);
+  const agent=musicianAgents.find(a=>a.id===id)||{name:id};
+  return {
+    isStarted:!!(anchor||currentCard||unlocked.length),
+    firstCard:anchor||normalizeFateCard(deck[unlocked[0]],id,unlocked[0]),
+    currentCard,
+    unlockedCards:unlocked,
+    round:Number(chapter?.turns)||0,
+    isCompleted:deck.length>0&&unlocked.length>=deck.length,
+    chatHistory:Array.isArray(musicianChats[id])?musicianChats[id]:defaultMusicianChat(agent),
+    activeChapter:chapter||null,
+    updatedAt:new Date().toISOString()
+  };
+}
+function getGameState(id=currentMusicianId){
+  const saved=readStoredJson(gameStateKey(id),null);
+  if(saved&&typeof saved==='object')return saved;
+  const migrated=buildGameStateFromLegacy(id);
+  try{localStorage.setItem(gameStateKey(id),JSON.stringify(migrated));}catch{}
+  return migrated;
+}
+function saveGameState(id,patch={}){
+  const next={...getGameState(id),...patch,updatedAt:new Date().toISOString()};
+  const deck=getDeck(id);
+  next.isStarted=!!(next.firstCard||next.currentCard||(next.unlockedCards||[]).length);
+  next.isCompleted=deck.length>0&&(next.unlockedCards||[]).length>=deck.length;
+  try{localStorage.setItem(gameStateKey(id),JSON.stringify(next));}catch{}
+  return next;
+}
+function persistMusicianChat(id){
+  if(!musicianChats[id])return;
+  saveGameState(id,{chatHistory:musicianChats[id]});
+}
+function grChatKey(){return 'letterGrChatHistory';}
+function saveGrChatHistory(){try{localStorage.setItem(grChatKey(),JSON.stringify(grChatHistory.slice(-80)));}catch{}}
+function restoreGrChatHistory(){
+  const saved=readStoredJson(grChatKey(),[]);
+  if(!Array.isArray(saved)||!saved.length)return;
+  grChatHistory.splice(0,grChatHistory.length,...saved);
+  const feed=document.getElementById('gr-chat-feed');
+  if(!feed)return;
+  feed.innerHTML=saved.map(m=>`<div class="msg ${m.role==='user'?'user':'gr'}"><span class="msg-meta">${m.role==='user'?'你':'Gr 小姐'}</span>${escHtml(m.text)}</div>`).join('');
+  feed.scrollTop=feed.scrollHeight;
 }
 function getPersonaAnchor(id=currentMusicianId){
   try{
@@ -1179,6 +1237,7 @@ function ensurePersonaAnchor(card){
   if(existing)return existing;
   const anchor=normalizeFateCard(card,card.musicianId,card.index);
   try{localStorage.setItem(personaAnchorKey(card.musicianId),JSON.stringify(anchor));}catch{}
+  saveGameState(card.musicianId,{firstCard:anchor,isStarted:true});
   return anchor;
 }
 function getActiveChapter(id=currentMusicianId){
@@ -1186,6 +1245,10 @@ function getActiveChapter(id=currentMusicianId){
   try{
     const saved=JSON.parse(localStorage.getItem(activeChapterKey(id))||'null');
     if(saved&&saved.card){activeChapters[id]=saved;return saved;}
+  }catch{}
+  try{
+    const state=readStoredJson(gameStateKey(id),null);
+    if(state?.activeChapter?.card){activeChapters[id]=state.activeChapter;return state.activeChapter;}
   }catch{}
   try{
     const unlocked=JSON.parse(localStorage.getItem(fateKey(id))||'[]');
@@ -1203,6 +1266,7 @@ function getActiveChapter(id=currentMusicianId){
 function setActiveChapter(id,chapter){
   activeChapters[id]=chapter;
   try{localStorage.setItem(activeChapterKey(id),JSON.stringify(chapter));}catch{}
+  saveGameState(id,{activeChapter:chapter,currentCard:chapter?.card||null,firstCard:chapter?.anchor||getPersonaAnchor(id),round:Number(chapter?.turns)||0});
 }
 function sameChapterCard(a,b){
   return !!a&&!!b&&a.musicianId===b.musicianId&&a.index===b.index&&String(a.year)===String(b.year)&&String(a.period)===String(b.period);
@@ -1369,6 +1433,7 @@ async function sendGrMessage(){
   input.value='';
   addMsg('gr-chat-feed','user',text,'你');
   grChatHistory.push({role:'user',text});
+  saveGrChatHistory();
   const pending=addMsg('gr-chat-feed','gr','壁炉旁有一页纸正在翻动。','Gr 小姐');
   try{
 	    const reply=await callLetterAgent({
@@ -1385,11 +1450,13 @@ async function sendGrMessage(){
     if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐</span>${escHtml(reply)}`;
     playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
+    saveGrChatHistory();
   }catch(e){
     const reply=grReply(text);
     if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐 · 本地兜底</span>${escHtml(reply)}`;
     playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
+    saveGrChatHistory();
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
 }
@@ -1424,11 +1491,13 @@ async function sendMusicianMessage(id){
   currentMusicianId=id;
   input.value='';
   musicianChats[id].push({role:'user',text});
+  persistMusicianChat(id);
   addMsg('mini-feed-'+id,'user',text,'你');
   const chapter=getActiveChapter(id);
   if(!chapter||!chapter.card){
     const hint='这边还没有被命运卡牌唤醒。先去抽一张牌，再给我写信。';
     musicianChats[id].push({role:'musician',text:hint});
+    persistMusicianChat(id);
     addMsg('mini-feed-'+id,'musician',hint,agent.name);
     return;
   }
@@ -1470,10 +1539,12 @@ async function sendMusicianMessage(id){
       temperature:.74
     },musicianReply(agent,text));
     musicianChats[id].push({role:'musician',text:reply});
+    persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
   }catch(e){
     const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
+    persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
@@ -1494,6 +1565,8 @@ function unlockFateCard(id,index){
     const list=JSON.parse(localStorage.getItem(key)||'[]');
     if(!list.includes(index))list.push(index);
     localStorage.setItem(key,JSON.stringify(list));
+    const deck=getDeck(id);
+    saveGameState(id,{unlockedCards:list,currentCard:normalizeFateCard(deck[index],id,index)});
   }catch{}
 }
 function getFateLetters(id=currentMusicianId){
@@ -1507,8 +1580,29 @@ function currentAgent(){
   currentMusicianId=openMusicianId();
   return musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];
 }
+function showFateCompletion(agent=currentAgent()){
+  const state=getGameState(agent.id);
+  document.getElementById('fate-title').textContent=`${agent.name} · 时间轴已完成`;
+  document.getElementById('fate-sub').textContent='这一条时间线的命运卡牌已经全部解锁。你可以保存记忆继续聊天，或重新建立联系开启新时间轴。';
+  document.getElementById('fate-content').innerHTML=`<div class="travel-letter"><strong>旅行信札终局</strong><br>你已经走完这条时间线。第一张牌锁定的是 ${esc(state.firstCard?.year||'—')} · ${esc(state.firstCard?.period||'—')}；最后停留在 ${esc(state.currentCard?.year||'—')} · ${esc(state.currentCard?.period||'—')}。<br><br>保存记忆后，${esc(agent.name)}会继续以这条时间线的身份和你聊天。开启新时间轴会清空该音乐家的卡牌、章节和聊天记录。</div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px"><button class="ib" onclick="closeFateOverlay()">保存记忆继续聊</button><button class="ib solid" onclick="resetMusicianTimeline('${agent.id}')">开启新时间轴</button></div>`;
+  document.getElementById('fate-overlay')?.classList.add('open');
+}
+function resetMusicianTimeline(id=currentMusicianId){
+  try{
+    [gameStateKey(id),activeChapterKey(id),personaAnchorKey(id),fateKey(id),fateLettersKey(id)].forEach(k=>localStorage.removeItem(k));
+  }catch{}
+  delete activeChapters[id];
+  const agent=musicianAgents.find(a=>a.id===id);
+  musicianChats[id]=agent?defaultMusicianChat(agent):[];
+  currentMusicianId=id;
+  closeFateOverlay();
+  renderMusicianAgents(id);
+  toast('已开启新的时间轴');
+}
 function openFateCard(){
   const agent=currentAgent();
+  const state=getGameState(agent.id);
+  if(state.isCompleted){showFateCompletion(agent);return;}
   const deck=getDeck(agent.id);
   const unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
   const locked=deck.map((_,i)=>i).filter(i=>!unlocked.has(i));
@@ -1545,6 +1639,7 @@ async function sendFateLetter(){
   saveFateLetter(agent.id,entry);
   musicianChats[agent.id]=musicianChats[agent.id]||[];
   musicianChats[agent.id].push({role:'user',text:`命运卡牌来信：${text}`});
+  persistMusicianChat(agent.id);
   renderMusicianAgents(agent.id);
   closeFateOverlay();
   const pending=addMsg('mini-feed-'+agent.id,'musician','信纸正在穿过隧道。',agent.name);
@@ -1562,10 +1657,12 @@ async function sendFateLetter(){
       temperature:.76
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
+    persistMusicianChat(agent.id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
+    persistMusicianChat(agent.id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
   }
 }
@@ -1599,7 +1696,8 @@ window.sendFateLetter=sendFateLetter;
 window.openCardLibrary=openCardLibrary;
 window.openTravelLetter=openTravelLetter;
 window.closeFateOverlay=closeFateOverlay;
-document.addEventListener('DOMContentLoaded',()=>renderMusicianAgents('mozart'));
+window.resetMusicianTimeline=resetMusicianTimeline;
+document.addEventListener('DOMContentLoaded',()=>{restoreGrChatHistory();renderMusicianAgents('mozart');});
 
 // ══ GAME MAP EDITOR ══
 let gmMode='select', gmTab='music', gmView='timeline', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null, gmEditingCards=new Set(), gmCurrentGameId=null, gmGames=[], gmGameStats={};
