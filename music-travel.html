@@ -1,144 +1,2055 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>音乐旅行 | 声轨档案</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIME MUSIC · 月影摇弦</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Courier+Prime:ital@0;1&display=swap" rel="stylesheet">
 <style>
+*{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --ink:#211b18;--muted:#766a61;--paper:#fffaf1;--line:#e8dccb;
-  --cream:#f6ead9;--gold:#b88746;--green:#758b68;--blue:#627b99;--rose:#aa6d62;
+  --abyss:#080c14;--tunnel:#0a0a0e;--steam:#c8c4b8;
+  --lamp:#b89020;--copper:#6a4a2a;--leather:#3a1a1a;
+  --archive:#9a9080;--inkblue:#1a1510;
+  --D:'Cinzel',serif;--S:'IM Fell English',Georgia,serif;
+  --B:'Crimson Text',Georgia,serif;--M:'Courier Prime',monospace;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Serif SC","Songti SC",serif;background:radial-gradient(circle at 20% 0,#fff8e9 0,#f3e3cd 34%,#d9c3a5 100%);color:var(--ink);min-height:100vh}
-button,input,textarea{font:inherit}
-.top{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.72);backdrop-filter:blur(14px);position:sticky;top:0;z-index:10}
-.brand{font-size:20px;font-weight:800;letter-spacing:.06em}.brand span{font-size:10px;color:var(--muted);font-family:Menlo,monospace;margin-left:8px;text-transform:uppercase}
-.nav{display:flex;gap:8px}.btn{height:34px;border:1px solid rgba(80,58,39,.2);background:rgba(255,255,255,.45);border-radius:999px;padding:0 14px;cursor:pointer;color:var(--ink)}.btn.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
-.wrap{max-width:1180px;margin:0 auto;padding:34px 24px 46px}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:stretch}
-.hero h1{font-size:54px;line-height:1.08;margin:0 0 16px;letter-spacing:.03em}.hero p{font-size:16px;line-height:1.9;color:var(--muted);max-width:560px}
-.seal{border:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.58);border-radius:18px;padding:20px;box-shadow:0 22px 80px rgba(67,44,27,.16)}
-.map{min-height:320px;border-radius:16px;background:linear-gradient(135deg,#f9edd8,#d8c2a5);position:relative;overflow:hidden;border:1px solid rgba(80,58,39,.14)}
-.route{position:absolute;inset:18px;border:1px dashed rgba(65,47,31,.32);border-radius:48% 52% 44% 56%;transform:rotate(-8deg)}
-.city{position:absolute;width:104px;border:1px solid rgba(80,58,39,.18);background:rgba(255,250,241,.82);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 10px 30px rgba(70,43,20,.12)}
-.city strong{display:block;font-size:14px}.city span{font-size:11px;color:var(--muted)}
-.city.on{outline:2px solid var(--gold);background:#fff8ea}.c1{left:9%;top:18%}.c2{left:43%;top:10%}.c3{right:9%;top:26%}.c4{left:24%;bottom:12%}.c5{right:20%;bottom:13%}
-.panel{margin-top:24px;display:grid;grid-template-columns:320px 1fr;gap:18px}
-.card,.letter,.agent{border:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.76);border-radius:18px;padding:18px;box-shadow:0 18px 58px rgba(72,48,27,.12)}
-.card h2,.letter h2,.agent h2{margin:0 0 12px;font-size:22px}.list{display:flex;flex-direction:column;gap:9px}
-.composer{border:1px solid var(--line);background:rgba(255,255,255,.52);border-radius:14px;padding:12px;cursor:pointer;display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:center}
-.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--rose));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
-.composer strong{display:block}.composer span{font-size:12px;color:var(--muted)}.composer.on{border-color:var(--gold);background:#fff6e7}
-.journey{display:grid;grid-template-columns:1fr 290px;gap:16px}.letter-text{font-size:15px;line-height:2;color:#4a3a2f;min-height:174px;white-space:pre-wrap}
-.meta{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.tag{font-size:12px;color:#5d5148;border:1px solid var(--line);background:#fffaf4;border-radius:999px;padding:4px 9px}
-.track{border:1px solid var(--line);border-radius:14px;background:#fffaf4;padding:12px;margin-bottom:10px}.track strong{display:block;font-size:14px}.track span{font-size:12px;color:var(--muted)}
-.placeholder{height:38px;border-radius:999px;background:linear-gradient(90deg,#d8c7b1,#9d8061,#d8c7b1);margin-top:9px;position:relative;overflow:hidden}.placeholder:after{content:"";position:absolute;left:18px;right:18px;top:17px;height:4px;border-radius:99px;background:rgba(255,255,255,.55)}
-.agent-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.agent-cell{border:1px solid var(--line);background:rgba(255,255,255,.42);border-radius:14px;padding:12px}.agent-cell strong{display:block;font-size:14px}.agent-cell span{font-size:12px;color:var(--muted);line-height:1.7}
-@media(max-width:900px){.hero,.panel,.journey{grid-template-columns:1fr}.hero h1{font-size:40px}.agent-grid{grid-template-columns:1fr 1fr}.top{padding:0 14px}.wrap{padding:24px 14px}}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--abyss);}
+
+/* ══ 修改六：7%宽银幕黑边 ══ */
+body::before,body::after{
+  content:'';position:fixed;left:0;right:0;z-index:900;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.96) 0%,rgba(0,0,0,.6) 55%,transparent 100%);}
+body::before{top:0;height:7%;}
+body::after{bottom:0;height:7%;transform:scaleY(-1);}
+
+/* ══ 变形镜头暗角（水平椭圆，比之前重40%）══ */
+#vig{position:fixed;inset:0;z-index:800;pointer-events:none;
+  background:radial-gradient(ellipse 72% 52% at 50% 50%,
+    transparent 18%,
+    rgba(2,4,10,.38) 42%,
+    rgba(1,2,6,.72) 66%,
+    rgba(0,0,3,.96) 100%);}
+
+/* ══ 胶片颗粒 ══ */
+#grain{position:fixed;inset:0;z-index:850;pointer-events:none;
+  opacity:.32;mix-blend-mode:overlay;
+  animation:gS .08s steps(1) infinite;}
+#grain::before,#grain::after{content:'';position:absolute;inset:-50%;}
+#grain::before{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+  animation:gM .12s steps(1) infinite;}
+#grain::after{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='turbulence' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n2)' opacity='.08'/%3E%3C/svg%3E");
+  animation:gM2 .16s steps(1) infinite;}
+@keyframes gS{0%{transform:translate(0,0)}25%{transform:translate(-1%,-1%)}50%{transform:translate(1%,1%)}75%{transform:translate(-1%,1%)}100%{transform:translate(1%,-1%)}}
+@keyframes gM{0%{transform:translate(0,0) scale(1.1)}33%{transform:translate(3%,-2%) scale(1.05)}66%{transform:translate(-2%,3%) scale(1.08)}100%{transform:translate(2%,1%) scale(1.1)}}
+@keyframes gM2{0%{transform:translate(0,0)}50%{transform:translate(-3%,2%)}100%{transform:translate(2%,-2%)}}
+
+/* ══ 色散 ══ */
+#ca-r,#ca-b{position:fixed;inset:0;z-index:820;pointer-events:none;opacity:.13;mix-blend-mode:screen;}
+#ca-r{background:linear-gradient(90deg,rgba(255,80,60,.2) 0%,transparent 12%,transparent 88%,rgba(255,60,40,.14) 100%);transform:translateX(1px);}
+#ca-b{background:linear-gradient(90deg,rgba(40,80,255,.2) 0%,transparent 12%,transparent 88%,rgba(60,100,255,.14) 100%);transform:translateX(-1px);}
+
+/* ══ 主场景 ══ */
+#scene{position:fixed;inset:0;z-index:10;will-change:transform;}
+#cabin{position:absolute;inset:0;
+  background:linear-gradient(180deg,#0c0906 0%,#100c06 30%,#080604 70%,#060408 100%);
+  overflow:hidden;}
+#cabin::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent 220px,rgba(255,255,255,.012) 220px,rgba(255,255,255,.012) 222px),
+    repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,.007) 80px,rgba(255,255,255,.007) 81px);}
+#cabin::after{content:'';position:absolute;left:0;right:0;top:60%;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(106,74,42,.5) 10%,rgba(150,110,50,.35) 50%,rgba(106,74,42,.5) 90%,transparent);}
+
+/* 地板 */
+#floor{position:absolute;bottom:0;left:0;right:0;height:22%;z-index:2;
+  background:linear-gradient(180deg,#080604 0%,#100c06 40%,#181006 100%);
+  clip-path:polygon(0 45%,100% 18%,100% 100%,0 100%);}
+#floor::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(95deg,transparent,transparent 60px,rgba(255,255,255,.018) 60px,rgba(255,255,255,.018) 62px);}
+
+/* ══ 窗口 ══ */
+#window-zone{position:absolute;left:0;top:8%;width:40%;height:68%;z-index:5;}
+#window-outer{position:absolute;inset:12px 20px 12px 16px;
+  background:linear-gradient(180deg,#050810 0%,#060a14 40%,#050810 100%);
+  overflow:hidden;border-radius:2px;}
+#steam-layer{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(170,170,150,.06) 0%,rgba(190,186,174,.04) 30%,transparent 60%,rgba(170,170,150,.03) 100%);
+  animation:steamD 8s ease-in-out infinite;}
+@keyframes steamD{0%,100%{transform:translateX(0) scaleX(1);opacity:.8;}50%{transform:translateX(-20px) scaleX(1.05);opacity:1;}}
+#passing-world{position:absolute;inset:0;overflow:hidden;}
+.rain{position:absolute;top:0;width:1px;height:100%;
+  background:linear-gradient(180deg,transparent 0%,rgba(170,190,210,.14) 30%,rgba(170,190,210,.07) 100%);}
+#glass-reflection{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(180,144,32,.02) 0%,transparent 40%),
+    linear-gradient(180deg,rgba(170,170,150,.04) 0%,transparent 30%,rgba(170,170,150,.02) 100%);}
+#glass-reflection::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(190,186,174,.07) 0%,transparent 14%),
+    linear-gradient(270deg,rgba(190,186,174,.05) 0%,transparent 11%),
+    linear-gradient(0deg,rgba(190,186,174,.04) 0%,transparent 9%);}
+/* 窗框 */
+#window-frame{position:absolute;inset:0;pointer-events:none;z-index:6;
+  background:linear-gradient(90deg,#180e06 0%,#281808 4%,transparent 4%,transparent 96%,#281808 96%,#180e06 100%),
+    linear-gradient(180deg,#180e06 0%,#281808 5%,transparent 5%,transparent 92%,#281808 92%,#180e06 100%);}
+#window-frame::before{content:'';position:absolute;inset:10px 18px;
+  border:2px solid rgba(106,74,42,.65);border-radius:3px;pointer-events:none;}
+#window-frame::after{content:'';position:absolute;inset:12px 20px;
+  border:1px solid rgba(150,110,50,.25);border-radius:2px;pointer-events:none;}
+/* 窗帘 */
+#curtain-left,#curtain-right{position:absolute;top:0;bottom:0;width:22%;z-index:7;pointer-events:none;
+  background:linear-gradient(90deg,#220c0c 0%,#381818 60%,#280e0e 100%);}
+#curtain-left{left:0;border-right:1px solid rgba(90,50,25,.4);}
+#curtain-right{right:0;border-left:1px solid rgba(90,50,25,.4);
+  background:linear-gradient(270deg,#220c0c 0%,#381818 60%,#280e0e 100%);}
+#curtain-left{animation:cL 4.2s ease-in-out infinite;}
+#curtain-right{animation:cR 3.8s ease-in-out infinite .6s;}
+@keyframes cL{0%,100%{transform:skewX(0)}50%{transform:skewX(.6deg) translateX(1px)}}
+@keyframes cR{0%,100%{transform:skewX(0)}50%{transform:skewX(-.5deg) translateX(-1px)}}
+#curtain-left::before,#curtain-right::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 8px,rgba(0,0,0,.14) 8px,rgba(0,0,0,.14) 10px);}
+
+/* ══ 油灯 ══ */
+#lamp-zone{position:absolute;right:6%;top:12%;z-index:20;
+  filter:drop-shadow(0 0 40px rgba(184,144,32,.2)) drop-shadow(0 0 80px rgba(184,144,32,.09));}
+#lamp-halo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:340px;height:130px;border-radius:50%;
+  background:radial-gradient(ellipse 100% 100% at 50% 50%,
+    rgba(184,144,32,.2) 0%,rgba(160,110,20,.1) 35%,rgba(120,80,15,.04) 60%,transparent 100%);
+  pointer-events:none;animation:hF 3s ease-in-out infinite;}
+@keyframes hF{0%,100%{opacity:.85;transform:translate(-50%,-50%) scaleX(1);}33%{opacity:1;transform:translate(-50%,-50%) scaleX(1.09);}66%{opacity:.78;transform:translate(-50%,-50%) scaleX(.95);}}
+#lamp-svg{width:52px;position:relative;z-index:1;}
+#lflame{animation:lF .6s ease-in-out infinite alternate;transform-origin:50% 100%;}
+@keyframes lF{from{transform:scale(1,1) skewX(0deg);opacity:1;}to{transform:scale(.88,1.18) skewX(2.5deg);opacity:.88;}}
+#lflame-glow{animation:lFG .9s ease-in-out infinite alternate;}
+@keyframes lFG{from{opacity:.55}to{opacity:1}}
+.jolt #lflame{animation:lJolt .4s ease-out;transform-origin:50% 100%;}
+@keyframes lJolt{0%{transform:scale(1,1) skewX(0)}20%{transform:scale(.8,1.25) skewX(-4deg);opacity:.6;}60%{transform:scale(1.05,1.08) skewX(2deg);opacity:.95;}100%{transform:scale(1,1) skewX(0);opacity:1;}}
+#lamp-beam{position:absolute;left:50%;top:60%;transform:translateX(-50%);
+  width:180px;height:280px;
+  background:linear-gradient(180deg,rgba(184,144,32,.09) 0%,rgba(184,144,32,.05) 40%,transparent 100%);
+  clip-path:polygon(30% 0%,70% 0%,100% 100%,0% 100%);
+  pointer-events:none;animation:bF 2.8s ease-in-out infinite;}
+@keyframes bF{0%,100%{opacity:.65}50%{opacity:1}}
+.dust{position:absolute;border-radius:50%;
+  background:rgba(184,144,32,.55);animation:dF linear infinite;}
+@keyframes dF{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:0;}10%{opacity:.8;}90%{opacity:.4;}100%{transform:translateY(-200px) translateX(var(--dx,20px)) rotate(360deg);opacity:0;}}
+
+/* ══ 修改一：GR小姐区域 ══ */
+#gr-zone{
+  position:absolute;left:0;top:0;bottom:0;width:42%;
+  display:flex;flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;   /* 整体贴底 */
+  padding-bottom:64px;        /* 留出底部导航高度 */
+  z-index:15;
+  pointer-events:none;        /* 避免遮挡书架点击 */
+}
+#gr-zone>*{pointer-events:auto;}
+#gr-fig{
+  position:relative;
+  width:min(260px,75%);
+  flex-shrink:0;
+  opacity:0;animation:fadeUp 2.2s cubic-bezier(.22,1,.36,1) 1.2s forwards;
+  /* 黑白漫画滤镜 + 油灯侧光 */
+  filter:
+    drop-shadow(0 24px 60px rgba(0,0,0,.95))
+    drop-shadow(-6px 0 25px rgba(232,200,160,.1))
+    contrast(1.15)
+    saturate(0.2);}
+#gr-fig::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(140,180,220,.1) 50%,transparent 70%);
+  animation:coldSweep 6s ease-in-out infinite 3s;pointer-events:none;}
+@keyframes coldSweep{
+  0%,100%{opacity:0;transform:translateX(-100%);}
+  48%{opacity:0;transform:translateX(-100%);}
+  52%{opacity:1;transform:translateX(0);}
+  56%{opacity:0;transform:translateX(100%);}}
+
+/* ══ 修改四：对话框羊皮纸 ══ */
+#gr-plate{
+  position:relative;
+  text-align:center;white-space:nowrap;
+  margin-top:-8px;margin-bottom:8px;
+  opacity:0;animation:fadeUp 1.5s ease 2.8s forwards;}
+#gr-plate .lbl{font-family:var(--M);font-size:8.5px;letter-spacing:.3em;color:var(--archive);opacity:.5;}
+#gr-plate .rl{width:52px;height:.5px;margin:.5em auto 0;
+  background:linear-gradient(90deg,transparent,var(--lamp),transparent);opacity:.35;}
+#dlg{
+  position:relative;
+  width:calc(100% - 20px);
+  margin:0 10px;
+  opacity:0;animation:fadeUp 1.5s ease 3.4s forwards;z-index:20;}
+.dp{
+  background:
+    radial-gradient(ellipse 60% 50% at 35% 65%,#b8a080 0%,#a09078 50%,#988870 100%),
+    radial-gradient(ellipse 50% 80% at 80% 20%,rgba(130,120,110,.3) 0%,transparent 60%),
+    radial-gradient(circle at 30% 70%,rgba(150,130,70,.14) 0%,transparent 40%),
+    radial-gradient(circle at 60% 40%,rgba(110,120,100,.07) 0%,transparent 30%);
+  border:none;
+  border-radius:2px 3px 1px 4px / 1px 2px 3px 2px;
+  box-shadow:
+    inset 0 0 0 1px rgba(170,150,130,.4),
+    0 8px 40px rgba(0,0,0,.82),
+    0 0 0 2px rgba(150,130,110,.18),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  transform:perspective(500px) rotateX(0.5deg);
+  position:relative;overflow:hidden;}
+.dp::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    repeating-linear-gradient(88deg,transparent,transparent 2px,rgba(150,130,110,.04) 2px,rgba(150,130,110,.04) 3px),
+    repeating-linear-gradient(178deg,transparent,transparent 4px,rgba(130,120,100,.025) 4px,rgba(130,120,100,.025) 5px);
+  mix-blend-mode:multiply;opacity:.7;}
+.dp::after{content:'TIME MUSIC  •  月影摇弦  •  CONFIDENTIAL';
+  position:absolute;bottom:6px;right:10px;
+  font-family:var(--M);font-size:6.5px;letter-spacing:.1em;
+  color:rgba(26,20,10,.12);pointer-events:none;white-space:nowrap;transform:rotate(-1deg);}
+.db{padding:12px 14px 30px 20px;position:relative;z-index:1;}
+/* 装订孔 */
+.db::before{content:'';position:absolute;left:8px;top:20%;width:5px;height:5px;
+  background:transparent;border-radius:50%;
+  box-shadow:0 0 0 1px rgba(130,110,90,.6),0 0 0 2px rgba(90,70,50,.3),inset 0 1px 2px rgba(0,0,0,.4);}
+.db::after{content:'';position:absolute;left:8px;bottom:28%;width:5px;height:5px;
+  background:transparent;border-radius:50%;
+  box-shadow:0 0 0 1px rgba(130,110,90,.6),0 0 0 2px rgba(90,70,50,.3),inset 0 1px 2px rgba(0,0,0,.4);}
+.dw{font-family:var(--M);font-size:8px;letter-spacing:.22em;color:rgba(26,20,10,.55);
+  margin-bottom:7px;display:flex;align-items:center;gap:8px;}
+.dw::before,.dw::after{content:'';flex:1;height:.5px;opacity:.28;background:rgba(26,20,10,.4);}
+.dw::after{background:rgba(26,20,10,.4);}
+/* 文字墨水晕开 */
+.dt{font-family:var(--S);font-size:clamp(11.5px,1vw,13px);
+  line-height:1.9;color:#1a1510;
+  min-height:3.6em;white-space:pre-wrap;
+  text-shadow:
+    0 0.3px 0.5px rgba(90,50,30,.14),
+    0 -0.1px 0.2px rgba(130,90,70,.07),
+    0.2px 0 0.3px rgba(110,70,50,.09),
+    -0.2px 0 0.3px rgba(110,70,50,.09);}
+/* 金色方块光标 */
+.cur{display:inline-block;width:8px;height:1em;background:var(--lamp);
+  margin-left:2px;vertical-align:middle;
+  animation:curBlink .9s step-end infinite;
+  box-shadow:0 1px 2px rgba(90,50,30,.2);}
+@keyframes curBlink{0%,100%{opacity:1}50%{opacity:0}}
+.dir{display:flex;gap:6px;margin-top:9px;padding-top:9px;
+  border-top:.5px solid rgba(26,20,10,.18);}
+.di{flex:1;background:rgba(0,0,0,.1);
+  border:.5px solid rgba(26,20,10,.18);border-radius:1px;
+  padding:6px 10px;font-family:var(--M);font-size:11px;
+  color:var(--inkblue);outline:none;transition:border-color .2s,background .2s;}
+.di::placeholder{color:rgba(26,20,10,.28);font-style:italic;}
+.di:focus{border-color:var(--lamp);background:rgba(0,0,0,.18);}
+.dsb{background:linear-gradient(135deg,#2a1c0e,#1a1008);
+  border:1px solid var(--copper);border-radius:1px;
+  padding:6px 12px;font-family:var(--M);font-size:7.5px;letter-spacing:.18em;
+  color:var(--steam);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.dsb:hover{border-color:var(--lamp);color:#fff;}
+
+/* ══ 右侧书房 ══ */
+#right{position:absolute;right:0;top:0;bottom:64px;width:55%;
+  display:flex;flex-direction:column;align-items:flex-start;
+  padding:3vh 3vw 0 1.5vw;overflow:hidden;z-index:15;}
+
+/* ══ 修改三：标题金属质感 ══ */
+#ttl{align-self:flex-end;text-align:right;margin-bottom:1.8vh;
+  opacity:0;animation:fadeUp 1.8s ease .4s forwards;}
+#ttl .en{
+  font-family:var(--D);font-size:clamp(18px,2.2vw,32px);
+  letter-spacing:.32em;color:transparent;font-weight:700;
+  text-transform:uppercase;position:relative;
+  background:linear-gradient(135deg,
+    #e8c860 0%,#b89020 25%,#6a4a1a 60%,#b89020 85%,#f0d880 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:
+    drop-shadow(0 1px 0 #3a2a0a)
+    drop-shadow(0 2px 1px rgba(0,0,0,.6))
+    drop-shadow(0 0 10px rgba(232,200,96,.12));}
+#ttl .en::after{
+  content:'TIME MUSIC';
+  position:absolute;left:0;top:0;
+  background:linear-gradient(135deg,rgba(100,68,20,.8) 0%,rgba(52,36,8,.9) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  transform:translate(0.5px,0.5px);filter:blur(0.3px);z-index:-1;}
+#ttl .zh{
+  font-family:var(--B);font-size:clamp(10px,.9vw,12px);
+  letter-spacing:.4em;
+  background:linear-gradient(180deg,#c8a850 0%,#8a6a30 50%,#5a3a1a 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:.72;margin-top:6px;font-style:italic;}
+#ttl .rl{width:100%;height:1px;margin-top:8px;
+  background:linear-gradient(90deg,transparent,#6a4a2a 15%,#b89020 50%,#6a4a2a 85%,transparent);
+  opacity:.58;}
+
+/* ══ 修改五：书架 ══ */
+#shelf{width:100%;opacity:0;animation:fadeUp 1.8s ease .8s forwards;}
+.sc{
+  background:linear-gradient(175deg,#0e0a04 0%,#160e06 50%,#0a0804 100%);
+  border:1.5px solid #4a3010;border-radius:3px;
+  padding:22px 14px 14px;position:relative;
+  box-shadow:0 14px 55px rgba(0,0,0,.94),inset 0 1px 0 rgba(255,255,255,.03),
+    inset 5px 0 15px rgba(0,0,0,.5),inset -5px 0 15px rgba(0,0,0,.5);}
+.sc::before{content:'TIME MUSIC  •  TEMPORAL ARCHIVE';
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  font-family:var(--M);font-size:6px;letter-spacing:.22em;
+  color:rgba(106,74,42,.4);white-space:nowrap;pointer-events:none;}
+/* 书架横板（有实质厚度）*/
+.sr{display:flex;align-items:flex-end;gap:2px;
+  padding:7px 8px 0;min-height:90px;flex-wrap:nowrap;overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.75) 100%),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,.007) 40px,rgba(255,255,255,.007) 41px);
+  border-radius:1px;margin-bottom:6px;
+  border-bottom:6px solid #2a1a08;
+  box-shadow:
+    inset 0 5px 16px rgba(0,0,0,.7),
+    inset 0 -2px 0 rgba(255,255,255,.03),
+    0 4px 8px rgba(0,0,0,.5);
+  position:relative;}
+.sr:last-child{margin-bottom:0;}
+/* 皮带扣（横跨所有书）*/
+.sr::after{content:'';position:absolute;
+  left:8px;right:8px;top:48%;height:6px;margin-top:-3px;
+  background:linear-gradient(180deg,#4a3010 0%,#3a2208 50%,#4a3010 100%);
+  border-radius:2px;box-shadow:0 1px 4px rgba(0,0,0,.6);
+  opacity:.5;pointer-events:none;transition:opacity .35s ease;}
+.sr:hover::after{opacity:.15;}
+
+/* 单本书 */
+.bk{display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;flex-shrink:0;
+  transform-origin:bottom center;
+  transition:transform .3s ease-in-out,filter .25s;
+  border-radius:1px 2px 2px 1px;}
+.bk::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:rgba(0,0,0,.52);border-radius:1px 0 0 1px;z-index:1;pointer-events:none;}
+.bk::after{content:'';position:absolute;left:4px;top:0;bottom:0;width:2px;
+  background:rgba(255,255,255,.06);z-index:1;pointer-events:none;}
+.bk:hover{transform:translateY(-14px) translateX(3px);filter:brightness(1.25) saturate(1.1);z-index:30;}
+.bk:hover .btt{opacity:1;}
+/* 书脊文字 */
+.bs{writing-mode:vertical-lr;text-orientation:mixed;
+  font-family:var(--M);font-size:clamp(5px,.48vw,6.5px);letter-spacing:.06em;
+  color:rgba(200,196,184,.65);text-shadow:0 1px 3px rgba(0,0,0,.95);
+  padding:5px 1px;white-space:nowrap;max-height:82px;overflow:hidden;}
+.btt{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  background:rgba(6,8,14,.97);border:.5px solid var(--copper);border-radius:2px;
+  color:var(--steam);font-family:var(--M);font-size:10px;
+  padding:5px 10px;white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .18s;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.9);}
+.btt::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--copper);opacity:.8;}
+/* 莫扎特——未结案天鹅绒 */
+.bk-mz{animation:caseGlow 2.8s ease-in-out infinite;}
+@keyframes caseGlow{
+  0%,100%{box-shadow:0 0 0 1px rgba(160,40,30,.45),0 0 10px rgba(140,20,10,.22);}
+  50%{box-shadow:0 0 0 1.5px rgba(210,60,40,.65),0 0 20px rgba(190,40,20,.4),0 0 38px rgba(170,20,10,.12);}}
+
+/* ══ 修改二：书桌 z-index提升 ══ */
+#desk{position:absolute;right:2.5vw;bottom:0;width:min(260px,36%);
+  opacity:0;animation:fadeUp 1.8s ease 1.3s forwards;z-index:16;}
+.dsurf{height:12px;
+  background:linear-gradient(180deg,#3a2810 0%,#2a1c08 100%);
+  border-radius:2px 2px 0 0;border-top:1px solid rgba(106,74,42,.38);
+  box-shadow:0 -4px 18px rgba(0,0,0,.72);}
+.ditems{display:flex;align-items:flex-end;justify-content:space-around;
+  padding:0 8px;position:absolute;bottom:12px;left:0;right:0;}
+.map-svg{opacity:.52;animation:mapR 4s ease-in-out infinite;}
+@keyframes mapR{0%,100%{transform:rotate(-.5deg)}50%{transform:rotate(.3deg)}}
+.watch-item{cursor:pointer;position:relative;}
+.watch-glow{position:absolute;inset:-4px;border-radius:50%;
+  background:radial-gradient(circle,rgba(40,180,80,.14) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;}
+.watch-item:hover .watch-glow{opacity:1;}
+
+/* ── 底部导航 ── */
+#nav{position:fixed;bottom:0;right:0;width:55%;height:52px;
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:8px;padding:0 2.5vw;z-index:20;
+  background:linear-gradient(0deg,rgba(0,0,0,.96) 0%,rgba(2,2,6,.82) 50%,transparent 100%);
+  border-top:.5px solid rgba(140,100,40,.18);
+  opacity:0;animation:fadeUp 1.5s ease 4.2s forwards;}
+/* .nb 已整合到增强版 */
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ════════════════════
+   莫扎特世界
+   ════════════════════ */
+#moz{position:fixed;inset:0;z-index:200;
+  background:radial-gradient(ellipse at 50% 45%,#100804 0%,#060402 100%);
+  opacity:0;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;padding-top:5vh;overflow:hidden;}
+#moz.on{opacity:1;pointer-events:all;}
+#moz::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:500px;height:500px;border-radius:50%;pointer-events:none;
+  border:.5px solid rgba(106,74,42,.06);
+  box-shadow:0 0 0 60px rgba(106,74,42,.02),0 0 0 120px rgba(106,74,42,.01);}
+#mbk{position:absolute;top:22px;left:30px;
+  font-family:var(--M);font-size:7.5px;letter-spacing:.18em;
+  color:var(--archive);background:none;
+  border:.5px solid rgba(106,74,42,.2);border-radius:1px;
+  padding:7px 14px;cursor:pointer;
+  opacity:0;transition:opacity .8s ease 2s,background .2s,border-color .2s;}
+#moz.on #mbk{opacity:.4;}
+#mbk:hover{background:rgba(22,14,6,.7);border-color:var(--lamp);opacity:1!important;}
+.morn{font-family:var(--M);font-size:10px;letter-spacing:.6em;
+  color:rgba(106,74,42,.32);margin-bottom:16px;
+  opacity:0;transition:opacity .9s ease .4s;}
+#moz.on .morn{opacity:1;}
+#mnm{font-family:var(--D);font-size:clamp(16px,2.6vw,36px);
+  letter-spacing:.2em;color:var(--steam);text-align:center;line-height:1.3;
+  text-shadow:0 0 60px rgba(184,144,32,.15),0 4px 20px rgba(0,0,0,.9);
+  opacity:0;transform:translateY(12px);transition:all 1.1s ease .6s;}
+#moz.on #mnm{opacity:1;transform:translateY(0);}
+#myr{font-family:var(--S);font-size:clamp(10px,1vw,14px);letter-spacing:.35em;color:var(--archive);
+  opacity:0;margin-top:8px;font-style:italic;transition:opacity .9s ease 1s;}
+#moz.on #myr{opacity:.45;}
+.mhr{width:160px;height:.5px;margin:14px auto;
+  background:linear-gradient(90deg,transparent,var(--copper),transparent);
+  opacity:0;transition:opacity .9s ease 1.1s;}
+#moz.on .mhr{opacity:.4;}
+#card-area{width:100%;flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;transition:opacity .9s ease 1.3s;position:relative;}
+#moz.on #card-area{opacity:1;}
+#float-cards{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.fc{position:absolute;width:110px;height:170px;border-radius:6px;
+  background:linear-gradient(145deg,#160a04,#201408);
+  border:.5px solid rgba(106,74,42,.22);box-shadow:0 8px 30px rgba(0,0,0,.7);}
+#main-card-wrap{perspective:1000px;
+  width:min(190px,40vw);height:min(295px,52vh);
+  cursor:pointer;position:relative;z-index:10;}
+#main-card{width:100%;height:100%;position:relative;
+  transform-style:preserve-3d;transition:transform .8s ease-in-out;}
+#main-card.flipped{transform:rotateY(180deg);}
+.card-back,.card-front{position:absolute;inset:0;border-radius:8px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.card-back{background:linear-gradient(145deg,#120a04,#1c1006,#100804);
+  border:1px solid rgba(106,74,42,.48);
+  box-shadow:0 10px 40px rgba(0,0,0,.88);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.card-back::before{content:'';position:absolute;inset:8px;
+  border:.5px solid rgba(106,74,42,.18);border-radius:5px;
+  background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(106,74,42,.04) 7px,rgba(106,74,42,.04) 8px),
+    repeating-linear-gradient(-45deg,transparent,transparent 7px,rgba(106,74,42,.04) 7px,rgba(106,74,42,.04) 8px);}
+.back-center{text-align:center;}
+.back-orn{font-family:var(--D);font-size:20px;color:rgba(106,74,42,.48);display:block;line-height:1.5;}
+.back-txt{font-family:var(--M);font-size:6.5px;letter-spacing:.28em;color:rgba(106,74,42,.32);margin-top:8px;display:block;}
+.card-front{transform:rotateY(180deg);
+  background:linear-gradient(160deg,#a89070,#9a8060,#907050);
+  border:1px solid rgba(106,74,42,.68);
+  box-shadow:0 10px 40px rgba(0,0,0,.88);
+  display:flex;flex-direction:column;padding:14px 13px 12px;overflow:hidden;}
+.card-front::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent,transparent 19px,rgba(36,24,8,.11) 19px,rgba(36,24,8,.11) 20px);}
+.card-front::after{content:'';position:absolute;inset:6px;
+  border:.5px solid rgba(54,34,8,.18);border-radius:4px;pointer-events:none;}
+.cf-inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;}
+.cf-period{font-family:var(--M);font-size:6.5px;letter-spacing:.22em;
+  color:rgba(26,20,10,.52);text-align:center;margin-bottom:7px;}
+.cf-year{font-family:var(--D);font-size:clamp(16px,2.2vw,24px);
+  color:#1a1510;text-align:center;line-height:1;margin-bottom:8px;}
+.cf-rule{width:55%;height:.5px;margin:0 auto 9px;
+  background:linear-gradient(90deg,transparent,rgba(26,20,10,.38),transparent);}
+.cf-event{font-family:var(--S);font-style:italic;
+  font-size:clamp(9px,.88vw,11px);color:#1a1510;
+  line-height:1.72;text-align:center;flex:1;
+  display:flex;align-items:center;justify-content:center;opacity:.82;}
+.cf-divider{width:75%;height:.5px;margin:8px auto;
+  background:linear-gradient(90deg,transparent,rgba(26,20,10,.22),transparent);}
+.cf-work{font-family:var(--M);font-size:6px;letter-spacing:.12em;
+  color:rgba(26,20,10,.42);text-align:center;}
+.cf-work-title{font-family:var(--S);font-style:italic;
+  font-size:clamp(8px,.78vw,10px);color:#1a1510;
+  text-align:center;opacity:.78;margin-top:3px;}
+#draw-area{text-align:center;margin-top:14px;
+  opacity:0;transition:opacity .9s ease 1.5s;}
+#moz.on #draw-area{opacity:1;}
+.chint{font-family:var(--S);font-style:italic;font-size:11.5px;
+  color:var(--archive);opacity:.48;margin-bottom:11px;}
+.drb{background:linear-gradient(135deg,#2a1c0e,#1a1008);
+  border:1px solid var(--copper);border-radius:1px;
+  padding:8px 24px;font-family:var(--M);font-size:8px;letter-spacing:.2em;
+  color:var(--steam);cursor:pointer;transition:all .26s;
+  box-shadow:0 0 20px rgba(184,144,32,.09);}
+.drb:hover{border-color:var(--lamp);box-shadow:0 0 30px rgba(184,144,32,.24);transform:translateY(-2px);}
+#write-area{margin-top:12px;text-align:center;
+  opacity:0;transform:translateY(6px);transition:opacity .6s ease,transform .6s ease;}
+#write-area.show{opacity:1;transform:translateY(0);}
+.write-btn{background:none;border:.5px solid rgba(106,74,42,.48);border-radius:1px;
+  padding:7px 20px;font-family:var(--M);font-size:7.5px;letter-spacing:.18em;
+  color:var(--lamp);cursor:pointer;transition:all .22s;}
+.write-btn:hover{background:rgba(106,74,42,.09);border-color:var(--lamp);
+  box-shadow:0 0 14px rgba(184,144,32,.1);}
+
+/* ════ 书信 ════ */
+#letter-screen{position:fixed;inset:0;z-index:300;
+  background:radial-gradient(ellipse at 50% 50%,#0c0a06 0%,#040302 100%);
+  opacity:0;pointer-events:none;transition:opacity .7s ease;
+  display:flex;align-items:center;justify-content:center;}
+#letter-screen.on{opacity:1;pointer-events:all;}
+.letter-wrap{width:min(660px,88vw);max-height:90vh;display:flex;flex-direction:column;gap:0;}
+.letter-paper{
+  background:linear-gradient(160deg,#a89070,#9a8060,#907050);
+  border:1px solid rgba(106,74,42,.78);border-radius:2px;
+  box-shadow:0 20px 80px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.05);
+  position:relative;overflow:hidden;padding:28px 32px 22px;}
+.letter-paper::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent,transparent 26px,rgba(36,24,8,.09) 26px,rgba(36,24,8,.09) 27px);}
+.letter-paper::after{content:'';position:absolute;inset:9px;
+  border:.5px solid rgba(54,34,8,.14);border-radius:1px;pointer-events:none;}
+.lp-inner{position:relative;z-index:1;}
+.letter-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.letter-to{font-family:var(--M);font-size:8px;letter-spacing:.18em;color:rgba(26,20,10,.48);}
+.letter-date{font-family:var(--S);font-style:italic;font-size:11px;color:rgba(26,20,10,.42);}
+.letter-context{font-family:var(--S);font-style:italic;font-size:clamp(10.5px,.95vw,12px);
+  color:rgba(26,20,10,.68);line-height:1.8;margin-bottom:16px;
+  padding:10px 12px;background:rgba(0,0,0,.07);
+  border-left:2px solid rgba(106,74,42,.38);}
+.letter-salute{font-family:var(--S);font-size:clamp(11px,1vw,13px);color:#1a1510;margin-bottom:9px;font-style:italic;}
+.letter-textarea{width:100%;min-height:110px;background:transparent;border:none;
+  border-bottom:.5px solid rgba(26,20,10,.18);
+  font-family:var(--S);font-style:italic;font-size:clamp(11px,1vw,13px);
+  color:#1a1510;line-height:1.9;resize:none;outline:none;padding-bottom:7px;}
+.letter-textarea::placeholder{color:rgba(26,20,10,.26);}
+.letter-sign{font-family:var(--S);font-style:italic;font-size:11px;color:rgba(26,20,10,.42);margin-top:12px;}
+.letter-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+.lbtn-cancel{background:none;border:.5px solid rgba(106,74,42,.28);border-radius:1px;
+  padding:6px 14px;font-family:var(--M);font-size:7.5px;letter-spacing:.15em;
+  color:var(--archive);cursor:pointer;transition:all .2s;}
+.lbtn-cancel:hover{border-color:var(--archive);color:var(--steam);}
+.lbtn-send{background:linear-gradient(135deg,#2a1c0e,#1a1008);border:1px solid var(--copper);border-radius:1px;
+  padding:7px 20px;font-family:var(--M);font-size:7.5px;letter-spacing:.18em;
+  color:var(--steam);cursor:pointer;transition:all .22s;box-shadow:0 0 16px rgba(184,144,32,.09);}
+.lbtn-send:hover{border-color:var(--lamp);box-shadow:0 0 24px rgba(184,144,32,.2);}
+#reply-paper{
+  background:linear-gradient(160deg,#988468,#8a7858,#806848);
+  border:1px solid rgba(86,56,26,.78);border-radius:2px;margin-top:-3px;
+  box-shadow:0 20px 80px rgba(0,0,0,.9);
+  position:relative;overflow:hidden;padding:24px 32px 20px;display:none;}
+#reply-paper.show{display:block;}
+#reply-paper::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent,transparent 26px,rgba(26,16,4,.09) 26px,rgba(26,16,4,.09) 27px);}
+.rp-inner{position:relative;z-index:1;}
+.rp-from{font-family:var(--M);font-size:8px;letter-spacing:.2em;color:rgba(26,20,10,.42);margin-bottom:12px;}
+.rp-text{font-family:var(--S);font-style:italic;font-size:clamp(11px,1vw,13px);
+  color:#1a1510;line-height:1.88;white-space:pre-wrap;min-height:2em;}
+.rp-loading{font-family:var(--S);font-style:italic;font-size:12px;
+  color:rgba(26,20,10,.38);display:flex;align-items:center;gap:8px;}
+.dots span{display:inline-block;animation:dot 1.2s ease-in-out infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+/* 时空闪光 */
+#time-flash{position:fixed;inset:0;z-index:999;background:#c8a040;
+  opacity:0;pointer-events:none;transition:opacity .15s ease;}
+
+/* ═══════════════════════════════════════
+   新增：AI通信系统 + 折叠动画 + 年表
+   ═══════════════════════════════════════ */
+
+/* ── Toast通知 ── */
+#toast{
+  position:fixed;top:9%;left:50%;transform:translateX(-50%) translateY(-20px);
+  z-index:950;opacity:0;pointer-events:none;
+  transition:all .5s cubic-bezier(.22,1,.36,1);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-paper{
+  background:linear-gradient(135deg,#a89070,#9a8060);
+  border:1px solid rgba(106,74,42,.8);border-radius:2px;
+  padding:8px 18px;font-family:var(--M);font-size:9px;
+  letter-spacing:.14em;color:#1a1510;
+  box-shadow:0 4px 20px rgba(0,0,0,.7);}
+
+/* ── 莫扎特来信面板（全屏覆盖在 #moz 之上）── */
+#incoming-letter{
+  position:fixed;inset:0;z-index:250;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .6s ease;
+  background:radial-gradient(ellipse at 50% 50%,rgba(8,6,4,.92) 0%,rgba(4,3,2,.98) 100%);}
+#incoming-letter.show{opacity:1;pointer-events:all;}
+
+.incoming-wrap{
+  width:min(620px,85vw);
+  display:flex;flex-direction:column;
+  align-items:center;gap:0;
+  transform:translateY(20px);
+  transition:transform .6s cubic-bezier(.22,1,.36,1);}
+#incoming-letter.show .incoming-wrap{transform:translateY(0);}
+
+/* 来信标头 */
+.inc-header{
+  width:100%;display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:12px;}
+.inc-from{font-family:var(--M);font-size:8px;letter-spacing:.22em;
+  color:rgba(200,196,184,.45);}
+.inc-close{font-family:var(--M);font-size:7.5px;letter-spacing:.15em;
+  color:rgba(200,196,184,.3);background:none;
+  border:.5px solid rgba(106,74,42,.25);border-radius:1px;
+  padding:5px 12px;cursor:pointer;transition:all .2s;}
+.inc-close:hover{border-color:var(--lamp);color:var(--steam);}
+
+/* 来信信纸 */
+.inc-paper{
+  width:100%;
+  background:linear-gradient(160deg,#f0e4c4,#e8d8a8,#e0cc94);
+  border:1px solid rgba(106,74,42,.75);border-radius:2px;
+  box-shadow:0 16px 60px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.07);
+  position:relative;overflow:hidden;
+  padding:28px 32px 24px;
+  max-height:45vh;overflow-y:auto;}
+.inc-paper::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent,transparent 26px,rgba(36,24,8,.09) 26px,rgba(36,24,8,.09) 27px);}
+.inc-paper::after{content:'';position:absolute;inset:9px;
+  border:.5px solid rgba(54,34,8,.12);border-radius:1px;pointer-events:none;}
+.inc-inner{position:relative;z-index:1;}
+.inc-salute{font-family:var(--S);font-style:italic;font-size:13px;
+  color:#1a1510;margin-bottom:10px;}
+.inc-body{font-family:var(--S);font-style:italic;font-size:clamp(11px,1vw,13px);
+  color:#1a1510;line-height:1.9;white-space:pre-wrap;min-height:3em;}
+.inc-sign{font-family:var(--S);font-style:italic;font-size:11.5px;
+  color:rgba(26,20,10,.55);margin-top:14px;}
+.inc-loading{font-family:var(--S);font-style:italic;font-size:12px;
+  color:rgba(26,20,10,.4);display:flex;align-items:center;gap:8px;}
+
+/* 折叠动画：来信向上折叠消失 */
+.inc-paper.fold-up{
+  animation:foldUp .7s cubic-bezier(.4,0,.6,1) forwards;}
+@keyframes foldUp{
+  0%{transform:perspective(600px) rotateX(0deg) scaleY(1);opacity:1;}
+  60%{transform:perspective(600px) rotateX(-45deg) scaleY(0.5);opacity:.4;}
+  100%{transform:perspective(600px) rotateX(-90deg) scaleY(0);opacity:0;}}
+
+/* 写信界面（折叠后出现）*/
+.write-panel{
+  width:100%;margin-top:0;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .5s ease .6s,transform .5s ease .6s;}
+.write-panel.show{opacity:1;transform:translateY(0);}
+
+.write-paper{
+  background:linear-gradient(160deg,#9a8468,#8a7458,#807048);
+  border:1px solid rgba(86,56,26,.78);border-radius:2px;
+  box-shadow:0 16px 60px rgba(0,0,0,.85);
+  position:relative;overflow:hidden;padding:22px 28px 18px;}
+.write-paper::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent,transparent 24px,rgba(26,16,4,.1) 24px,rgba(26,16,4,.1) 25px);}
+.write-paper::after{content:'';position:absolute;inset:8px;
+  border:.5px solid rgba(54,34,8,.14);border-radius:1px;pointer-events:none;}
+.wp-inner{position:relative;z-index:1;}
+.wp-to{font-family:var(--M);font-size:8px;letter-spacing:.18em;
+  color:rgba(26,20,10,.48);margin-bottom:14px;}
+.wp-salute{font-family:var(--S);font-style:italic;font-size:12px;
+  color:#1a1510;margin-bottom:8px;}
+.wp-textarea{
+  width:100%;height:90px;background:transparent;border:none;
+  border-bottom:.5px solid rgba(26,20,10,.18);
+  font-family:var(--S);font-style:italic;
+  font-size:clamp(11px,.95vw,13px);
+  color:#1a1510;line-height:1.85;resize:none;outline:none;
+  padding-bottom:6px;}
+.wp-textarea::placeholder{color:rgba(26,20,10,.28);}
+.wp-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.wp-count{font-family:var(--M);font-size:9px;color:rgba(26,20,10,.35);letter-spacing:.05em;}
+.wp-count.warn{color:rgba(180,60,20,.6);}
+.wp-sign{font-family:var(--S);font-style:italic;font-size:11px;
+  color:rgba(26,20,10,.4);}
+.wp-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end;}
+.wp-cancel{background:none;border:.5px solid rgba(106,74,42,.28);border-radius:1px;
+  padding:6px 12px;font-family:var(--M);font-size:7.5px;letter-spacing:.14em;
+  color:var(--archive);cursor:pointer;transition:all .2s;}
+.wp-cancel:hover{border-color:var(--archive);color:var(--steam);}
+.wp-send{background:linear-gradient(135deg,#2a1c0e,#1a1008);
+  border:1px solid var(--copper);border-radius:1px;
+  padding:6px 18px;font-family:var(--M);font-size:7.5px;letter-spacing:.18em;
+  color:var(--steam);cursor:pointer;transition:all .22s;
+  box-shadow:0 0 14px rgba(184,144,32,.09);}
+.wp-send:hover{border-color:var(--lamp);box-shadow:0 0 22px rgba(184,144,32,.2);}
+.wp-send:disabled{opacity:.4;cursor:default;}
+
+/* 寄信动画 */
+#send-anim{
+  position:fixed;inset:0;z-index:400;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;}
+#send-anim.play{animation:sendFly 1.8s ease-in-out forwards;}
+@keyframes sendFly{
+  0%{opacity:1;}
+  20%{opacity:1;}
+  100%{opacity:0;}}
+.envelope{
+  font-size:48px;
+  animation:envFly 1.8s ease-in-out forwards;}
+@keyframes envFly{
+  0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1;}
+  30%{transform:translate(40px,-20px) rotate(10deg) scale(1.1);opacity:1;}
+  100%{transform:translate(300px,-200px) rotate(25deg) scale(0.3);opacity:0;}}
+
+/* ── Gr关键词引导对话 ── */
+#gr-chat-hint{
+  position:absolute;
+  bottom:165px;left:14px;right:10px;
+  z-index:21;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .5s ease,transform .5s ease;}
+#gr-chat-hint.show{opacity:1;transform:translateY(0);}
+.hint-paper{
+  background:linear-gradient(145deg,rgba(168,152,120,.9),rgba(152,136,104,.9));
+  border:.5px solid rgba(106,74,42,.6);border-radius:2px;
+  padding:8px 12px;position:relative;}
+.hint-text{font-family:var(--S);font-style:italic;font-size:10.5px;
+  color:#1a1510;line-height:1.7;}
+.hint-keyword{
+  display:inline;color:var(--copper);
+  font-style:normal;font-weight:600;
+  border-bottom:1px solid rgba(106,74,42,.4);}
+
+/* ── 解锁Toast ── */
+#unlock-toast{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.8);
+  z-index:950;opacity:0;pointer-events:none;
+  transition:all .5s cubic-bezier(.22,1,.36,1);}
+#unlock-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.unlock-box{
+  background:linear-gradient(145deg,#1e1408,#2a1c0e);
+  border:1px solid var(--gold2,#e8b830);border-radius:3px;
+  padding:16px 28px;text-align:center;
+  box-shadow:0 0 60px rgba(232,184,48,.25),0 20px 60px rgba(0,0,0,.8);}
+.unlock-icon{font-size:28px;margin-bottom:8px;display:block;}
+.unlock-title{font-family:var(--D);font-size:9px;letter-spacing:.22em;
+  color:var(--lamp);margin-bottom:6px;}
+.unlock-desc{font-family:var(--S);font-style:italic;font-size:11px;
+  color:var(--steam);opacity:.7;}
+
+/* ── 人生年表（终章）── */
+#chronicle{
+  position:fixed;inset:0;z-index:500;
+  background:radial-gradient(ellipse at 50% 30%,#120a04 0%,#060402 100%);
+  opacity:0;pointer-events:none;
+  transition:opacity .8s ease;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-y:auto;padding:6vh 0 8vh;}
+#chronicle.show{opacity:1;pointer-events:all;}
+
+.chr-title{font-family:var(--D);font-size:clamp(14px,2vw,24px);
+  letter-spacing:.28em;color:var(--steam);text-align:center;
+  margin-bottom:6px;
+  text-shadow:0 0 40px rgba(184,144,32,.2);}
+.chr-sub{font-family:var(--S);font-style:italic;font-size:clamp(10px,.9vw,13px);
+  letter-spacing:.2em;color:var(--archive);opacity:.6;margin-bottom:8px;}
+.chr-note{font-family:var(--S);font-style:italic;font-size:11px;
+  color:rgba(200,196,184,.35);margin-bottom:28px;text-align:center;}
+.chr-rule{width:200px;height:.5px;margin:0 auto 32px;
+  background:linear-gradient(90deg,transparent,var(--copper),transparent);opacity:.5;}
+
+/* 年表主体 */
+.chr-timeline{
+  width:min(760px,90vw);
+  position:relative;padding:0 0 40px;}
+/* 时间轴竖线 */
+.chr-timeline::before{
+  content:'';position:absolute;
+  left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(106,74,42,.5) 8%,rgba(106,74,42,.4) 92%,transparent);
+  transform:translateX(-50%);}
+
+/* 单个节点 */
+.chr-node{
+  display:flex;align-items:flex-start;
+  gap:0;margin-bottom:28px;position:relative;}
+.chr-node:nth-child(even){flex-direction:row-reverse;}
+
+/* 年份标记 */
+.chr-year{
+  position:absolute;left:50%;top:8px;transform:translateX(-50%);
+  background:linear-gradient(135deg,#2a1c0e,#1a1008);
+  border:1px solid var(--copper);border-radius:2px;
+  padding:4px 10px;font-family:var(--M);font-size:8.5px;
+  letter-spacing:.12em;color:var(--lamp);
+  white-space:nowrap;z-index:1;
+  box-shadow:0 0 16px rgba(184,144,32,.12);}
+
+/* 节点圆点 */
+.chr-dot{
+  position:absolute;left:50%;top:12px;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--copper);border:2px solid var(--lamp);
+  transform:translateX(-50%);z-index:2;
+  box-shadow:0 0 10px rgba(184,144,32,.3);}
+
+/* 内容卡片（左右交替）*/
+.chr-card{
+  width:46%;
+  background:linear-gradient(145deg,#1c1208,#241808);
+  border:.5px solid rgba(106,74,42,.4);border-radius:2px;
+  padding:14px 16px;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.chr-node:nth-child(odd) .chr-card{margin-right:auto;margin-left:4%;}
+.chr-node:nth-child(even) .chr-card{margin-left:auto;margin-right:4%;}
+
+.chr-card-period{
+  font-family:var(--M);font-size:7px;letter-spacing:.2em;
+  color:rgba(106,74,42,.7);margin-bottom:6px;}
+.chr-card-event{
+  font-family:var(--S);font-style:italic;
+  font-size:clamp(10px,.9vw,12px);color:var(--steam);
+  line-height:1.7;margin-bottom:8px;opacity:.85;}
+.chr-card-work{
+  font-family:var(--M);font-size:7px;letter-spacing:.1em;
+  color:var(--lamp);opacity:.7;}
+
+/* 玩家影响标记（金色高亮）*/
+.chr-card-player{
+  margin-top:8px;padding-top:8px;
+  border-top:.5px solid rgba(106,74,42,.3);}
+.chr-player-icon{font-size:10px;margin-right:4px;}
+.chr-player-text{
+  font-family:var(--S);font-style:italic;
+  font-size:10px;color:rgba(232,184,48,.65);
+  line-height:1.6;}
+
+/* 最终作品展示 */
+.chr-final{
+  width:min(760px,90vw);
+  background:linear-gradient(145deg,#1a1208,#221808);
+  border:1px solid rgba(106,74,42,.5);border-radius:3px;
+  padding:24px 28px;margin-top:16px;text-align:center;
+  box-shadow:0 0 40px rgba(184,144,32,.08);}
+.chr-final-title{font-family:var(--D);font-size:10px;letter-spacing:.25em;
+  color:var(--lamp);margin-bottom:12px;opacity:.8;}
+.chr-cards-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:10px;margin:14px 0;}
+.chr-mini-card{
+  background:linear-gradient(145deg,#9a8060,#8a7050);
+  border:.5px solid rgba(106,74,42,.5);border-radius:4px;
+  padding:10px 8px;text-align:center;}
+.chr-mini-year{font-family:var(--D);font-size:11px;color:#1a1510;margin-bottom:4px;}
+.chr-mini-work{font-family:var(--S);font-style:italic;font-size:8px;
+  color:rgba(26,20,10,.65);line-height:1.4;}
+.chr-epilogue{
+  font-family:var(--S);font-style:italic;
+  font-size:clamp(11px,1vw,13px);color:var(--steam);
+  line-height:1.9;opacity:.6;margin-top:16px;text-align:center;}
+
+.chr-close{
+  margin-top:28px;
+  font-family:var(--M);font-size:8px;letter-spacing:.2em;
+  color:var(--archive);background:none;
+  border:.5px solid rgba(106,74,42,.3);border-radius:1px;
+  padding:9px 22px;cursor:pointer;transition:all .2s;}
+.chr-close:hover{border-color:var(--lamp);color:var(--steam);}
+
+@keyframes wR{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+
+/* ── 底部导航按钮 ── */
+.nb{
+  background:linear-gradient(135deg,rgba(30,18,6,.96),rgba(20,12,4,.98));
+  border:1px solid rgba(180,130,48,.7);
+  border-radius:3px;
+  padding:9px 20px;
+  font-family:'Cinzel',serif;
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:.22em;
+  /* 金色高亮文字 */
+  color:#c8961a;
+  text-shadow:
+    0 0 12px rgba(200,150,26,.6),
+    0 1px 3px rgba(0,0,0,.8);
+  cursor:pointer;
+  transition:all .25s;
+  box-shadow:
+    0 0 0 1px rgba(180,130,48,.2),
+    inset 0 1px 0 rgba(255,220,100,.08),
+    inset 0 -1px 0 rgba(0,0,0,.3);
+}
+.nb:hover{
+  background:linear-gradient(135deg,rgba(60,36,8,.98),rgba(40,24,6,.99));
+  border-color:#e8b830;
+  color:#f0d060;
+  text-shadow:0 0 20px rgba(240,208,80,.8),0 1px 4px rgba(0,0,0,.8);
+  box-shadow:
+    0 0 20px rgba(200,150,26,.3),
+    0 0 0 1px rgba(232,184,48,.45),
+    inset 0 1px 0 rgba(255,220,100,.12);
+  transform:translateY(-1px);
+}
+.nb:active{transform:translateY(0);}
+
+/* ── Gr标题栏 ── */
+.dlg-titlebar{display:flex;align-items:center;justify-content:space-between;
+  padding:5px 10px 4px;border-bottom:.5px solid rgba(139,90,30,.22);margin-bottom:0;}
+.dlg-tname{font-family:var(--M);font-size:6.5px;letter-spacing:.22em;color:rgba(184,144,32,.58);}
+.dlg-tbtn{background:none;border:none;cursor:pointer;font-size:14px;
+  color:rgba(184,144,32,.42);line-height:1;padding:0 2px;transition:color .2s;}
+.dlg-tbtn:hover{color:var(--lamp);}
+#dlg.dlg-mini .dlg-body-wrap{display:none;}
+/* ── X关闭按钮 ── */
+.panel-x{position:absolute;top:8px;right:10px;width:22px;height:22px;
+  background:rgba(0,0,0,.3);border:.5px solid rgba(106,74,42,.35);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:rgba(200,196,184,.5);font-size:11px;
+  transition:all .2s;z-index:10;}
+.panel-x:hover{background:rgba(60,30,8,.7);border-color:var(--lamp);color:#c8c4b8;}
+#chr-close-fixed{position:fixed;top:8.5%;right:20px;z-index:510;display:none;
+  background:rgba(12,8,4,.82);border:.5px solid rgba(106,74,42,.4);border-radius:2px;
+  padding:6px 14px;font-family:var(--M);font-size:8px;letter-spacing:.15em;
+  color:rgba(200,196,184,.5);cursor:pointer;transition:all .2s;}
+#chr-close-fixed:hover{border-color:var(--lamp);color:#c8c4b8;}
+#chronicle.show+#chr-close-fixed,#chronicle.show ~ #chr-close-fixed{display:block;}
+
+/* ── Gr对话框整体优化 ── */
+#dlg .dp{
+  border-radius:3px;
+  box-shadow:
+    0 -4px 24px rgba(0,0,0,.5),
+    0 8px 32px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+/* 标题栏更显眼 */
+.dlg-titlebar{
+  background:linear-gradient(180deg,rgba(80,50,10,.25),rgba(0,0,0,.1));
+  border-radius:2px 2px 0 0;
+}
+.dlg-tname{
+  font-size:7.5px;letter-spacing:.25em;
+  color:rgba(200,160,60,.75);
+  text-shadow:0 0 8px rgba(184,144,32,.3);
+}
+/* 输入框更宽 */
+.db{padding:10px 13px 10px 13px;}
+.dt{min-height:3.2em;font-size:clamp(11.5px,1vw,13px);}
+.dir{margin-top:8px;padding-top:8px;}
+.di{font-size:11.5px;padding:7px 10px;}
+.dsb{padding:7px 14px;font-size:8px;letter-spacing:.15em;}
+/* 对话框底部导航区高度留白 */
+#gr-zone{gap:0;}
+
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="brand">音乐旅行<span>Music Travel</span></div>
-  <div class="nav">
-    <button class="btn" onclick="location.href='index.html'">返回 CMS</button>
-    <button class="btn solid" onclick="generateLetter()">生成信札</button>
+<div id="vig"></div>
+<div id="aud-ind" style="position:fixed;bottom:72px;left:14px;z-index:920;opacity:0;transition:opacity 1s;pointer-events:none;font-family:'Courier Prime',monospace;font-size:8px;letter-spacing:.12em;color:rgba(184,144,32,.42);">♪ AMBIENT</div>
+<div id="ca-r"></div>
+<div id="ca-b"></div>
+<div id="grain"></div>
+<div id="time-flash"></div>
+
+<div id="scene">
+<div id="cabin">
+
+  <!-- ══ 窗口 ══ -->
+  <div id="window-zone">
+    <div id="window-outer">
+      <div id="steam-layer"></div>
+      <div id="passing-world"></div>
+      <div id="glass-reflection"></div>
+    </div>
+    <div id="window-frame">
+      <div id="curtain-left"></div>
+      <div id="curtain-right"></div>
+    </div>
   </div>
-</header>
 
-<main class="wrap">
-  <section class="hero">
-    <div>
-      <h1>把音乐家，放进一张会发光的旅行地图。</h1>
-      <p>第一版先用静态数据跑通体验：选择音乐家，点击城市，解锁作品、故事和旅行信札。以后这里可以接音频链接，也可以接 DeepSeek，让每一次旅行自动生成新的文本与任务。</p>
-    </div>
-    <div class="seal">
-      <div class="map" id="map">
-        <div class="route"></div>
-        <div class="city c1 on" onclick="chooseCity('leipzig',this)"><strong>莱比锡</strong><span>巴赫的工作室</span></div>
-        <div class="city c2" onclick="chooseCity('vienna',this)"><strong>维也纳</strong><span>古典时代的客厅</span></div>
-        <div class="city c3" onclick="chooseCity('paris',this)"><strong>巴黎</strong><span>印象派的雾</span></div>
-        <div class="city c4" onclick="chooseCity('tokyo',this)"><strong>东京</strong><span>电影与动画的声场</span></div>
-        <div class="city c5" onclick="chooseCity('newyork',this)"><strong>纽约</strong><span>现代声音的路口</span></div>
+  <!-- ══ 油灯 ══ -->
+  <div id="lamp-zone">
+    <div id="lamp-halo"></div>
+    <div id="lamp-beam"></div>
+    <svg id="lamp-svg" viewBox="0 0 52 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="fg2" cx="50%" cy="75%" r="55%">
+          <stop offset="0%" stop-color="#fffde0"/>
+          <stop offset="30%" stop-color="#f5d040"/>
+          <stop offset="100%" stop-color="#e08010" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse id="lflame-glow" cx="26" cy="16" rx="12" ry="16" fill="url(#fg2)" opacity=".7"/>
+      <g id="lflame">
+        <path d="M26 4 Q32 12 30 22 Q26 28 22 22 Q20 12 26 4Z" fill="#ffd840"/>
+        <path d="M26 8 Q29 15 27 22 Q26 26 25 22 Q23 15 26 8Z" fill="#fff8c0"/>
+      </g>
+      <line x1="26" y1="28" x2="26" y2="33" stroke="#1a0800" stroke-width="1.8"/>
+      <path d="M16 32 Q14 55 14 68 Q14 76 26 80 Q38 76 38 68 Q38 55 36 32Z" fill="rgba(200,180,120,.14)" stroke="rgba(170,150,90,.38)" stroke-width="1"/>
+      <rect x="21" y="26" width="10" height="7" rx="1" fill="#5a4010" stroke="rgba(170,130,50,.38)" stroke-width=".7"/>
+      <rect x="23" y="23" width="6" height="5" rx="1" fill="#4a3010"/>
+      <ellipse cx="26" cy="82" rx="16" ry="5" fill="#6a4a18"/>
+      <rect x="11" y="79" width="30" height="6" rx="1" fill="#5a3c12" stroke="rgba(170,130,50,.28)" stroke-width=".7"/>
+      <rect x="20" y="85" width="12" height="20" rx="2" fill="#5a3c12"/>
+      <ellipse cx="26" cy="106" rx="18" ry="6" fill="#6a4a18"/>
+      <rect x="9" y="102" width="34" height="7" rx="2" fill="#5a3c12" stroke="rgba(170,130,50,.28)" stroke-width=".7"/>
+    </svg>
+  </div>
+
+  <div id="floor"></div>
+</div>
+
+<!-- ══ 修改一：GR小姐 — 黑白漫画风，风衣+眼镜+雨伞 ══ -->
+<div id="gr-zone">
+  <div id="gr-fig">
+    <svg viewBox="0 0 320 480" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <!-- 座椅靠背（深酒红皮革） -->
+      <path d="M60 280 Q50 240 55 200 Q60 160 80 140 Q100 120 130 115 L190 115 Q220 120 240 140 Q260 160 265 200 Q270 240 260 280"
+            fill="#1a0e0e" stroke="#2a1a1a" stroke-width="2"/>
+      <path d="M70 200 Q80 170 100 155 Q120 140 150 135"
+            stroke="#3a1a1a" stroke-width="1.5" fill="none" opacity=".55"/>
+      <!-- 座椅扶手（右侧，黄铜纽扣）-->
+      <rect x="242" y="218" width="34" height="78" rx="8" fill="#1a0e0e" stroke="#2a1a1a" stroke-width="1.5"/>
+      <circle cx="259" cy="244" r="4" fill="#6a4a2a" stroke="rgba(180,140,60,.4)" stroke-width="1"/>
+      <circle cx="259" cy="274" r="4" fill="#6a4a2a" stroke="rgba(180,140,60,.4)" stroke-width="1"/>
+      <!-- 风衣主体 -->
+      <path d="M108 182 Q94 220 90 278 Q87 336 92 396 Q96 436 106 458 L214 458 Q224 436 228 396 Q233 336 230 278 Q226 220 212 182Z"
+            fill="#1e1c1a" stroke="#0c0c0c" stroke-width="2"/>
+      <!-- 大翻领 -->
+      <path d="M128 182 L122 232 L138 218 L155 232 L150 182Z" fill="#242220" stroke="#0c0c0c" stroke-width="1.5"/>
+      <path d="M172 182 L178 232 L162 218 L145 232 L150 182Z" fill="#242220" stroke="#0c0c0c" stroke-width="1.5"/>
+      <!-- 内搭高领 -->
+      <path d="M143 182 L140 212 Q160 207 180 212 L177 182Z" fill="#0e0e0e"/>
+      <!-- 双排扣 -->
+      <circle cx="138" cy="258" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <circle cx="182" cy="258" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <circle cx="138" cy="298" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <circle cx="182" cy="298" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <circle cx="138" cy="338" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <circle cx="182" cy="338" r="3.5" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1.2"/>
+      <!-- 腰带 -->
+      <path d="M94 358 Q160 366 226 358" stroke="#2a1e18" stroke-width="5" fill="none"/>
+      <rect x="147" y="354" width="26" height="10" rx="2" fill="#3a2a1a" stroke="#5a3c1a" stroke-width="1"/>
+      <!-- 颈部 -->
+      <rect x="146" y="152" width="28" height="32" rx="10" fill="#c8c0b0"/>
+      <!-- 油灯侧轮廓光（右侧） -->
+      <path d="M210 182 Q230 218 235 278 Q238 338 232 396"
+            stroke="rgba(232,200,160,.12)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- 头发后层 -->
+      <path d="M120 68 Q110 92 108 128 Q106 162 110 192 Q114 222 122 248 Q118 224 116 196 Q114 164 116 132 Q118 100 124 78Z"
+            fill="#0e0e0e"/>
+      <path d="M200 68 Q210 92 212 128 Q214 162 210 192 Q206 222 198 248 Q202 224 204 196 Q206 164 204 132 Q202 100 196 78Z"
+            fill="#0e0e0e"/>
+      <!-- 头顶发量 -->
+      <path d="M122 62 Q144 46 160 43 Q178 46 198 62 Q193 50 160 46 Q127 50 122 62Z" fill="#121010"/>
+      <!-- 脸部（冷暖分割布光）-->
+      <ellipse cx="160" cy="122" rx="42" ry="44" fill="#d8d0c8"/>
+      <!-- 左脸冷阴影（靠窗侧）-->
+      <ellipse cx="186" cy="120" rx="22" ry="38" fill="rgba(100,120,140,.1)"/>
+      <!-- 右脸暖高光（靠油灯侧）-->
+      <ellipse cx="136" cy="122" rx="18" ry="32" fill="rgba(232,200,160,.07)"/>
+      <!-- 腮红 -->
+      <ellipse cx="128" cy="130" rx="14" ry="8" fill="#cc7868" opacity=".13"/>
+      <ellipse cx="192" cy="130" rx="14" ry="8" fill="#cc7868" opacity=".13"/>
+      <!-- 头发前层 -->
+      <path d="M120 78 Q116 98 118 118 Q120 102 126 86 Q132 74 140 66 Q128 70 120 78Z" fill="#161414"/>
+      <path d="M200 78 Q204 98 202 118 Q200 102 194 86 Q188 74 180 66 Q192 70 200 78Z" fill="#161414"/>
+      <path d="M118 112 Q110 148 112 188 Q114 228 122 268 Q118 242 116 210 Q114 174 116 144 Q118 124 122 110Z" fill="#161414"/>
+      <path d="M202 112 Q210 148 208 188 Q206 228 198 268 Q202 242 204 210 Q206 174 204 144 Q202 124 198 110Z" fill="#161414"/>
+      <!-- 发丝高光（油灯侧）-->
+      <path d="M130 56 Q126 78 128 114" stroke="rgba(210,190,150,.16)" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M136 60 Q132 84 134 110" stroke="rgba(190,170,130,.1)" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- 飘散发丝（速度感）-->
+      <path d="M197 52 Q242 74 257 116 Q267 148 252 178"
+            stroke="#121010" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".55"/>
+      <path d="M123 52 Q82 78 68 126 Q58 162 73 196"
+            stroke="#121010" stroke-width="2" fill="none" stroke-linecap="round" opacity=".45"/>
+      <!-- 铜边圆框眼镜 -->
+      <circle cx="140" cy="116" r="14" stroke="#8a6428" stroke-width="2.2" fill="rgba(200,220,240,.04)"/>
+      <circle cx="180" cy="116" r="14" stroke="#8a6428" stroke-width="2.2" fill="rgba(200,220,240,.04)"/>
+      <path d="M154 115 Q160 112 166 115" stroke="#8a6428" stroke-width="2" fill="none"/>
+      <line x1="126" y1="112" x2="112" y2="106" stroke="#8a6428" stroke-width="2" stroke-linecap="round"/>
+      <line x1="194" y1="112" x2="208" y2="106" stroke="#8a6428" stroke-width="2" stroke-linecap="round"/>
+      <!-- 镜片双重反射 -->
+      <ellipse cx="136" cy="110" rx="6" ry="4" fill="rgba(232,200,160,.18)" transform="rotate(-15 136 110)"/>
+      <line x1="130" y1="108" x2="150" y2="114" stroke="rgba(200,220,255,.24)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="170" y1="108" x2="190" y2="114" stroke="rgba(200,220,255,.2)" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- 眼睛（细长，知性）-->
+      <path d="M128 116 Q140 110 150 116 Q140 122 128 116Z" fill="#0e0e0e"/>
+      <path d="M130 116 Q140 111 148 116 Q140 121 130 116Z" fill="#1e1e1e"/>
+      <circle cx="142" cy="113" r="2.5" fill="#e8e4e0"/>
+      <circle cx="136" cy="118" r="1.2" fill="rgba(255,255,255,.28)"/>
+      <path d="M170 116 Q182 110 192 116 Q182 122 170 116Z" fill="#0e0e0e"/>
+      <path d="M172 116 Q182 111 190 116 Q182 121 172 116Z" fill="#1e1e1e"/>
+      <circle cx="184" cy="113" r="2.5" fill="#e8e4e0"/>
+      <circle cx="178" cy="118" r="1.2" fill="rgba(255,255,255,.28)"/>
+      <!-- 眉毛 -->
+      <path d="M122 102 Q138 96 152 102" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M168 102 Q184 96 198 102" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- 鼻子 -->
+      <path d="M158 124 Q160 128 162 124" stroke="#b0a088" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <!-- 嘴（神秘微笑）-->
+      <path d="M148 136 Q160 142 172 136" stroke="#a08070" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- 下颌线 -->
+      <path d="M120 140 Q160 156 200 140" stroke="rgba(100,80,60,.13)" stroke-width="4" fill="none"/>
+      <!-- 手臂（风衣袖）-->
+      <path d="M104 196 Q84 232 78 278 Q76 312 82 342" stroke="#1e1c1a" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <path d="M216 196 Q236 232 242 278 Q244 312 238 342" stroke="#1e1c1a" stroke-width="20" stroke-linecap="round" fill="none"/>
+      <!-- 手部 -->
+      <ellipse cx="80" cy="348" rx="13" ry="10" fill="#c8c0b0"/>
+      <ellipse cx="240" cy="346" rx="12" ry="9" fill="#c8c0b0"/>
+      <!-- 长柄雨伞（收拢，斜靠右侧）-->
+      <line x1="236" y1="348" x2="288" y2="470" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+      <path d="M236 348 Q230 326 234 306 Q238 290 248 284 Q258 290 262 306"
+            stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M250 284 L272 290 L268 168 L252 168Z" fill="#181818" stroke="#0e0e0e" stroke-width="1"/>
+      <line x1="262" y1="168" x2="272" y2="290" stroke="#262626" stroke-width="1" opacity=".5"/>
+      <line x1="258" y1="168" x2="250" y2="284" stroke="#262626" stroke-width="1" opacity=".5"/>
+      <circle cx="260" cy="166" r="3.5" fill="#6a4a2a" stroke="rgba(180,140,60,.4)" stroke-width=".8"/>
+      <ellipse cx="288" cy="472" rx="7" ry="3" fill="rgba(0,0,0,.28)"/>
+    </svg>
+  </div>
+  <div id="gr-plate">
+    <div class="lbl">GR. — TEMPORAL ARCHIVIST</div>
+    <div class="rl"></div>
+  </div>
+  <div id="dlg">
+    <div class="dp">
+      <div class="dlg-titlebar">
+        <span class="dlg-tname">GR. — ARCHIVIST</span>
+        <button class="dlg-tbtn" onclick="var d=document.getElementById('dlg');d.classList.toggle('dlg-mini');this.textContent=d.classList.contains('dlg-mini')?'+':'—';">—</button>
       </div>
+      <div class="dlg-body-wrap"><div class="db">
+        <div class="dt"><span id="tw"></span><span class="cur" id="cur"></span></div>
+        <div class="dir">
+          <input class="di" id="inp" type="text" placeholder="在颠簸中……" maxlength="80">
+          <button class="dsb" onclick="send()">发</button>
+        </div>
+      </div></div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <section class="panel">
-    <aside class="card">
-      <h2>选择音乐家</h2>
-      <div class="list" id="composer-list"></div>
-    </aside>
-    <section class="journey">
-      <div class="letter">
-        <h2 id="letter-title">今日旅行信札</h2>
-        <div class="meta" id="letter-tags"></div>
-        <div class="letter-text" id="letter-text"></div>
-        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-          <button class="btn solid" onclick="generateLetter()">重新生成信札</button>
-          <button class="btn" onclick="savePlan()">保存旅行草稿</button>
+<!-- ══ RIGHT: 档案书架 ══ -->
+<div id="right">
+  <div id="ttl">
+    <div class="en">TIME MUSIC</div>
+    <div class="zh">月影摇弦</div>
+    <div class="rl"></div>
+  </div>
+  <div id="shelf"><div class="sc">
+    <div class="sr" id="r1"></div>
+    <div class="sr" id="r2"></div>
+    <div class="sr" id="r3"></div>
+  </div></div>
+</div>
+
+<!-- 桌面物件 -->
+<div id="desk">
+  <div class="ditems">
+    <div>
+      <svg class="map-svg" width="60" height="42" viewBox="0 0 60 42">
+        <rect width="60" height="42" rx="2" fill="#888068" opacity=".68"/>
+        <rect x="2" y="2" width="56" height="38" rx="1" fill="#948870" opacity=".48"/>
+        <path d="M4 27 Q17 21 27 25 Q37 29 51 21" stroke="#686050" stroke-width="1.5" fill="none" opacity=".55"/>
+        <circle cx="37" cy="17" r="3.5" fill="#8a1a1a" opacity=".8"/>
+        <circle cx="37" cy="17" r="1.5" fill="#c02020"/>
+        <line x1="37" y1="20" x2="37" y2="25" stroke="#6a1010" stroke-width="1"/>
+        <line x1="19" y1="2" x2="19" y2="40" stroke="rgba(96,86,56,.2)" stroke-width=".5"/>
+        <line x1="39" y1="2" x2="39" y2="40" stroke="rgba(96,86,56,.2)" stroke-width=".5"/>
+        <line x1="2" y1="14" x2="58" y2="14" stroke="rgba(96,86,56,.2)" stroke-width=".5"/>
+        <line x1="2" y1="29" x2="58" y2="29" stroke="rgba(96,86,56,.2)" stroke-width=".5"/>
+      </svg>
+    </div>
+    <div>
+      <svg width="26" height="34" viewBox="0 0 26 34">
+        <path d="M4 9 Q3 26 3 28 L23 28 Q23 26 22 9Z" fill="#d8d4c4" stroke="#b0a888" stroke-width=".7"/>
+        <path d="M4 9 Q13 7 22 9" stroke="#b0a888" stroke-width=".7" fill="none"/>
+        <ellipse cx="13" cy="22" rx="6.5" ry="2.8" fill="#8a6838" opacity=".18"/>
+        <path d="M22 14 Q27 16 27 20 Q27 24 22 24" stroke="#b0a888" stroke-width="1.2" fill="none"/>
+        <ellipse cx="13" cy="30" rx="11" ry="2.8" fill="#c8c4b0" stroke="#a8a488" stroke-width=".7"/>
+      </svg>
+    </div>
+    <div class="watch-item">
+      <div class="watch-glow"></div>
+      <svg width="34" height="40" viewBox="0 0 34 40">
+        <rect x="13" y="0" width="8" height="6" rx="2" fill="#5a3c12"/>
+        <circle cx="17" cy="23" r="15" fill="#6a4a18" stroke="rgba(180,140,60,.48)" stroke-width="1.5"/>
+        <circle cx="17" cy="23" r="12" fill="#2a2010" stroke="rgba(150,110,38,.28)" stroke-width=".8"/>
+        <circle cx="17" cy="23" r="10" fill="#1a1808" stroke="rgba(130,94,28,.18)" stroke-width=".5"/>
+        <line x1="17" y1="14" x2="17" y2="16" stroke="rgba(200,196,184,.28)" stroke-width=".8"/>
+        <line x1="17" y1="30" x2="17" y2="32" stroke="rgba(200,196,184,.28)" stroke-width=".8"/>
+        <line x1="8" y1="23" x2="10" y2="23" stroke="rgba(200,196,184,.28)" stroke-width=".8"/>
+        <line x1="24" y1="23" x2="26" y2="23" stroke="rgba(200,196,184,.28)" stroke-width=".8"/>
+        <line x1="17" y1="23" x2="17" y2="15" stroke="#b89020" stroke-width="1.2" stroke-linecap="round" style="transform-origin:17px 23px;animation:wR 8s linear infinite;"/>
+        <line x1="17" y1="23" x2="21" y2="17" stroke="#c8a030" stroke-width=".8" stroke-linecap="round" style="transform-origin:17px 23px;animation:wR 2s linear infinite;"/>
+        <circle cx="17" cy="23" r="1.5" fill="#b89020"/>
+      </svg>
+    </div>
+    <svg width="46" height="56" viewBox="0 0 46 56" opacity=".78">
+      <rect x="24" y="32" width="16" height="18" rx="3" fill="#14202e" stroke="#242e3e" stroke-width=".7"/>
+      <rect x="28" y="27" width="10" height="7" rx="2" fill="#10182a"/>
+      <ellipse cx="33" cy="27" rx="5" ry="2.5" fill="#080e18"/>
+      <path d="M3 53 Q21 32 40 8" stroke="#b0a070" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M40 8 Q47 2 48 5 Q42 14 40 8Z" fill="#e0d8c0" opacity=".85"/>
+      <path d="M36 14 Q44 7 46 11 Q40 18 36 14Z" fill="#d0c8b0" opacity=".75"/>
+      <path d="M32 20 Q40 13 42 17 Q37 23 32 20Z" fill="#c0b8a0" opacity=".65"/>
+      <path d="M3 53 Q1 56 5 54Z" fill="#180a00"/>
+    </svg>
+  </div>
+  <div class="dsurf"></div>
+</div>
+
+</div><!-- end #scene -->
+
+<div id="nav">
+  <button class="nb" onclick="goNav('cards')">卡牌收集</button>
+  <button class="nb" onclick="goNav('music')">音乐欣赏</button>
+  <button class="nb" onclick="goNav('bio')">人生传记</button>
+</div>
+
+<!-- ══ 莫扎特世界 ══ -->
+<div id="moz">
+  <button id="mbk" onclick="closeMoz()">← 返回列车</button>
+  <div class="morn">✦ · ✦ · ✦</div>
+  <div id="mnm">WOLFGANG AMADEUS MOZART</div>
+  <div id="myr">Vienna · 1756 — 1791</div>
+  <div class="mhr"></div>
+  <div id="card-area">
+    <div id="float-cards"></div>
+    <div id="main-card-wrap" onclick="flipCard()">
+      <div id="main-card">
+        <div class="card-back">
+          <div class="back-center">
+            <span class="back-orn">♩</span>
+            <span class="back-orn" style="font-size:13px;opacity:.48;">✦</span>
+            <span class="back-txt">DESTINY · 命运</span>
+          </div>
+        </div>
+        <div class="card-front">
+          <div class="cf-inner">
+            <div class="cf-period" id="cf-period">—</div>
+            <div class="cf-year" id="cf-year">——</div>
+            <div class="cf-rule"></div>
+            <div class="cf-event" id="cf-event"></div>
+            <div class="cf-divider"></div>
+            <div class="cf-work" id="cf-work-label">作品</div>
+            <div class="cf-work-title" id="cf-work-title"></div>
+          </div>
         </div>
       </div>
-      <aside class="card">
-        <h2>音频入口</h2>
-        <div id="track-list"></div>
-      </aside>
-    </section>
-  </section>
-
-  <section class="agent" style="margin-top:18px">
-    <h2>未来接口规划</h2>
-    <div class="agent-grid">
-      <div class="agent-cell"><strong>DeepSeek 信札</strong><span>未来调用 /api/music-travel-letter，按音乐家、城市、作品生成故事。</span></div>
-      <div class="agent-cell"><strong>音频链接</strong><span>先跳转网易云、Spotify、Apple Music 搜索，避免版权风险。</span></div>
-      <div class="agent-cell"><strong>旅行任务</strong><span>根据作品生成听辨、情绪、时代、场景选择题。</span></div>
-      <div class="agent-cell"><strong>资料沉淀</strong><span>把信札、作品和点评同步进 CMS 的资料库与笔记卡片。</span></div>
     </div>
-  </section>
-</main>
+    <div id="draw-area">
+      <div class="chint">点击卡牌翻开命运</div>
+      <button class="drb" onclick="drawNew()">重新抽取</button>
+    </div>
+    <div id="write-area">
+      <button class="write-btn" onclick="triggerIncomingLetter(GAME.currentCard)">✉ 给莫扎特写信</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 书信 ══ -->
+<div id="letter-screen">
+  <div class="letter-wrap">
+    <div class="letter-paper">
+      <div class="lp-inner">
+        <div class="letter-header">
+          <div class="letter-to" id="letter-to">致 W. A. 莫扎特</div>
+          <div class="letter-date" id="letter-date">维也纳，某年某月</div>
+        </div>
+        <div class="letter-context" id="letter-context">——</div>
+        <div class="letter-salute">亲爱的莫扎特：</div>
+        <textarea class="letter-textarea" id="letter-input"
+          placeholder="我读到了你在那段时日里的处境……"></textarea>
+        <div class="letter-sign">来自时光之外的友人</div>
+        <div class="letter-actions">
+          <button class="lbtn-cancel" onclick="closeLetter()">搁置此信</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;opacity:.28;">🕯</span>
+            <button class="lbtn-send" onclick="sendLetter()">封缄寄出 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="reply-paper">
+      <div class="rp-inner">
+        <div class="rp-from">W. A. MOZART — 回函</div>
+        <div class="rp-text" id="reply-text">
+          <div class="rp-loading">正在等待回信<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <script>
-const composers=[
-  {id:'bach',name:'巴赫',years:'1685-1750',home:'leipzig',tags:['复调','宗教','键盘'],works:['G弦上的咏叹调','平均律键盘曲集']},
-  {id:'mozart',name:'莫扎特',years:'1756-1791',home:'vienna',tags:['古典','歌剧','明亮'],works:['费加罗的婚礼','第40号交响曲']},
-  {id:'debussy',name:'德彪西',years:'1862-1918',home:'paris',tags:['印象派','色彩','朦胧'],works:['月光','大海']},
-  {id:'hisaishi',name:'久石让',years:'1950-',home:'tokyo',tags:['电影','动画','旋律'],works:['天空之城','One Summer’s Day']},
-  {id:'sakamoto',name:'坂本龙一',years:'1952-2023',home:'newyork',tags:['电子','电影','极简'],works:['Merry Christmas Mr. Lawrence','Energy Flow']}
+const CARDS=[
+  {period:"神童时期",year:"1762",event:"六岁的沃尔夫冈在维也纳为女皇玛丽亚·特蕾莎表演，演毕跳上她的膝头亲吻她的脸颊。父亲利奥波德站在一旁，记录着每一个细节。",workFull:"Minuet in D minor, K.1"},
+  {period:"神童时期",year:"1764",event:"在伦敦，他结识了克里斯蒂安·巴赫。两人共同即兴演奏，这次相遇让他明白：音乐可以是两个人之间的秘密语言。",workFull:"Violin Sonata in B♭, K.8"},
+  {period:"萨尔茨堡时期",year:"1773",event:"他向大主教递交辞呈，被拒绝。十七岁的他感到被困住了——他出生的城市是一座笼子，而笼子的门从外面锁着。",workFull:"Symphony No.25 in G minor, K.183"},
+  {period:"萨尔茨堡时期",year:"1776",event:"他为宫廷写下小夜曲。表面是庆典的音乐，内里藏着无处宣泄的野心。他开始在信中以更尖刻的语言谈及大主教。",workFull:"Serenade No.7 'Haffner', K.250"},
+  {period:"巴黎之痛",year:"1778",event:"他的母亲在他们租住的巴黎房间里病倒。他守在床边三天，然后写信给父亲，用了很长的篇幅绕弯子，因为那句话实在说不出口。",workFull:"Piano Sonata in A minor, K.310"},
+  {period:"巴黎之痛",year:"1778",event:"巴黎的贵族对他毫无兴趣。他曾经是神童，而神童长大后，就只是另一个寻求赞助的音乐家。他在愤怒与失望中开始构思新的作品。",workFull:"Symphony No.31 'Paris', K.297"},
+  {period:"维也纳黄金期",year:"1782",event:"他违抗父亲的意志，与康斯坦采秘密订婚后成婚。父亲迟来的同意信让莫扎特沉默了整整两天，然后他去买了一束花。",workFull:"Die Entführung aus dem Serail, K.384"},
+  {period:"维也纳黄金期",year:"1786",event:"《费加罗的婚礼》首演，维也纳为之疯狂。有些唱段被要求安可了七次。皇帝只说了一句：'音符太多了，莫扎特。'",workFull:"Le nozze di Figaro, K.492"},
+  {period:"黄昏与告别",year:"1788",event:"他在六周内写下最后三首交响曲，没有委托，没有演出的预期。这三部作品在他生前从未被公演。没有人知道他为何写下它们。",workFull:"Symphony No.41 'Jupiter', K.551"},
+  {period:"黄昏与告别",year:"1791",event:"一个戴灰色面具的陌生人登门，委托他写一部安魂曲，却拒绝透露委托人的姓名。莫扎特开始相信这是死亡本身向他索要一首歌。",workFull:"Requiem in D minor, K.626 (unfinished)"},
 ];
-const cities={
-  leipzig:{name:'莱比锡',mood:'秩序与烛光',line:'这里适合写一封关于复调、教堂和清晨键盘声的信。'},
-  vienna:{name:'维也纳',mood:'圆舞曲与剧院',line:'这里适合写一封关于才华、社交和乐句转身的信。'},
-  paris:{name:'巴黎',mood:'雾、河岸与色彩',line:'这里适合写一封关于月光、和声雾气和现代听觉的信。'},
-  tokyo:{name:'东京',mood:'霓虹与电影胶片',line:'这里适合写一封关于动画、钢琴主题和城市孤独的信。'},
-  newyork:{name:'纽约',mood:'玻璃、噪声与远行',line:'这里适合写一封关于现代性、电子声和漂泊的信。'}
+
+const SD={
+  r1:[
+    {s:"J.S. Bach",f:"约翰·塞巴斯蒂安·巴赫",w:16,h:78,c:"leather"},
+    {s:"Handel",f:"格奥尔格·弗里德里克·亨德尔",w:14,h:72,c:"velvet_g"},
+    {s:"Vivaldi",f:"安东尼奥·维瓦尔第",w:14,h:75,c:"metal"},
+    {s:"Haydn",f:"弗朗茨·约瑟夫·海顿",w:15,h:70,c:"leather"},
+    {s:"Gluck",f:"克里斯托弗·格鲁克",w:13,h:66,c:"chain"},
+    {s:"Scarlatti",f:"多梅尼科·斯卡拉蒂",w:14,h:73,c:"velvet_b"},
+    {s:"C.P.E. Bach",f:"C.P.E.巴赫",w:15,h:68,c:"leather"},
+    {s:"Rameau",f:"让-菲利普·拉莫",w:12,h:64,c:"metal"},
+    {s:"Couperin",f:"弗朗索瓦·库普兰",w:13,h:71,c:"chain"},
+    {s:"Purcell",f:"亨利·珀赛尔",w:13,h:74,c:"velvet_g"},
+  ],
+  r2:[
+    {s:"Mozart",f:"沃尔夫冈·阿马德乌斯·莫扎特",w:20,h:86,c:"velvet_r",moz:true},
+    {s:"Beethoven",f:"路德维希·范·贝多芬",w:17,h:78,c:"leather"},
+    {s:"Schubert",f:"弗朗茨·舒伯特",w:14,h:70,c:"velvet_g"},
+    {s:"Weber",f:"卡尔·马利亚·冯·韦伯",w:13,h:65,c:"metal"},
+    {s:"Cherubini",f:"路易吉·凯鲁比尼",w:13,h:67,c:"chain"},
+    {s:"Hummel",f:"约翰·内波穆克·胡梅尔",w:14,h:63,c:"leather"},
+    {s:"Clementi",f:"穆肖·克莱门蒂",w:14,h:69,c:"velvet_b"},
+    {s:"Paer",f:"费迪南多·帕尔",w:11,h:60,c:"metal"},
+  ],
+  r3:[
+    {s:"Chopin",f:"弗雷德里克·肖邦",w:14,h:72,c:"velvet_b"},
+    {s:"Schumann",f:"罗伯特·舒曼",w:13,h:68,c:"leather"},
+    {s:"Liszt",f:"弗朗茨·李斯特",w:14,h:75,c:"velvet_g"},
+    {s:"Brahms",f:"约翰内斯·勃拉姆斯",w:16,h:71,c:"leather"},
+    {s:"Wagner",f:"理查德·瓦格纳",w:14,h:77,c:"metal"},
+    {s:"Verdi",f:"朱塞佩·威尔第",w:13,h:66,c:"chain"},
+    {s:"Tchaikovsky",f:"柴可夫斯基",w:17,h:72,c:"velvet_r"},
+    {s:"Dvorak",f:"安东宁·德沃夏克",w:14,h:66,c:"leather"},
+    {s:"Debussy",f:"克劳德·德彪西",w:14,h:71,c:"velvet_b"},
+  ]
 };
-let activeComposer=composers[0],activeCity='leipzig';
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function renderComposers(){
-  document.getElementById('composer-list').innerHTML=composers.map(c=>`<div class="composer ${c.id===activeComposer.id?'on':''}" onclick="chooseComposer('${c.id}')"><div class="avatar">${esc(c.name.slice(0,1))}</div><div><strong>${esc(c.name)}</strong><span>${esc(c.years)} · ${esc(c.tags.join(' / '))}</span></div></div>`).join('');
+
+/* ══ 修改五：书架材质系统 ══ */
+const MATERIALS={
+  leather:{
+    bg:`linear-gradient(90deg,#2a1a0a 0%,#3a2a1a 30%,#2a1a0a 60%,#1a0e06 100%)`,
+    shadow:`inset 2px 0 4px rgba(0,0,0,.42),inset -1px 0 2px rgba(255,255,255,.04)`},
+  velvet_r:{
+    bg:`radial-gradient(ellipse 70% 60% at 40% 40%,#4a1a1a 0%,#2a0a0a 60%,#1a0505 100%)`,
+    shadow:`inset 0 0 8px rgba(180,40,40,.2),0 0 0 1px rgba(110,18,18,.42)`},
+  velvet_g:{
+    bg:`radial-gradient(ellipse 70% 60% at 45% 40%,#0e1e1a 0%,#061412 60%,#040e0a 100%)`,
+    shadow:`inset 0 0 6px rgba(30,120,80,.15)`},
+  velvet_b:{
+    bg:`radial-gradient(ellipse 70% 60% at 45% 40%,#0e1428 0%,#060e1e 60%,#04080e 100%)`,
+    shadow:`inset 0 0 6px rgba(40,60,140,.15)`},
+  metal:{
+    bg:`linear-gradient(90deg,#383838 0%,#585858 20%,#484848 50%,#282828 100%)`,
+    shadow:`inset 0 0 4px rgba(0,0,0,.5),0 0 0 .5px rgba(180,180,180,.1)`},
+  chain:{
+    bg:`linear-gradient(90deg,#1c1c1c 0%,#2c2c2c 50%,#1c1c1c 100%)`,
+    shadow:`inset 0 0 6px rgba(0,0,0,.6)`,
+    borderLeft:`2px solid #6a4a2a`},
+};
+
+function buildShelves(){
+  Object.entries(SD).forEach(([id,bks])=>{
+    const row=document.getElementById(id);
+    bks.forEach((b,idx)=>{
+      const el=document.createElement('div');
+      el.className='bk'+(b.moz?' bk-mz':'');
+      const mat=MATERIALS[b.c]||MATERIALS.leather;
+      const goldOp=b.moz?0.92:(0.48+Math.random()*0.38);
+      const tilt=idx%3===1?'rotate(-1.5deg)':idx%4===0?'rotate(1deg)':'';
+      el.style.cssText=`\n        width:${b.w}px;height:${b.h}px;\n        background:${mat.bg};\n        box-shadow:${mat.shadow||''};\n        ${mat.borderLeft?'border-left:'+mat.borderLeft+';':''}\n        ${tilt?'transform:'+tilt+';':''}`;
+      el.innerHTML=`<div class="bs" style="color:rgba(200,196,184,${goldOp})">${b.s}</div><div class="btt">${b.f}</div>`;
+      el.onclick=b.moz?openMoz:()=>grSay(`${b.f}的档案，尚未解封。\n或许，等你准备好了再来。`);
+      row.appendChild(el);
+    });
+  });
 }
-function chooseComposer(id){activeComposer=composers.find(c=>c.id===id)||activeComposer;activeCity=activeComposer.home;syncCity();renderComposers();generateLetter();}
-function chooseCity(id,el){activeCity=id;document.querySelectorAll('.city').forEach(c=>c.classList.remove('on'));el.classList.add('on');generateLetter();}
-function syncCity(){document.querySelectorAll('.city').forEach(c=>c.classList.remove('on'));const idx=Object.keys(cities).indexOf(activeCity);document.querySelectorAll('.city')[Math.max(idx,0)]?.classList.add('on');}
-function renderTracks(){
-  document.getElementById('track-list').innerHTML=activeComposer.works.map((w,i)=>`<div class="track"><strong>${esc(w)}</strong><span>未来可接音频或外部搜索</span><div class="placeholder"></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" onclick="openSearch(activeComposer.works[${i}])">搜索</button></div></div>`).join('');
+
+/* ══ 窗外生成器 ══ */
+const world=document.getElementById('passing-world');
+let worldActive=true;
+function spawnElement(){
+  if(!worldActive)return;
+  const type=Math.random();
+  const el=document.createElement('div');
+  if(type<0.45){
+    el.style.cssText=`position:absolute;right:-2px;top:0;bottom:0;width:1.5px;background:#0e0c0a;`;
+    const dur=(0.8+Math.random()*0.6)+'s';
+    el.style.transition=`transform ${dur} linear`;
+    world.appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.transform=`translateX(-${world.clientWidth+4}px)`));
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},parseFloat(dur)*1000+100);
+  }else if(type<0.72){
+    el.style.cssText=`position:absolute;right:0;top:${20+Math.random()*40}%;width:6px;height:6px;border-radius:50%;background:#a87a10;box-shadow:0 0 12px 4px rgba(168,120,16,.55),0 0 40px 1px rgba(190,190,170,.12);`;
+    const dur=(1+Math.random()*0.5)+'s';
+    el.style.transition=`transform ${dur} linear`;
+    world.appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.transform=`translateX(-${world.clientWidth+10}px)`));
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},parseFloat(dur)*1000+100);
+  }else if(type<0.88){
+    el.style.cssText=`position:absolute;right:${Math.random()*100}%;top:-20px;width:1px;height:${12+Math.random()*18}px;background:linear-gradient(180deg,transparent,rgba(150,180,200,.18));border-radius:0 0 50% 50%;`;
+    const dur=(1.5+Math.random()*1.5)+'s';
+    el.style.transition=`top ${dur} linear,transform ${dur} linear`;
+    world.appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.top=(world.clientHeight+20)+'px';el.style.transform='translateX(-6px)';}));
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},parseFloat(dur)*1000+100);
+  }else{
+    el.style.cssText=`position:absolute;right:-60px;bottom:0;width:${40+Math.random()*60}px;height:${30+Math.random()*50}px;background:#0a0808;border-radius:2px 2px 0 0;opacity:.65;`;
+    const dur=(3+Math.random()*2)+'s';
+    el.style.transition=`transform ${dur} linear`;
+    world.appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.transform=`translateX(-${world.clientWidth+80}px)`));
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},parseFloat(dur)*1000+100);
+  }
 }
-function openSearch(q){window.open('https://music.163.com/#/search/m/?s='+encodeURIComponent(q+' '+activeComposer.name),'_blank');}
-async function fetchTravelLetter(){
-  // 未来接入 DeepSeek 时，把这里替换为 fetch('/api/music-travel-letter', { method:'POST', ... })。
-  const city=cities[activeCity];
-  return `${activeComposer.name}抵达${city.name}时，声音先变成一种${city.mood}。\n\n${city.line}\n\n请从《${activeComposer.works[0]}》开始听，把旋律里最先出现的情绪记下来。今天的任务不是判断它好不好，而是找出它为什么会在这个地方被你听见。`;
+function runWorld(){spawnElement();setTimeout(runWorld,150+Math.random()*200);}
+runWorld();
+// 静态雨痕
+for(let i=0;i<8;i++){
+  const r=document.createElement('div');r.className='rain';
+  r.style.cssText=`left:${Math.random()*100}%;height:${40+Math.random()*60}%;top:${Math.random()*30}%;opacity:${.06+Math.random()*.08};`;
+  world.appendChild(r);
 }
-async function generateLetter(){
-  const city=cities[activeCity];
-  document.getElementById('letter-title').textContent=`${activeComposer.name} · ${city.name}`;
-  document.getElementById('letter-tags').innerHTML=[...activeComposer.tags,city.mood].map(t=>`<span class="tag">${esc(t)}</span>`).join('');
-  document.getElementById('letter-text').textContent=await fetchTravelLetter();
-  renderTracks();
+
+/* ══ 火车震动 ══ */
+const sceneEl=document.getElementById('scene');
+function startPhysics(){
+  let t=0;
+  (function micro(){
+    t+=0.1;
+    const x=Math.sin(t*1.7)*.3+Math.sin(t*3.1)*.15;
+    const y=Math.sin(t*2.3)*.8+Math.sin(t*1.1)*.4;
+    const r=Math.sin(t*.8)*.06;
+    sceneEl.style.transform=`translate(${x}px,${y}px) rotate(${r}deg)`;
+    requestAnimationFrame(micro);
+  })();
+  function joltSchedule(){
+    const d=4200+Math.random()*1600;
+    setTimeout(()=>{
+      document.getElementById('lamp-zone').classList.add('jolt');
+      setTimeout(()=>document.getElementById('lamp-zone').classList.remove('jolt'),500);
+      sceneEl.style.transition='transform .12s ease-in';
+      sceneEl.style.transform='translateY(2.5px)';
+      setTimeout(()=>{sceneEl.style.transition='transform .2s ease-out';sceneEl.style.transform='translateY(0)';setTimeout(()=>sceneEl.style.transition='',200);},120);
+      joltSchedule();
+    },d);
+  }
+  joltSchedule();
 }
-function savePlan(){localStorage.setItem('musicTravelDraft',JSON.stringify({composer:activeComposer.id,city:activeCity,date:new Date().toISOString()}));alert('已保存到本机草稿');}
-renderComposers();generateLetter();
+startPhysics();
+
+/* ══ 尘埃 ══ */
+function spawnDust(){
+  const beam=document.getElementById('lamp-beam');
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div');d.className='dust';
+    const sz=1+Math.random()*2;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${30+Math.random()*40}%;top:${50+Math.random()*50}%;--dx:${-20+Math.random()*40}px;animation-duration:${4+Math.random()*6}s;animation-delay:${Math.random()*4}s;`;
+    beam.appendChild(d);
+    setTimeout(()=>{if(d.parentNode)d.parentNode.removeChild(d);},10000);
+  }
+  setTimeout(spawnDust,3000);
+}
+spawnDust();
+
+/* ══ 打字机 ══ */
+let tt=null;
+function grSay(text,spd=36){
+  if(tt){clearTimeout(tt);tt=null;}
+  const el=document.getElementById('tw'),cur=document.getElementById('cur');
+  el.textContent='';cur.style.display='inline-block';
+  let i=0;
+  (function step(){
+    if(i<text.length){el.textContent+=text[i++];tt=setTimeout(step,text.charCodeAt(i-1)===10?spd*5:spd);}
+    else setTimeout(()=>cur.style.display='none',2200);
+  })();
+}
+const LS=[
+  "你来了。\n列车不会为任何人停下——但你刚好赶上了。",
+  "那排书架固定在车厢壁上。\n每当经过隧道，你才能看清书脊上写着什么。",
+  "莫扎特的档案在第二排最左边。\n皮带是解开的，说明最近有人查阅过。",
+  "这趟列车没有终点。\n但有些车站，只停一次。",
+  "命运卡牌不是用来算命的。\n它只是问你——那一刻，你在哪节车厢里。",
+  "窗外的景色永远在后退。\n这是时间唯一诚实的地方。",
+];
+let li=0;
+function send(){
+  const inp=document.getElementById('inp');
+  if(!inp.value.trim())return;inp.value='';
+  grSay(LS[li%LS.length]);li++;
+}
+document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+
+/* ══ 卡牌 ══ */
+let currentCard=null,flipped=false;
+function buildFloatCards(){
+  const c=document.getElementById('float-cards');
+  if(c.children.length>0)return;
+  [{l:'7%',t:'12%',r:'-18deg',dur:'6s',del:'0s',op:.1},
+   {l:'78%',t:'8%',r:'22deg',dur:'7s',del:'1.2s',op:.09},
+   {l:'4%',t:'55%',r:'-8deg',dur:'5.5s',del:'.5s',op:.07},
+   {l:'80%',t:'50%',r:'15deg',dur:'6.5s',del:'2s',op:.1},
+   {l:'38%',t:'5%',r:'5deg',dur:'8s',del:'1.8s',op:.06},
+  ].forEach(cfg=>{
+    const el=document.createElement('div');el.className='fc';
+    el.style.cssText=`left:${cfg.l};top:${cfg.t};opacity:${cfg.op};transform:rotate(${cfg.r});animation:fcFloat ${cfg.dur} ${cfg.del} ease-in-out infinite;`;
+    c.appendChild(el);
+  });
+}
+function drawNew(){
+  const card=document.getElementById('main-card');
+  if(flipped){card.classList.remove('flipped');flipped=false;}
+  document.getElementById('write-area').classList.remove('show');
+  currentCard=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById('cf-period').textContent=currentCard.period;
+  document.getElementById('cf-year').textContent=currentCard.year;
+  document.getElementById('cf-event').textContent=currentCard.event;
+  document.getElementById('cf-work-label').textContent='代表作品';
+  document.getElementById('cf-work-title').textContent=currentCard.workFull;
+  grSay(`${currentCard.year}年。\n${currentCard.period}。\n点击卡牌，翻开它。`);
+}
+function flipCard(){
+  if(!currentCard)return;
+  const card=document.getElementById('main-card');
+  if(!flipped){
+    card.classList.add('flipped');flipped=true;
+    setTimeout(()=>{
+      document.getElementById('write-area').classList.add('show');
+      grSay(`你看到了。\n${currentCard.year}年，${currentCard.period}。\n如果你想和他说些什么——现在可以写信了。`);
+    },900);
+  }else{card.classList.remove('flipped');flipped=false;document.getElementById('write-area').classList.remove('show');}
+}
+
+/* ══ 莫扎特转场 ══ */
+function openMoz(){
+  grSay("那份档案，你拿起来了。\n窗外会有一道闪光。\n不要闭眼。");
+  setTimeout(()=>{
+    worldActive=false;
+    setTimeout(()=>{
+      const flash=document.getElementById('time-flash');
+      flash.style.opacity='.88';
+      setTimeout(()=>{
+        flash.style.opacity='0';
+        document.getElementById('moz').classList.add('on');
+        buildFloatCards();drawNew();
+        setTimeout(()=>{worldActive=true;},500);
+      },600);
+    },800);
+  },2200);
+}
+function closeMoz(){
+  const flash=document.getElementById('time-flash');
+  flash.style.opacity='.6';
+  setTimeout(()=>{
+    flash.style.opacity='0';
+    document.getElementById('moz').classList.remove('on');
+    setTimeout(()=>grSay("你回来了。\n列车还在走。\n那份档案还在架子上，还是未结案。"),600);
+  },500);
+}
+function openLetter(){
+  if(!currentCard)return;
+  document.getElementById('letter-to').textContent='致 W. A. 莫扎特';
+  document.getElementById('letter-date').textContent=`维也纳，${currentCard.year}年`;
+  document.getElementById('letter-context').textContent=currentCard.event;
+  document.getElementById('letter-input').value='';
+  document.getElementById('reply-paper').classList.remove('show');
+  document.getElementById('reply-text').innerHTML=
+    `<div class="rp-loading">正在等待回信<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>`;
+  document.getElementById('letter-screen').classList.add('on');
+}
+function closeLetter(){document.getElementById('letter-screen').classList.remove('on');}
+async function sendLetter(){
+  const text=document.getElementById('letter-input').value.trim();
+  if(!text)return;
+  const rp=document.getElementById('reply-paper'),rt=document.getElementById('reply-text');
+  rp.classList.add('show');
+  rt.innerHTML=`<div class="rp-loading">正在等待回信<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>`;
+  const KEY=DSKEY;
+  const sys=`你是沃尔夫冈·阿马德乌斯·莫扎特，现在是${currentCard.year}年，"${currentCard.period}"阶段。你刚经历：${currentCard.event}。给来自未来的神秘通信者回信。用莫扎特真实性格：机智、孩子气、热爱音乐、对父亲又爱又怕。书信体，现代中文，150-250字。结尾：你忠实的 W. A. 莫扎特`;
+  try{
+    const res=await fetch('https://api.deepseek.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${KEY}`},
+      body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:text}],max_tokens:400,temperature:.88})
+    });
+    const d=await res.json();
+    typeReply(d.choices?.[0]?.message?.content||'（信件在传递途中遗失了）',rt);
+  }catch(e){
+    typeReply(`亲爱的朋友，\n\n您的信让我既惊讶又感动。\n\n您说得对。那些日子里我的确感到沉重——不过请放心，音符从未真正离开我。即便是在最难捱的夜晚，我也能听见它们在脑中流淌，就像一条地下的河，无论地表如何变化，它始终在那里。\n\n您忠实的\nW. A. 莫扎特`,rt);
+  }
+}
+function typeReply(text,el){
+  el.textContent='';let i=0;
+  (function step(){if(i<text.length){el.textContent+=text[i++];setTimeout(step,text.charCodeAt(i-1)===10?100:28);}})();
+}
+function goNav(s){
+  if(s==='bio'){if(GAME.collectedCards.length===0){grSay('还没有收集到任何卡牌。\n翻开一张，先读读他的故事。');}else{setTimeout(generateChronicle,300);}return;}
+  const m={cards:"卡牌收集功能，即将开放。\n你收集的每一张，都是他人生里的某一天。",
+    music:"音乐欣赏功能，正在准备。\n你听到的第一首，会是哪一年的哪一刻。",
+    bio:"人生传记，等你解锁足够多的卡牌。\n那时候，你就能从头看一遍他的一生。"};
+  grSay(m[s]||'');
+}
+
+/* 浮动卡动画 */
+const sty=document.createElement('style');
+sty.textContent=`@keyframes fcFloat{0%,100%{transform:translateY(0) rotate(var(--r,0deg));}50%{transform:translateY(-10px) rotate(var(--r,0deg));}}`;
+document.head.appendChild(sty);
+
+buildShelves();
+startPhysics();
+setTimeout(()=>grSay(LS[0]),3500);
+
+
+/* === 白噪音系统 === */
+var audioCtx=null,noiseStarted=false;
+function startTrainNoise(){
+  if(noiseStarted)return;noiseStarted=true;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    var master=audioCtx.createGain();
+    master.gain.setValueAtTime(0,audioCtx.currentTime);
+    master.gain.linearRampToValueAtTime(0.15,audioCtx.currentTime+3);
+    master.connect(audioCtx.destination);
+    var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*4,audioCtx.sampleRate);
+    var d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.7;
+    var s=audioCtx.createBufferSource();s.buffer=buf;s.loop=true;
+    var lp=audioCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=80;
+    var g=audioCtx.createGain();g.gain.value=0.5;
+    s.connect(lp);lp.connect(g);g.connect(master);s.start();
+    var buf2=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);
+    var d2=buf2.getChannelData(0);
+    for(var j=0;j<d2.length;j++)d2[j]=(Math.random()*2-1)*0.2;
+    var s2=audioCtx.createBufferSource();s2.buffer=buf2;s2.loop=true;
+    var bp=audioCtx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=700;bp.Q.value=0.5;
+    var g2=audioCtx.createGain();g2.gain.value=0.1;
+    s2.connect(bp);bp.connect(g2);g2.connect(master);s2.start();
+    (function beat(){
+      if(!audioCtx)return;
+      var osc=audioCtx.createOscillator(),env=audioCtx.createGain();
+      osc.frequency.value=55+Math.random()*20;
+      env.gain.setValueAtTime(0.06,audioCtx.currentTime);
+      env.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.08);
+      osc.connect(env);env.connect(master);
+      osc.start();osc.stop(audioCtx.currentTime+0.1);
+      setTimeout(beat,380+Math.random()*180);
+    })();
+  }catch(e){}
+  var _i=document.getElementById('aud-ind');if(_i)_i.style.opacity='1';
+}
+document.addEventListener('click',startTrainNoise,{once:true});
+document.addEventListener('keydown',startTrainNoise,{once:true});
+document.addEventListener('touchstart',startTrainNoise,{once:true,passive:true});
+document.addEventListener('wheel',startTrainNoise,{once:true,passive:true});
+
+/* === 游戏状态 === */
+function _safeLS(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):[];}catch(e){return[];}}
+var GAME={
+  currentCard:null,flipped:false,
+  collectedCards:_safeLS('tm_collection'),
+  playerInfluences:_safeLS('tm_influences'),
+  grChatRound:0,grTargetRounds:0,awaitingGrChat:false,
+  pendingCard:null,origSend:null
+};
+function saveGame(){
+  localStorage.setItem('tm_collection',JSON.stringify(GAME.collectedCards));
+  localStorage.setItem('tm_influences',JSON.stringify(GAME.playerInfluences));
+}
+
+/* === Toast === */
+function showToast(msg,dur){
+  dur=dur||2800;
+  var el=document.getElementById('toast');
+  document.getElementById('toast-text').textContent=msg;
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');},dur);
+}
+function showUnlock(desc){
+  var el=document.getElementById('unlock-toast');
+  document.getElementById('unlock-desc').textContent=desc;
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');},4000);
+}
+
+/* === DeepSeek API === */
+var DSKEY=(function(){try{var k=localStorage.getItem('tm_apikey');if(k&&k.length>10)return k;}catch(e){}return 'YOUR_DEEPSEEK_API_KEY';})();
+window.setApiKey=function(k){if(!k||k.length<10){alert('Key过短');return;}try{localStorage.setItem('tm_apikey',k);DSKEY=k;alert('已保存');}catch(e){alert('保存失败');}};
+function ds(messages,temp,cb){
+  temp=temp||0.88;
+  fetch('https://api.deepseek.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DSKEY},
+    body:JSON.stringify({model:'deepseek-chat',messages:messages,max_tokens:500,temperature:temp})
+  }).then(function(r){return r.json();}).then(function(d){
+    cb(null,(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'');
+  }).catch(function(e){cb(e,'');});
+}
+
+/* === 打字机（通用）=== */
+function typeEl(el,text,spd,done){
+  spd=spd||22;el.textContent='';var i=0;
+  (function step(){
+    if(i<text.length){
+      el.textContent+=text[i++];
+      setTimeout(step,text.charCodeAt(i-1)===10?70:spd);
+    }else if(done)done();
+  })();
+}
+
+/* === 来信面板 === */
+function triggerIncomingLetter(card){
+  GAME.pendingCard=card;
+  document.getElementById('inc-from-label').textContent='来函 · W. A. MOZART · '+card.year;
+  document.getElementById('inc-salute').textContent='亲爱的神秘旅客：';
+  document.getElementById('inc-sign').textContent='你忠实的\nW. A. 莫扎特';
+  document.getElementById('inc-body').innerHTML='<div class="inc-loading">正在翻译时空信件<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>';
+  document.getElementById('inc-paper').style.display='';
+  document.getElementById('inc-paper').classList.remove('fold-up');
+  document.getElementById('write-panel').classList.remove('show');
+  var closeBtn=document.querySelector('.inc-close');
+  closeBtn.textContent='× 收好信件';
+  closeBtn.onclick=closeIncoming;
+  document.getElementById('wp-textarea').value='';
+  document.getElementById('wp-count').textContent='0 / 100';
+  document.getElementById('wp-to').textContent='致 沃尔夫冈·阿马德乌斯·莫扎特，'+card.year+'年';
+  document.getElementById('incoming-letter').classList.add('show');
+
+  var sys='你是沃尔夫冈·阿马德乌斯·莫扎特，现在是'+card.year+'年，"'+card.period+'"阶段。\n你刚刚经历了：'+card.event+'\n主动给一位来自未来的神秘旅客写信。真实莫扎特语气：机智、孩子气、热爱音乐、对父亲有隐怨。\n书信体中文，120-180字，提及'+card.workFull+'，邀请旅客谈谈他们时代对音乐的看法。\n结尾固定：你忠实的 W. A. 莫扎特';
+  var fallback='亲爱的旅客，\n\n您好——若您真的来自遥远的未来，我有太多想问您。\n此刻我正在创作《'+card.workFull+'》，这首曲子让我既兴奋又焦虑。您那个时代还有人演奏它吗？\n\n请告诉我，您那里的音乐是什么模样的？\n\n你忠实的 W. A. 莫扎特';
+
+  ds([{role:'system',content:sys},{role:'user',content:'请写这封信。'}],0.88,function(err,reply){
+    var text=reply||fallback;
+    var bodyEl=document.getElementById('inc-body');
+    typeEl(bodyEl,text,20,function(){
+      setTimeout(foldAndShowWrite,2500);
+    });
+  });
+}
+
+function foldAndShowWrite(){
+  var paper=document.getElementById('inc-paper');
+  var wp=document.getElementById('write-panel');
+  paper.classList.add('fold-up');
+  setTimeout(function(){paper.style.display='none';wp.classList.add('show');},700);
+}
+
+function updateCount(){
+  var v=document.getElementById('wp-textarea').value.length;
+  var c=document.getElementById('wp-count');
+  c.textContent=v+' / 100';
+  if(v>85)c.classList.add('warn');else c.classList.remove('warn');
+}
+
+function skipWrite(){closeIncoming();grSay('那封信，你留到下次再写。\n他会等的。');}
+
+function sendPlayerLetter(){
+  var text=document.getElementById('wp-textarea').value.trim();
+  if(!text)return;
+  document.getElementById('wp-send-btn').disabled=true;
+  var anim=document.getElementById('send-anim');
+  anim.classList.add('play');
+  setTimeout(function(){anim.classList.remove('play');},1800);
+  var inf={cardYear:GAME.pendingCard?GAME.pendingCard.year:'',
+           cardPeriod:GAME.pendingCard?GAME.pendingCard.period:'',
+           playerText:text,influence:''};
+  GAME.playerInfluences.push(inf);saveGame();
+  setTimeout(function(){
+    closeIncoming();
+    showToast('信件已寄出，等待回音……',2500);
+    startGrGuidance(text,GAME.pendingCard,inf);
+  },1500);
+}
+
+function closeIncoming(){
+  document.getElementById('incoming-letter').classList.remove('show');
+  document.getElementById('inc-paper').style.display='';
+  document.getElementById('inc-paper').classList.remove('fold-up');
+  document.getElementById('write-panel').classList.remove('show');
+  document.getElementById('wp-send-btn').disabled=false;
+  var _b=document.querySelector('.inc-close');
+  if(_b){_b.textContent='× 收好信件';_b.onclick=closeIncoming;}
+}
+
+/* === Gr引导系统 === */
+var GR_KW=[
+  {kw:'时间',h:'时间对音乐家而言是节拍，还是流逝？'},
+  {kw:'孤独',h:'创作的孤独和失去的孤独，哪一种更难承受？'},
+  {kw:'父亲',h:'在那个时代，父亲的意志就是命运。你怎么看？'},
+  {kw:'音乐',h:'如果他活得更长，你觉得他会写出什么？'},
+  {kw:'未来',h:'你知道他的未来，他不知道。这是一种沉重吗？'},
+  {kw:'自由',h:'他找到过真正的自由吗？'}
+];
+
+function startGrGuidance(playerText,card,inf){
+  GAME.awaitingGrChat=true;
+  GAME.grChatRound=0;
+  GAME.grTargetRounds=1+Math.floor(Math.random()*5);
+  var kwObj=GR_KW[Math.floor(Math.random()*GR_KW.length)];
+  inf.keyword=kwObj.kw;
+  var hint=document.getElementById('gr-chat-hint');
+  document.getElementById('hint-text').innerHTML=kwObj.h.replace(kwObj.kw,'<span class="hint-keyword">'+kwObj.kw+'</span>');
+  hint.classList.add('show');
+  grSay('你的信已经寄出去了。\n在等回音的时候，我想问你——\n'+kwObj.h);
+  var _rSend=window._baseSend||send;
+  GAME.origSend=_rSend;
+  window.send=function(){
+    var inp=document.getElementById('inp');
+    var t=inp.value.trim();
+    if(!t)return;inp.value='';
+    if(GAME.awaitingGrChat){
+      GAME.grChatRound++;
+      hint.classList.remove('show');
+      if(GAME.grChatRound>=GAME.grTargetRounds){
+        GAME.awaitingGrChat=false;
+        window.send=GAME.origSend;
+        triggerMozartReply(card,inf,t);
+      }else{
+        grSay('你说得有意思。\n那么——他的那首曲子，\n你觉得他写它的时候心里在想什么？');
+      }
+    }else{
+      if(GAME.origSend)GAME.origSend();
+    }
+  };
+}
+
+/* === 音乐家回信 + 解锁 === */
+function triggerMozartReply(card,inf,lastText){
+  grSay('等等——\n我感觉到了什么。\n是他。他回信了。');
+  var nextIdx=0;
+  for(var k=0;k<CARDS.length;k++){
+    if(CARDS[k].year===card.year&&CARDS[k].period===card.period){nextIdx=k+1;break;}
+  }
+  var nextCard=CARDS[nextIdx]||null;
+  var nextHint=nextCard?'('+nextCard.year+'年'+nextCard.period+')':'晚年的思考';
+  var sys='你是莫扎特，'+card.year+'年，刚收到旅客的信：'+inf.playerText+'\n他们聊到了"'+(inf.keyword||'音乐')+'"。\n回信：回应旅客信的具体内容；透露对下一阶段的预感'+nextHint+'；\n历史大事件不变，情绪细节10%浮动；书信体中文，150-200字。结尾：你忠实的 W. A. 莫扎特';
+  var fallback='亲爱的旅客，\n\n您的话让我思考了很久。\n\n您说得对，那首曲子里藏着我说不出口的东西。也许这就是音乐存在的理由——说那些无法言说的话。\n\n我隐约感觉，前面还有更多故事等着我。不管那是什么，我想继续写下去。\n\n你忠实的\nW. A. 莫扎特';
+  setTimeout(function(){
+    ds([{role:'system',content:sys},{role:'user',content:lastText}],0.88,function(err,reply){
+      var text=reply||fallback;
+      inf.influence='与旅客谈论"'+(inf.keyword||'音乐')+'"后，他在信中写道：'+text.slice(0,55)+'……';
+      saveGame();
+      showReplyAndUnlock(card,text,nextCard);
+    });
+  },2000);
+}
+
+function showReplyAndUnlock(card,reply,nextCard){
+  document.getElementById('inc-from-label').textContent='回函 · W. A. MOZART · '+card.year;
+  document.getElementById('inc-salute').textContent='亲爱的旅客：';
+  document.getElementById('inc-sign').textContent='你忠实的\nW. A. 莫扎特';
+  document.getElementById('inc-body').textContent='';
+  document.getElementById('inc-paper').style.display='';
+  document.getElementById('inc-paper').classList.remove('fold-up');
+  document.getElementById('write-panel').classList.remove('show');
+  var closeBtn=document.querySelector('.inc-close');
+  closeBtn.textContent='× 珍藏此信';
+  closeBtn.onclick=function(){
+    closeIncoming();
+    if(nextCard)unlockNextCard(nextCard);
+    else setTimeout(generateChronicle,1500);
+  };
+  document.getElementById('incoming-letter').classList.add('show');
+  typeEl(document.getElementById('inc-body'),reply,20);
+}
+
+function unlockNextCard(nextCard){
+  var already=false;
+  for(var i=0;i<GAME.collectedCards.length;i++){
+    if(GAME.collectedCards[i].year===nextCard.year&&GAME.collectedCards[i].period===nextCard.period){already=true;break;}
+  }
+  if(!already){GAME.collectedCards.push(nextCard);saveGame();}
+  grSay('新的档案解封了。\n'+nextCard.year+'年，'+nextCard.period+'。\n他人生的下一页。');
+  showUnlock(nextCard.year+' · '+nextCard.period+'\n'+nextCard.workFull);
+  setTimeout(function(){
+    GAME.currentCard=nextCard;
+    document.getElementById('cf-period').textContent=nextCard.period;
+    document.getElementById('cf-year').textContent=nextCard.year;
+    document.getElementById('cf-event').textContent=nextCard.event;
+    document.getElementById('cf-work-title').textContent=nextCard.workFull;
+    document.getElementById('main-card').classList.remove('flipped');
+    GAME.flipped=false;
+    document.getElementById('write-area').classList.remove('show');
+  },3500);
+}
+
+/* === 重写 flipCard / drawNew === */
+window.flipCard=function(){
+  if(!GAME.currentCard)return;
+  var card=document.getElementById('main-card');
+  if(!GAME.flipped){
+    card.classList.add('flipped');GAME.flipped=true;
+    var c=GAME.currentCard;
+    var already=false;
+    for(var i=0;i<GAME.collectedCards.length;i++){
+      if(GAME.collectedCards[i].year===c.year&&GAME.collectedCards[i].period===c.period){already=true;break;}
+    }
+    if(!already){GAME.collectedCards.push(c);saveGame();showToast('已收录 · '+c.year+' · '+c.period,2000);}
+    setTimeout(function(){triggerIncomingLetter(GAME.currentCard);},1400);
+  }else{
+    card.classList.remove('flipped');GAME.flipped=false;
+    document.getElementById('write-area').classList.remove('show');
+  }
+};
+
+window.drawNew=function(){
+  var card=document.getElementById('main-card');
+  if(GAME.flipped){card.classList.remove('flipped');GAME.flipped=false;}
+  document.getElementById('write-area').classList.remove('show');
+  var uncollected=[];
+  for(var i=0;i<CARDS.length;i++){
+    var found=false;
+    for(var j=0;j<GAME.collectedCards.length;j++){
+      if(GAME.collectedCards[j].year===CARDS[i].year&&GAME.collectedCards[j].period===CARDS[i].period){found=true;break;}
+    }
+    if(!found)uncollected.push(CARDS[i]);
+  }
+  var pool=uncollected.length>0?uncollected:CARDS;
+  GAME.currentCard=pool[Math.floor(Math.random()*pool.length)];
+  var c=GAME.currentCard;
+  document.getElementById('cf-period').textContent=c.period;
+  document.getElementById('cf-year').textContent=c.year;
+  document.getElementById('cf-event').textContent=c.event;
+  document.getElementById('cf-work-label').textContent='代表作品';
+  document.getElementById('cf-work-title').textContent=c.workFull;
+  grSay(c.year+'年。\n'+c.period+'。\n点击卡牌，翻开它。');
+};
+
+/* === 人生年表 === */
+function generateChronicle(){
+  grSay('所有的卡牌都翻开了。\n他的一生，现在在你眼前。\n以及——因为你，改变的那些细节。');
+  setTimeout(function(){
+    var chr=document.getElementById('chronicle');chr.classList.add('show');
+    var tl=document.getElementById('chr-timeline');tl.innerHTML='';
+    var cg=document.getElementById('chr-cards-grid');cg.innerHTML='';
+    for(var ci=0;ci<CARDS.length;ci++){
+      var c=CARDS[ci];
+      var inf=null;
+      for(var pi=0;pi<GAME.playerInfluences.length;pi++){
+        if(GAME.playerInfluences[pi].cardYear===c.year&&GAME.playerInfluences[pi].cardPeriod===c.period){inf=GAME.playerInfluences[pi];break;}
+      }
+      var node=document.createElement('div');node.className='chr-node';
+      var playerHtml=inf?('<div class="chr-card-player"><span class="chr-player-icon">\u2736</span><span class="chr-player-text">'+(inf.influence||'旅客的来访在这一年留下了印记。')+'</span></div>'):'';
+      node.innerHTML='<span class="chr-year">'+c.year+'</span><span class="chr-dot"></span><div class="chr-card"><div class="chr-card-period">'+c.period+'</div><div class="chr-card-event">'+c.event+'</div><div class="chr-card-work">'+c.workFull+'</div>'+playerHtml+'</div>';
+      tl.appendChild(node);
+      var mini=document.createElement('div');mini.className='chr-mini-card';
+      mini.innerHTML='<div class="chr-mini-year">'+c.year+'</div><div class="chr-mini-work">'+c.workFull+'</div>';
+      cg.appendChild(mini);
+    }
+    document.getElementById('chr-note').textContent='你们通信 '+GAME.playerInfluences.length+' 次 · 收集了 '+GAME.collectedCards.length+' 张命运卡牌';
+    var epSys='你是旁白者。一位旅客与莫扎特通信'+GAME.playerInfluences.length+'次，收集了'+GAME.collectedCards.length+'张卡牌。用诗意语言写100字结语：旅客对莫扎特的意义，提到音乐仍在流传，历史大事不变，第三人称。';
+    var epFallback='那位旅客的到来，像一束穿越时间的光，照进了他创作最孤独的角落。而莫扎特的音符，依然在世界各地的音乐厅中回响——三百年后，如初见。';
+    ds([{role:'system',content:epSys},{role:'user',content:'请生成结语。'}],0.7,function(err,ep){
+      document.getElementById('chr-epilogue').textContent=ep||epFallback;
+    });
+  },2000);
+}
+
+function closeChronicle(){
+  document.getElementById('chronicle').classList.remove('show');
+  document.getElementById('moz').classList.remove('on');
+  grSay('年表已经封存。\n他的故事，你参与了其中的一部分。');
+}
+
+/* === 初始化补丁 === */
+var _origBF=window.buildFloatCards;
+window.buildFloatCards=function(){
+  if(_origBF)_origBF();
+  if(!GAME.currentCard){
+    var first=CARDS[0];
+    for(var i=0;i<CARDS.length;i++){
+      var found=false;
+      for(var j=0;j<GAME.collectedCards.length;j++){
+        if(GAME.collectedCards[j].year===CARDS[i].year&&GAME.collectedCards[j].period===CARDS[i].period){found=true;break;}
+      }
+      if(!found){first=CARDS[i];break;}
+    }
+    GAME.currentCard=first;
+    document.getElementById('cf-period').textContent=first.period;
+    document.getElementById('cf-year').textContent=first.year;
+    document.getElementById('cf-event').textContent=first.event;
+    document.getElementById('cf-work-label').textContent='代表作品';
+    document.getElementById('cf-work-title').textContent=first.workFull;
+  }
+};
 </script>
+
+<!-- ══ Toast通知 ══ -->
+<div id="toast"><div class="toast-paper" id="toast-text"></div></div>
+
+<!-- ══ 来信 + 写信面板 ══ -->
+<div id="incoming-letter">
+  <div class="incoming-wrap">
+    <div class="inc-header">
+      <div class="inc-from" id="inc-from-label">来函</div>
+      <button class="inc-close" onclick="closeIncoming()">× 收好信件</button>
+    </div>
+    <!-- 来信信纸（可折叠）-->
+    <div class="inc-paper" id="inc-paper">
+      <div class="inc-inner">
+        <div class="inc-salute" id="inc-salute"></div>
+        <div class="inc-body" id="inc-body">
+          <div class="inc-loading">正在翻译时空信件<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>
+        </div>
+        <div class="inc-sign" id="inc-sign"></div>
+      </div>
+    </div>
+    <!-- 写信面板（折叠后出现）-->
+    <div class="write-panel" id="write-panel">
+      <div class="write-paper">
+        <div class="wp-inner">
+          <div class="wp-to" id="wp-to">致 ——</div>
+          <div class="wp-salute" id="wp-salute">亲爱的朋友：</div>
+          <textarea class="wp-textarea" id="wp-textarea"
+            placeholder="写下你的回应，最多100字……"
+            maxlength="100"
+            oninput="updateCount()"></textarea>
+          <div class="wp-meta">
+            <div class="wp-sign">来自时光之外的旅客</div>
+            <div class="wp-count" id="wp-count">0 / 100</div>
+          </div>
+          <div class="wp-actions">
+            <button class="wp-cancel" onclick="skipWrite()">留待下次</button>
+            <button class="wp-send" id="wp-send-btn" onclick="sendPlayerLetter()">封缄寄出 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 寄信动画 ══ -->
+<div id="send-anim">
+  <div class="envelope">✉</div>
+</div>
+
+<!-- ══ Gr关键词引导 ══ -->
+<div id="gr-chat-hint">
+  <div class="hint-paper">
+    <div class="hint-text" id="hint-text"></div>
+  </div>
+</div>
+
+<!-- ══ 解锁Toast ══ -->
+<div id="unlock-toast">
+  <div class="unlock-box">
+    <span class="unlock-icon">📜</span>
+    <div class="unlock-title">新档案已解封</div>
+    <div class="unlock-desc" id="unlock-desc"></div>
+  </div>
+</div>
+
+<!-- ══ 人生年表 ══ -->
+<div id="chronicle">
+  <div class="chr-title">WOLFGNG AMADEUS MOZART</div>
+  <div class="chr-sub">人生年表 · 1756 — 1791</div>
+  <div class="chr-note" id="chr-note">因你的到来，有些细节悄然改变</div>
+  <div class="chr-rule"></div>
+  <div class="chr-timeline" id="chr-timeline"></div>
+  <div class="chr-final">
+    <div class="chr-final-title">你们之间往来的作品</div>
+    <div class="chr-cards-grid" id="chr-cards-grid"></div>
+    <div class="chr-epilogue" id="chr-epilogue"></div>
+  </div>
+  <button class="chr-close" onclick="closeChronicle()">← 返回列车</button>
+</div>
+
 </body>
 </html>
