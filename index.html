@@ -107,12 +107,13 @@ tbody tr:hover{background:var(--bg2)}
 .agent-chat{margin-top:18px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;min-height:390px;background:var(--bg)}
 .agent-feed{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:420px}
 .agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
-.msg{max-width:86%;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.msg{display:block;max-width:86%;width:fit-content;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;overflow:visible}
 .msg.gr,.msg.musician{align-self:flex-start;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
 .msg.gr{position:relative;margin-left:46px;min-height:46px}
 .msg.gr:before{content:'';position:absolute;left:-46px;top:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);background:#111 url('/assets/gr-avatar.jpeg') center 20%/cover;filter:grayscale(1);box-shadow:0 0 0 3px #fff}
 .msg.user{align-self:flex-end;background:var(--t1);color:#fff}
 .msg-meta{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t4);margin-bottom:4px}
+.msg-text{display:block;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .msg.user .msg-meta{color:rgba(255,255,255,.56)}
 .agent-input{border-top:1px solid var(--line);display:flex;gap:8px;padding:10px;background:var(--bg)}
 .agent-input input{flex:1;border:1px solid var(--line);border-radius:3px;height:34px;padding:0 10px;font-family:var(--sans);font-size:12px;outline:none;color:var(--t1);background:var(--bg)}
@@ -556,7 +557,7 @@ select.fi{cursor:pointer}
       </div>
       <div class="agent-chat">
         <div class="agent-feed" id="gr-chat-feed">
-          <div class="msg gr"><span class="msg-meta">Gr 小姐</span>你来了。先选一位音乐家，或者直接告诉我：你想调试作品背景、人生节点、旅行信札，还是游戏剧情里的音乐线索？</div>
+          <div class="msg gr"><span class="msg-meta">Gr 小姐</span><span class="msg-text">你来了。先选一位音乐家，或者直接告诉我：你想调试作品背景、人生节点、旅行信札，还是游戏剧情里的音乐线索？</span></div>
         </div>
         <div class="agent-input">
           <input id="gr-chat-input" placeholder="问 Gr 小姐：帮我调试莫扎特的旅行信札…" onkeydown="if(event.key==='Enter')sendGrMessage()">
@@ -1210,7 +1211,7 @@ function restoreGrChatHistory(){
   grChatHistory.splice(0,grChatHistory.length,...saved);
   const feed=document.getElementById('gr-chat-feed');
   if(!feed)return;
-  feed.innerHTML=saved.map(m=>`<div class="msg ${m.role==='user'?'user':'gr'}"><span class="msg-meta">${m.role==='user'?'你':'Gr 小姐'}</span>${escHtml(m.text)}</div>`).join('');
+  feed.innerHTML=saved.map(m=>`<div class="msg ${m.role==='user'?'user':'gr'}"><span class="msg-meta">${m.role==='user'?'你':'Gr 小姐'}</span><span class="msg-text">${escHtml(m.text)}</span></div>`).join('');
   feed.scrollTop=feed.scrollHeight;
 }
 function getPersonaAnchor(id=currentMusicianId){
@@ -1317,7 +1318,7 @@ function renderMusicianAgents(openId='mozart'){
   const box=document.getElementById('musician-agent-list');
   if(!box)return;
   box.innerHTML=musicianAgents.map(a=>{
-    const msgs=musicianChats[a.id].filter(m=>!(m.role!=='user'&&isSystemInterruptionText(m.text))).map(m=>`<div class="msg ${m.role==='user'?'user':'musician'}"><span class="msg-meta">${m.role==='user'?'你':a.name}</span>${escHtml(m.text)}</div>`).join('');
+    const msgs=musicianChats[a.id].filter(m=>!(m.role!=='user'&&isSystemInterruptionText(m.text))).map(m=>`<div class="msg ${m.role==='user'?'user':'musician'}"><span class="msg-meta">${m.role==='user'?'你':a.name}</span><span class="msg-text">${escHtml(m.text)}</span></div>`).join('');
     return `<div class="musician-card ${a.id===openId?'open':''}" id="musician-card-${a.id}">
       <div class="musician-head" onclick="toggleMusicianAgent('${a.id}')">
         <div class="musician-avatar">${a.mark}</div>
@@ -1357,7 +1358,7 @@ function addMsg(feedId,role,text,name){
   if(!feed)return null;
   const div=document.createElement('div');
   div.className='msg '+role;
-  div.innerHTML=`<span class="msg-meta">${escHtml(name||'')}</span>${escHtml(text)}`;
+  div.innerHTML=`<span class="msg-meta">${escHtml(name||'')}</span><span class="msg-text">${escHtml(text)}</span>`;
   feed.appendChild(div);
   feed.scrollTop=feed.scrollHeight;
   if(role==='gr')playBookPageSound();
@@ -1447,13 +1448,13 @@ async function sendGrMessage(){
       max_tokens:420,
       temperature:.72
     },grReply(text));
-    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐</span><span class="msg-text">${escHtml(reply)}</span>`;
     playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
     saveGrChatHistory();
   }catch(e){
     const reply=grReply(text);
-    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐 · 本地兜底</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐 · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
     playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
     saveGrChatHistory();
@@ -1540,12 +1541,12 @@ async function sendMusicianMessage(id){
     },musicianReply(agent,text));
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
 }
@@ -1658,12 +1659,12 @@ async function sendFateLetter(){
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
   }
 }
 function openCardLibrary(){
