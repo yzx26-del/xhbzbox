@@ -1270,7 +1270,7 @@ function getActiveChapter(id=currentMusicianId){
     const lastIndex=Array.isArray(unlocked)?unlocked[unlocked.length-1]:null;
     const card=deck[lastIndex];
     if(card){
-      const restored={card:normalizeFateCard(card,id,lastIndex),anchor:getPersonaAnchor(id),stage:'card_drawn',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString(),restored:true};
+      const restored={card:normalizeFateCard(card,id,lastIndex),anchor:getPersonaAnchor(id),stage:'card_drawn',turns:0,interruptAt:2+Math.floor(Math.random()*4),startedAt:new Date().toISOString(),restored:true};
       setActiveChapter(id,restored);
       return restored;
     }
@@ -1294,7 +1294,7 @@ function activateFateChapter(card,stage='card_drawn'){
     anchor,
     stage,
     turns:0,
-    interruptAt:3+Math.floor(Math.random()*8),
+    interruptAt:2+Math.floor(Math.random()*4),
     startedAt:new Date().toISOString()
   };
   chapter.card=card;
@@ -1422,9 +1422,28 @@ function grReply(text){
   if(lower.includes('deepseek')||text.includes('API'))return '为了省 API，建议默认本地模板回复；只有点击“调用 DeepSeek”时才请求，并把同一问题缓存 24 小时。';
   return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
 }
+function hashText(text){
+  let h=2166136261;
+  for(let i=0;i<text.length;i++){
+    h^=text.charCodeAt(i);
+    h=Math.imul(h,16777619);
+  }
+  return (h>>>0).toString(36);
+}
 function agentCacheKey(payload){
-  const raw=JSON.stringify({v:3,mode:payload.mode,musicianId:payload.musicianId||'',anchor:payload.anchor?`${payload.anchor.year||''}-${payload.anchor.period||''}`:'',card:payload.card?`${payload.card.year||''}-${payload.card.period||''}`:'',turn:payload.turn||0,message:payload.message});
-  try{return 'letterAgentCache:'+btoa(unescape(encodeURIComponent(raw))).slice(0,160);}catch{return 'letterAgentCache:'+raw.length+':'+Date.now();}
+  const raw=JSON.stringify({
+    v:4,
+    mode:payload.mode||'',
+    tool:payload.tool||'',
+    musicianId:payload.musicianId||'',
+    musicianName:payload.musicianName||'',
+    anchor:payload.anchor?`${payload.anchor.year||''}-${payload.anchor.period||''}-${payload.anchor.event||''}`:'',
+    card:payload.card?`${payload.card.year||''}-${payload.card.period||''}-${payload.card.event||''}`:'',
+    turn:payload.turn||0,
+    message:payload.message||'',
+    history:(payload.history||[]).map(x=>`${x.role||''}:${x.text||x.content||''}`).join('|').slice(-1200)
+  });
+  return `letterAgentCache:${payload.mode||'mode'}:${payload.tool||'plain'}:${payload.musicianId||'none'}:${hashText(raw)}`;
 }
 function getAgentCache(payload){
   try{
