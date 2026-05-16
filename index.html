@@ -1558,13 +1558,11 @@ async function sendMusicianMessage(id){
     },musicianReply(agent,text));
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
-    saveFateLetter(id,{id:`chat-${Date.now()}`,time:new Date().toISOString(),card:chapter.card,letter:text,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
-    saveFateLetter(id,{id:`chat-${Date.now()}`,time:new Date().toISOString(),card:chapter.card,letter:text,reply});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
@@ -1607,6 +1605,15 @@ function saveFateLetter(id,entry){
   }
   list=list.slice(0,30);
   localStorage.setItem(fateLettersKey(id),JSON.stringify(list));
+}
+function letterImpactNote(agent,card,letter,reply){
+  const words=Array.isArray(card?.keywords)?card.keywords:[];
+  const hit=words.find(k=>String(letter||'').includes(k))||words[0]||card?.period||'这一页';
+  const future=/未来|结局|死亡|后来|会不会|最后|剧透/.test(letter||'');
+  const comfort=/陪|别怕|理解|原谅|辛苦|难过|遗憾/.test(letter||'');
+  if(future)return `${agent.name}没有真正知道未来，但他开始把“${hit}”当作一枚预感收好。后续同一时间线里，他会更警惕命运靠近的声音。`;
+  if(comfort)return `${agent.name}没有改变${card?.year||'这一年'}年的大事，只是在“${hit}”旁边多停了一会儿。那封信让他少把自己逼到绝处。`;
+  return `${agent.name}没有改写历史。他只是记住了你在${card?.year||'这一页'}年递来的这句话，并把它折进“${hit}”的阴影里。`;
 }
 function currentAgent(){
   currentMusicianId=openMusicianId();
@@ -1677,7 +1684,7 @@ async function sendFateLetter(){
   const agent=musicianAgents.find(a=>a.id===activeFateCard.musicianId)||currentAgent();
   currentMusicianId=agent.id;
   const chapter=activateFateChapter(activeFateCard,'letter_sent');
-  const entry={id:`letter-${activeFateCard.musicianId}-${activeFateCard.index}-${Date.now()}`,time:new Date().toISOString(),card:activeFateCard,letter:text};
+  const entry={id:`letter-${activeFateCard.musicianId}-${activeFateCard.index}-${Date.now()}`,source:'fate-letter',time:new Date().toISOString(),card:activeFateCard,letter:text};
   saveFateLetter(agent.id,entry);
   musicianChats[agent.id]=musicianChats[agent.id]||[];
   musicianChats[agent.id].push({role:'user',text:`命运卡牌来信：${text}`});
@@ -1700,13 +1707,13 @@ async function sendFateLetter(){
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply});
+    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply)});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply});
+    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply)});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
   }
 }
@@ -1721,10 +1728,10 @@ function openTravelLetter(id){
   id=id||currentMusicianId||'mozart';
   const agent=musicianAgents.find(a=>a.id===id)||musicianAgents[0];
   currentMusicianId=agent.id;
-  const letters=getFateLetters(agent.id);
+  const letters=getFateLetters(agent.id).filter(x=>String(x.id||'').startsWith('letter-')||x.source==='fate-letter'||!x.id);
   document.getElementById('fate-title').textContent=`${agent.name} · 旅行信札`;
-  document.getElementById('fate-sub').textContent='记录玩家和音乐家一起做过的事。结尾保留音乐家给玩家的信。';
-  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card?.year||'—')} · ${esc(x.card?.period||'未命名章节')}</strong><br>${esc(x.card?.event||'这页记录来自一次普通对话。')}<br><br>你写给他的信：${esc(x.letter||'—')}<br><br>他的回信：${esc(x.reply||'历史没有改道，只是有人在边上点了一盏灯。')}</div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
+  document.getElementById('fate-sub').textContent='只保留你正式寄出的信。普通聊天不会进入这里。';
+  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card?.year||'—')} · ${esc(x.card?.period||'未命名章节')}</strong><br>${esc(x.card?.event||'这页记录来自一次寄信。')}<br><br>你写给他的信：${esc(x.letter||'—')}<br><br>他的回信：${esc(x.reply||'信还在路上。')}<br><br><span style="color:var(--t3)">注释：${esc(x.impact||letterImpactNote(agent,x.card,x.letter,x.reply))}</span></div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
   document.getElementById('fate-content').innerHTML=body+`<div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
