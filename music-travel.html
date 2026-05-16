@@ -2090,6 +2090,365 @@ body::before,body::after{opacity:.78;}
   border-color:rgba(95,64,30,.38)!important;
 }
 
+/* NOTE V2: 独立重建的维多利亚档案便签组件。保留 #tw / #inp / #note-action 功能入口。 */
+.tm-note-zone{
+  width:min(780px,82vw)!important;
+  margin:0 0 0 6px!important;
+  position:relative!important;
+  filter:drop-shadow(0 14px 34px rgba(0,0,0,.82))!important;
+}
+.tm-note-zone:before{
+  content:'AI生成'!important;
+  position:absolute!important;
+  top:8px!important;
+  left:8px!important;
+  z-index:12!important;
+  padding:2px 7px!important;
+  border-radius:4px!important;
+  font-family:var(--M)!important;
+  font-size:9px!important;
+  letter-spacing:.04em!important;
+  color:rgba(238,232,210,.62)!important;
+  background:rgba(10,10,8,.55)!important;
+  border:1px solid rgba(230,218,178,.26)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 8px rgba(0,0,0,.45)!important;
+  pointer-events:none!important;
+}
+.tm-note-zone .dp{
+  position:relative!important;
+  overflow:visible!important;
+  padding:14px 18px 17px 48px!important;
+  border:2px solid #5f4a2a!important;
+  border-top-color:#9c7c42!important;
+  border-left-color:#836635!important;
+  border-right-color:#2b2418!important;
+  border-bottom-color:#18130c!important;
+  border-radius:5px!important;
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(207,161,70,.34),transparent 19%),
+    linear-gradient(90deg,#0b0b08 0 34px,#1a1710 34px 40px,#776035 40px 42px,transparent 42px),
+    repeating-linear-gradient(0deg,rgba(255,231,154,.05) 0 1px,transparent 1px 7px),
+    repeating-linear-gradient(90deg,rgba(255,231,154,.035) 0 1px,transparent 1px 9px),
+    linear-gradient(180deg,#8b7144 0%,#342b1b 9%,#12120d 46%,#241d12 91%,#745b34 100%)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,238,178,.34),
+    inset 0 -3px 0 rgba(0,0,0,.65),
+    inset 3px 0 0 rgba(255,230,150,.08),
+    inset -3px 0 0 rgba(0,0,0,.45),
+    0 0 0 1px #090704,
+    0 0 0 4px rgba(10,8,4,.28),
+    0 13px 28px rgba(0,0,0,.86)!important;
+  transform:perspective(760px) rotateX(.45deg)!important;
+}
+.tm-note-zone .dp:before{
+  content:''!important;
+  position:absolute!important;
+  inset:5px!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  border-radius:4px!important;
+  background:
+    radial-gradient(circle at 16px 32px,#030302 0 5px,#58442a 6px,#b28a3e 7px,transparent 8px),
+    radial-gradient(circle at 16px 50%,#030302 0 5px,#58442a 6px,#b28a3e 7px,transparent 8px),
+    radial-gradient(circle at 16px calc(100% - 32px),#030302 0 5px,#58442a 6px,#b28a3e 7px,transparent 8px),
+    radial-gradient(circle at 56px 28px,transparent 0 25px,rgba(218,181,94,.72) 26px,transparent 27px),
+    radial-gradient(circle at calc(100% - 32px) 28px,transparent 0 24px,rgba(218,181,94,.75) 25px,transparent 26px),
+    radial-gradient(circle at 58px calc(100% - 29px),transparent 0 26px,rgba(218,181,94,.58) 27px,transparent 28px),
+    radial-gradient(circle at calc(100% - 43px) calc(100% - 27px),transparent 0 24px,rgba(218,181,94,.58) 25px,transparent 26px),
+    linear-gradient(90deg,rgba(212,169,78,.56),transparent 10%,transparent 90%,rgba(212,169,78,.5)),
+    linear-gradient(180deg,rgba(255,236,164,.2),transparent 15%,transparent 82%,rgba(0,0,0,.48))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(218,181,94,.48),
+    inset 0 0 0 4px rgba(0,0,0,.56),
+    inset 0 0 18px rgba(0,0,0,.5)!important;
+  opacity:1!important;
+  mix-blend-mode:normal!important;
+}
+.tm-note-zone .dp:after{
+  content:'❦'!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:-3px!important;
+  top:auto!important;
+  right:auto!important;
+  z-index:6!important;
+  width:auto!important;
+  height:auto!important;
+  transform:translateX(-50%)!important;
+  background:none!important;
+  font-family:Georgia,'Times New Roman',serif!important;
+  font-size:40px!important;
+  line-height:1!important;
+  color:rgba(216,178,92,.56)!important;
+  text-shadow:0 1px 0 #050403,0 0 12px rgba(216,178,92,.25)!important;
+  pointer-events:none!important;
+}
+.tm-note-zone .dlg-titlebar{
+  position:absolute!important;
+  top:-18px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  z-index:10!important;
+  min-width:310px!important;
+  width:auto!important;
+  height:auto!important;
+  margin:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:14px!important;
+  padding:7px 30px!important;
+  border-radius:3px!important;
+  border:2px solid rgba(189,147,65,.72)!important;
+  background:
+    radial-gradient(ellipse at 18% 18%,rgba(255,231,150,.16),transparent 34%),
+    repeating-linear-gradient(0deg,rgba(255,230,150,.045) 0 1px,transparent 1px 5px),
+    linear-gradient(180deg,#5a3a18 0%,#2d1e0e 43%,#120b05 100%)!important;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,.72),
+    0 0 0 1px rgba(0,0,0,.58),
+    inset 0 1px 0 rgba(255,238,178,.22),
+    inset 0 -2px 0 rgba(0,0,0,.55)!important;
+}
+.tm-note-zone .dlg-titlebar:before,.tm-note-zone .dlg-titlebar:after{
+  content:''!important;
+  width:50px!important;
+  height:2px!important;
+  min-width:50px!important;
+  flex:0 0 50px!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,transparent,#d7ad55 30%,#6a4a22 70%,transparent)!important;
+  box-shadow:none!important;
+}
+.tm-note-zone .dlg-tname{
+  font-family:'Songti SC','STSong',var(--D),serif!important;
+  font-size:16px!important;
+  font-weight:800!important;
+  letter-spacing:.2em!important;
+  white-space:nowrap!important;
+  color:#e9c870!important;
+  background:linear-gradient(180deg,#fff2af 0%,#e6c15c 42%,#9b6c18 82%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.8),0 0 10px rgba(224,178,82,.24)!important;
+}
+.tm-note-zone .dlg-tbtn{display:none!important;}
+.tm-note-zone .dlg-body-wrap{
+  position:relative!important;
+  z-index:2!important;
+  display:block!important;
+  overflow:hidden!important;
+  min-height:214px!important;
+  margin:8px 7px 4px 0!important;
+  border:1px solid rgba(115,80,38,.45)!important;
+  border-radius:2px 8px 3px 7px / 5px 3px 8px 3px!important;
+  background:
+    linear-gradient(90deg,rgba(108,70,28,.22) 0 1px,transparent 1px calc(100% - 1px),rgba(108,70,28,.2) calc(100% - 1px)),
+    radial-gradient(ellipse at 20% 18%,rgba(255,252,223,.46),transparent 29%),
+    radial-gradient(ellipse at 80% 72%,rgba(133,82,30,.14),transparent 34%),
+    linear-gradient(180deg,rgba(255,249,218,.28),transparent 18%,rgba(99,60,22,.1)),
+    linear-gradient(160deg,#f3e0bd 0%,#e7cda1 48%,#c8aa79 100%)!important;
+  box-shadow:
+    inset 0 0 34px rgba(94,55,20,.2),
+    inset 0 1px 0 rgba(255,255,255,.38),
+    inset 0 -2px 0 rgba(82,50,20,.18),
+    0 1px 0 rgba(255,238,190,.08),
+    0 8px 16px rgba(0,0,0,.58)!important;
+  transition:min-height .25s ease,transform .03s ease!important;
+}
+.tm-note-zone .dlg-body-wrap:before{
+  content:''!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(180deg,rgba(134,91,38,.16) 0 1px,transparent 1px 66%,rgba(134,91,38,.22) 66% calc(66% + 1px),transparent calc(66% + 2px)),
+    linear-gradient(100deg,transparent 0 17%,rgba(118,76,30,.16) 18%,transparent 23%),
+    linear-gradient(74deg,transparent 0 24%,rgba(118,76,30,.12) 25%,transparent 30%),
+    linear-gradient(138deg,transparent 0 84%,rgba(100,60,20,.18) 85%,rgba(255,245,205,.1) 100%),
+    radial-gradient(circle at 90% 9%,rgba(112,70,28,.24),transparent 8%),
+    radial-gradient(circle at 11% 80%,rgba(112,70,28,.14),transparent 12%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='220' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(3deg,transparent 0 14px,rgba(86,52,18,.04) 14px 15px),
+    repeating-linear-gradient(88deg,transparent 0 4px,rgba(130,94,48,.045) 4px 5px)!important;
+  opacity:.8!important;
+  mix-blend-mode:multiply!important;
+}
+.tm-note-zone .dlg-body-wrap:after{
+  content:'OTM09H-0312 46123515 87732949        S1/2524:343389 00 H26\\A 633025\\A 145028\\A 192024\\A 123029\\A 132033\\A 1.85/3105'!important;
+  white-space:pre!important;
+  position:absolute!important;
+  inset:14px 16px 11px 30px!important;
+  z-index:0!important;
+  background:none!important;
+  font-family:var(--M)!important;
+  font-size:9px!important;
+  line-height:2.2!important;
+  letter-spacing:.04em!important;
+  color:rgba(132,82,28,.23)!important;
+  text-align:right!important;
+  pointer-events:none!important;
+}
+.tm-note-zone .db{
+  position:relative!important;
+  z-index:1!important;
+  min-height:160px!important;
+  padding:44px 42px 22px 56px!important;
+}
+.tm-note-zone .db:before,.tm-note-zone .db:after{
+  content:''!important;
+  position:absolute!important;
+  left:-39px!important;
+  width:10px!important;
+  height:10px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 30% 30%,#030302,#11100c 54%,#74562b 78%,#c39b49 100%)!important;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.8),
+    0 0 0 1px rgba(200,166,86,.42),
+    0 0 0 3px rgba(0,0,0,.34)!important;
+}
+.tm-note-zone .db:before{top:33%!important;}
+.tm-note-zone .db:after{bottom:28%!important;}
+.tm-note-zone .dt{
+  min-height:4.6em!important;
+  max-height:6.4em!important;
+  overflow:hidden!important;
+  white-space:pre-wrap!important;
+  font-family:'Songti SC','STSong','Noto Serif SC',Georgia,serif!important;
+  font-size:22px!important;
+  line-height:1.72!important;
+  font-weight:800!important;
+  letter-spacing:.035em!important;
+  color:#2a1707!important;
+  text-shadow:0 1px 0 rgba(255,246,210,.5)!important;
+  filter:none!important;
+  transition:color .4s ease,transform .16s ease!important;
+}
+.tm-note-zone .tw-char,.tm-note-zone .tw-char.faint{
+  display:inline-block!important;
+  color:#2a1707!important;
+  text-shadow:inherit!important;
+}
+.tm-note-zone .tw-char.jitter{transform:translate(.3px,-.2px)!important;}
+.tm-note-zone .cur{
+  display:inline-block!important;
+  width:2px!important;
+  height:1.12em!important;
+  margin-left:2px!important;
+  vertical-align:-.1em!important;
+  border-radius:0!important;
+  background:#8f641d!important;
+  box-shadow:0 0 7px rgba(184,144,32,.4)!important;
+  animation:cursorBlink .9s step-end infinite!important;
+}
+.tm-note-zone.tm-typing .cur{opacity:1!important;animation:none!important;}
+.tm-note-zone.tm-typing .dlg-body-wrap{animation:typeShake .04s ease-out;}
+.tm-note-zone .dir{
+  position:relative!important;
+  z-index:2!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:12px!important;
+  margin-top:14px!important;
+  padding-top:16px!important;
+  border-top:1px solid rgba(116,78,32,.36)!important;
+  opacity:1!important;
+  transition:opacity .5s ease!important;
+}
+.tm-note-zone .dir:before,.tm-note-zone .dir:after{display:none!important;}
+.tm-note-zone.tm-typing .dir{opacity:0!important;pointer-events:none!important;}
+.tm-note-zone.tm-done .dir{opacity:1!important;pointer-events:auto!important;}
+.tm-note-zone:not(.tm-compose) .di{display:none!important;}
+.tm-note-zone.tm-compose .di{display:block!important;}
+.tm-note-zone .di{
+  flex:1!important;
+  min-width:220px!important;
+  height:38px!important;
+  padding:8px 12px!important;
+  border-radius:2px!important;
+  background:rgba(255,248,220,.32)!important;
+  border:1px solid rgba(98,64,28,.45)!important;
+  box-shadow:inset 0 2px 4px rgba(64,38,12,.16),0 1px 0 rgba(255,255,255,.16)!important;
+  font-family:'Songti SC','STSong',var(--M)!important;
+  font-size:13px!important;
+  color:#241405!important;
+  outline:none!important;
+}
+.tm-note-zone .di::placeholder{color:rgba(48,30,12,.42)!important;font-style:normal!important;}
+.tm-note-zone .di:focus{
+  border-color:rgba(184,144,32,.66)!important;
+  box-shadow:inset 0 2px 4px rgba(64,38,12,.16),0 0 10px rgba(184,144,32,.16)!important;
+}
+.tm-note-zone .dsb{
+  position:relative!important;
+  min-width:104px!important;
+  height:52px!important;
+  margin:0 30px 0 0!important;
+  padding:0 18px!important;
+  border-radius:3px!important;
+  background:
+    radial-gradient(ellipse at 32% 18%,rgba(255,222,150,.19),transparent 35%),
+    repeating-linear-gradient(0deg,rgba(255,230,150,.04) 0 1px,transparent 1px 5px),
+    linear-gradient(180deg,#704a28 0%,#332316 54%,#110c07 100%)!important;
+  border:2px solid #5a3a1e!important;
+  border-top-color:#9c7640!important;
+  border-bottom:4px solid #080503!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,232,160,.22),
+    inset 0 -2px 0 rgba(0,0,0,.46),
+    0 4px 0 #080503,
+    0 9px 16px rgba(0,0,0,.54)!important;
+  color:#f0d99b!important;
+  font-family:'Songti SC','STSong',var(--D),serif!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  letter-spacing:.38em!important;
+  text-indent:.38em!important;
+  cursor:pointer!important;
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease!important;
+}
+.tm-note-zone .dsb:before,.tm-note-zone .dsb:after{
+  content:''!important;
+  position:absolute!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:6px!important;
+  height:6px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 30% 30%,#d0a448,#6a4a2a 72%)!important;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.62)!important;
+}
+.tm-note-zone .dsb:before{left:9px!important;}
+.tm-note-zone .dsb:after{right:9px!important;}
+.tm-note-zone .dsb:hover{
+  border-color:#c99a3f!important;
+  color:#fff0b6!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,232,160,.24),
+    inset 0 -2px 0 rgba(0,0,0,.42),
+    0 4px 0 #080503,
+    0 0 18px rgba(184,144,32,.24),
+    0 9px 16px rgba(0,0,0,.54)!important;
+}
+.tm-note-zone .dsb:active{
+  transform:translateY(3px)!important;
+  border-bottom-width:1px!important;
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.44),0 2px 5px rgba(0,0,0,.44)!important;
+}
+@media (max-width:760px){
+  .tm-note-zone{width:min(94vw,760px)!important;margin-left:0!important;}
+  .tm-note-zone .dp{padding-left:40px!important;}
+  .tm-note-zone .dlg-titlebar{min-width:220px!important;padding:6px 18px!important;}
+  .tm-note-zone .dlg-titlebar:before,.tm-note-zone .dlg-titlebar:after{width:22px!important;min-width:22px!important;}
+  .tm-note-zone .dlg-tname{font-size:13px!important;letter-spacing:.12em!important;}
+  .tm-note-zone .db{padding:38px 24px 22px 40px!important;}
+  .tm-note-zone .dt{font-size:18px!important;}
+  .tm-note-zone .dsb{min-width:88px!important;height:46px!important;margin-right:8px!important;}
+}
+
 /* === PATCH ONLY: 2. 书架框 .tm-shelf-zone === */
 .tm-shelf-zone{}
 
@@ -2103,7 +2462,7 @@ body::before,body::after{opacity:.78;}
 </head>
 <body>
 <div id="vig"></div>
-<div id="aud-ind" style="position:fixed;bottom:72px;left:14px;z-index:920;opacity:0;transition:opacity 1s;pointer-events:none;font-family:'Courier Prime',monospace;font-size:8px;letter-spacing:.12em;color:rgba(184,144,32,.42);">♪ AMBIENT</div>
+<div id="aud-ind" style="display:none;position:fixed;bottom:72px;left:14px;z-index:920;opacity:0;transition:opacity 1s;pointer-events:none;font-family:'Courier Prime',monospace;font-size:8px;letter-spacing:.12em;color:rgba(184,144,32,.42);">♪ AMBIENT</div>
 <div id="ca-r"></div>
 <div id="ca-b"></div>
 <div id="grain"></div>
