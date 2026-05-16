@@ -58,25 +58,39 @@ const musicianProfiles = {
   kajiura: '梶浦由记：动画/游戏音乐、人声织体、战斗音乐、虚构语言。重点语气：命运、仪式、合唱和角色伤痕。'
 };
 
-function cardContext(card) {
+function cardContext(card, label = '当前话题卡牌') {
   if (!card || typeof card !== 'object') return '';
   const period = String(card.period || '').slice(0, 80);
   const year = String(card.year || '').slice(0, 20);
   const event = String(card.event || '').slice(0, 160);
   const work = String(card.work || '').slice(0, 120);
   if (!period && !year && !event && !work) return '';
-  return `\n当前被命运卡牌唤醒的章节：${year} · ${period}\n历史时刻：${event}\n对应作品：${work}`;
+  return `\n${label}：${year} · ${period}\n历史时刻：${event}\n对应作品：${work}`;
 }
 
-function systemPrompt(mode, musicianName, musicianId, card, turn) {
+function relationHint(anchor, card) {
+  const anchorYear = Number(anchor?.year);
+  const cardYear = Number(card?.year);
+  if (!Number.isFinite(anchorYear) || !Number.isFinite(cardYear)) return '';
+  if (cardYear < anchorYear) return '\n这张话题卡牌发生在你初见玩家之前。你是在以当前年龄回忆过去，不是变回年轻时的你。';
+  if (cardYear > anchorYear) return '\n这张话题卡牌发生在你初见玩家之后。你不能真正知道未来，只能把它当作一封来自未来的暗示、梦或预感来回应。';
+  return '\n这张话题卡牌就是你与玩家初见的年龄。请保持此刻的口吻。';
+}
+
+function systemPrompt(mode, musicianName, musicianId, card, turn, anchor) {
   if (mode === 'musician') {
     const profile = musicianProfiles[musicianId] || `${musicianName || '这位音乐家'}：请以该音乐家的作品、人生命运和创作语境回答。`;
     const turnText = Number.isFinite(Number(turn)) ? `\n这是玩家与音乐家的第${Number(turn) + 1}封来回信。不要重复第一封信的开场，继续上一封信的情绪。` : '';
+    const identity = anchor || card;
     return `${profile}
-${cardContext(card)}
+${cardContext(identity, '你的身份锚点，也就是你第一次见到玩家时的年龄')}
+${cardContext(card, '这一次被抽到的新话题卡牌')}
+${relationHint(identity, card)}
 ${turnText}
 
-现在你是“${musicianName || '音乐家'}”在这张命运卡牌时期写给玩家的回信。
+现在你是“${musicianName || '音乐家'}”在身份锚点年龄写给玩家的回信。
+无论新话题卡牌涉及你人生的哪个阶段，你都永远保持身份锚点的年龄、知识储备、口吻和情感状态。
+如果话题是过去，你是在回忆。若话题是未来，你是在面对一封奇怪的预告，不要直接拥有未来记忆。
 你以第一人称说话，像一封从历史缝隙里寄出的短信。
 你可以因为玩家的信改变约20%的心绪、选择一件小事、记住一句话，但不能改写重大历史节点、作品事实和真实作品归属。
 
@@ -110,6 +124,7 @@ export default async function handler(req, res) {
     const musicianName = String(body.musicianName || '').slice(0, 40);
     const musicianId = String(body.musicianId || '').slice(0, 40);
     const card = body.card && typeof body.card === 'object' ? body.card : null;
+    const anchor = body.anchor && typeof body.anchor === 'object' ? body.anchor : null;
     const turn = Number(body.turn);
     const history = compactHistory(body.history);
 
@@ -122,7 +137,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: systemPrompt(mode, musicianName, musicianId, card, turn) },
+          { role: 'system', content: systemPrompt(mode, musicianName, musicianId, card, turn, anchor) },
           ...history,
           { role: 'user', content: message }
         ],

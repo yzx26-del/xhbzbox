@@ -107,7 +107,7 @@ tbody tr:hover{background:var(--bg2)}
 .agent-chat{margin-top:18px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;min-height:390px;background:var(--bg)}
 .agent-feed{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:420px}
 .agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
-.msg{max-width:86%;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px}
+.msg{max-width:86%;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .msg.gr,.msg.musician{align-self:flex-start;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
 .msg.gr{position:relative;margin-left:46px;min-height:46px}
 .msg.gr:before{content:'';position:absolute;left:-46px;top:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);background:#111 url('/assets/gr-avatar.jpeg') center 20%/cover;filter:grayscale(1);box-shadow:0 0 0 3px #fff}
@@ -1149,6 +1149,38 @@ function ensureMusicianChats(){
   });
 }
 function activeChapterKey(id){return `letterActiveChapter:${id}`;}
+function personaAnchorKey(id){return `letterPersonaAnchor:${id}`;}
+function normalizeFateCard(card,id=currentMusicianId,index=null){
+  if(!card)return null;
+  const agent=musicianAgents.find(a=>a.id===id);
+  return {...card,index:index??card.index,musicianId:id,musicianName:card.musicianName||agent?.name||id};
+}
+function getPersonaAnchor(id=currentMusicianId){
+  try{
+    const saved=JSON.parse(localStorage.getItem(personaAnchorKey(id))||'null');
+    if(saved&&saved.year&&saved.period)return saved;
+  }catch{}
+  try{
+    const unlocked=JSON.parse(localStorage.getItem(fateKey(id))||'[]');
+    const deck=getDeck(id);
+    const firstIndex=Array.isArray(unlocked)?unlocked[0]:null;
+    const card=deck[firstIndex];
+    if(card){
+      const anchor=normalizeFateCard(card,id,firstIndex);
+      localStorage.setItem(personaAnchorKey(id),JSON.stringify(anchor));
+      return anchor;
+    }
+  }catch{}
+  return null;
+}
+function ensurePersonaAnchor(card){
+  if(!card)return null;
+  const existing=getPersonaAnchor(card.musicianId);
+  if(existing)return existing;
+  const anchor=normalizeFateCard(card,card.musicianId,card.index);
+  try{localStorage.setItem(personaAnchorKey(card.musicianId),JSON.stringify(anchor));}catch{}
+  return anchor;
+}
 function getActiveChapter(id=currentMusicianId){
   if(activeChapters[id])return activeChapters[id];
   try{
@@ -1161,7 +1193,7 @@ function getActiveChapter(id=currentMusicianId){
     const lastIndex=Array.isArray(unlocked)?unlocked[unlocked.length-1]:null;
     const card=deck[lastIndex];
     if(card){
-      const restored={card:{...card,index:lastIndex,musicianId:id,musicianName:(musicianAgents.find(a=>a.id===id)||{}).name||id},stage:'card_drawn',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString(),restored:true};
+      const restored={card:normalizeFateCard(card,id,lastIndex),anchor:getPersonaAnchor(id),stage:'card_drawn',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString(),restored:true};
       setActiveChapter(id,restored);
       return restored;
     }
@@ -1177,15 +1209,18 @@ function sameChapterCard(a,b){
 }
 function activateFateChapter(card,stage='card_drawn'){
   if(!card)return null;
+  const anchor=ensurePersonaAnchor(card);
   const current=getActiveChapter(card.musicianId);
   const chapter=sameChapterCard(current?.card,card)?current:{
     card,
+    anchor,
     stage,
     turns:0,
     interruptAt:3+Math.floor(Math.random()*8),
     startedAt:new Date().toISOString()
   };
   chapter.card=card;
+  chapter.anchor=anchor;
   chapter.stage=stage;
   setActiveChapter(card.musicianId,chapter);
   refreshChapterLine(card.musicianId);
@@ -1201,7 +1236,9 @@ function chapterLine(id){
     interrupted:'信号中断'
   };
   const status=stageNames[c.stage]||`通话中 · 第 ${Math.max(0,c.turns||0)}/${c.interruptAt||'?'} 轮`;
-  return `<div class="musician-sub chapter-line">当前章节：${esc(c.card.year)} · ${esc(c.card.period)} · ${status}</div>`;
+  const anchor=c.anchor||getPersonaAnchor(id);
+  const anchorText=anchor&&!sameChapterCard(anchor,c.card)?` · 初见 ${esc(anchor.year)} · ${esc(anchor.period)}`:'';
+  return `<div class="musician-sub chapter-line">当前话题：${esc(c.card.year)} · ${esc(c.card.period)} · ${status}${anchorText}</div>`;
 }
 function refreshChapterLine(id){
   const card=document.getElementById('musician-card-'+id);
@@ -1240,6 +1277,7 @@ function renderMusicianAgents(openId='mozart'){
   }).join('');
 }
 function toggleMusicianAgent(id){
+  currentMusicianId=id;
   document.querySelectorAll('.musician-card').forEach(card=>{
     const on=card.id==='musician-card-'+id&&!card.classList.contains('open');
     card.classList.toggle('open',on);
@@ -1322,8 +1360,12 @@ async function sendGrMessage(){
   grChatHistory.push({role:'user',text});
   const pending=addMsg('gr-chat-feed','gr','壁炉旁有一页纸正在翻动。','Gr 小姐');
   try{
-    const reply=await callLetterAgent({
+	    const reply=await callLetterAgent({
       mode:'gr',
+      musicianId:currentMusicianId,
+      musicianName:(musicianAgents.find(a=>a.id===currentMusicianId)||{}).name||'',
+      card:getActiveChapter(currentMusicianId)?.card||null,
+      anchor:getPersonaAnchor(currentMusicianId),
       message:text,
       history:grChatHistory.slice(-8),
       max_tokens:420,
@@ -1352,6 +1394,10 @@ function selectMusicianForGr(id){
   toggleMusicianAgent(id);
   addMsg('gr-chat-feed','gr',`已切换到${a.name}。你可以在右侧直接和他聊，也可以让我把你的问题整理后再交给他。`,'Gr 小姐');
 }
+function openMusicianId(){
+  const open=document.querySelector('.musician-card.open');
+  return open?.id?.replace('musician-card-','')||currentMusicianId;
+}
 function musicianReply(agent,text){
   if(text.includes('信札'))return `如果以我为主角，信札应该从一个具体地点开始。比如“${agent.era.split('·').pop().trim()}的夜里”，再让一首作品成为门钥匙。`;
   if(text.includes('作品')||text.includes('曲'))return `先不要列太多作品。调试阶段建议挑 3 首：一首代表少年/早期，一首代表转折，一首代表晚期或成熟风格。`;
@@ -1376,9 +1422,9 @@ async function sendMusicianMessage(id){
     return;
   }
   if(chapter.stage==='interrupted'){
-    const hint='信号已经断了。那辆火车开向了另一个方向。去问 Gr 小姐，她会告诉你下一页在哪里。';
-    musicianChats[id].push({role:'musician',text:hint});
-    addMsg('mini-feed-'+id,'musician',hint,agent.name);
+    const hint='信号已经断了。那辆火车开向了另一个方向。先回到我这里，我会告诉你下一页在哪里。';
+    addMsg('gr-chat-feed','gr',hint,'Gr 小姐');
+    toast('这段信号已经中断，去问 Gr 小姐');
     return;
   }
   chapter.turns=(chapter.turns||0)+1;
@@ -1392,9 +1438,7 @@ async function sendMusicianMessage(id){
       '窗外的雪倒着落下。那位音乐家的声音被隧道吞没了。'
     ];
     const hint=lines[Math.floor(Math.random()*lines.length)]+' 去问 Gr 小姐吧，她会告诉你接下来该抽哪张牌。';
-    musicianChats[id].push({role:'musician',text:hint});
-    addMsg('mini-feed-'+id,'musician',hint,agent.name);
-    addMsg('gr-chat-feed','gr',`${agent.name}的信号断了。别追着隧道喊。回来，抽下一张命运卡牌。`,'Gr 小姐');
+    addMsg('gr-chat-feed','gr',hint,'Gr 小姐');
     return;
   }
   chapter.stage='chatting';
@@ -1407,6 +1451,7 @@ async function sendMusicianMessage(id){
       musicianId:id,
       musicianName:agent.name,
       card:chapter.card,
+      anchor:chapter.anchor||getPersonaAnchor(id),
       turn:chapter.turns,
       message:text,
       history:musicianChats[id].slice(-8),
@@ -1447,7 +1492,10 @@ function saveFateLetter(id,entry){
   const list=[entry,...getFateLetters(id)].slice(0,30);
   localStorage.setItem(fateLettersKey(id),JSON.stringify(list));
 }
-function currentAgent(){return musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];}
+function currentAgent(){
+  currentMusicianId=openMusicianId();
+  return musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];
+}
 function openFateCard(){
   const agent=currentAgent();
   const deck=getDeck(agent.id);
@@ -1495,6 +1543,7 @@ async function sendFateLetter(){
       musicianId:agent.id,
       musicianName:agent.name,
       card:activeFateCard,
+      anchor:chapter?.anchor||getPersonaAnchor(agent.id),
       turn:0,
       message:`玩家在命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”后写来一封信：${text}`,
       history:musicianChats[agent.id].slice(-6),
