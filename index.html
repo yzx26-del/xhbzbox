@@ -1161,10 +1161,35 @@ function setActiveChapter(id,chapter){
   activeChapters[id]=chapter;
   try{localStorage.setItem(activeChapterKey(id),JSON.stringify(chapter));}catch{}
 }
+function sameChapterCard(a,b){
+  return !!a&&!!b&&a.musicianId===b.musicianId&&a.index===b.index&&String(a.year)===String(b.year)&&String(a.period)===String(b.period);
+}
+function activateFateChapter(card,stage='card_drawn'){
+  if(!card)return null;
+  const current=getActiveChapter(card.musicianId);
+  const chapter=sameChapterCard(current?.card,card)?current:{
+    card,
+    stage,
+    turns:0,
+    interruptAt:3+Math.floor(Math.random()*8),
+    startedAt:new Date().toISOString()
+  };
+  chapter.card=card;
+  chapter.stage=stage;
+  setActiveChapter(card.musicianId,chapter);
+  refreshChapterLine(card.musicianId);
+  return chapter;
+}
 function chapterLine(id){
   const c=getActiveChapter(id);
-  if(!c)return '<div class="musician-sub chapter-line">当前章节：未激活 · 先抽命运卡牌并写信</div>';
-  const status=c.stage==='interrupted'?'信号中断':`回信中 · 第 ${Math.max(0,c.turns||0)}/${c.interruptAt||'?'} 轮`;
+  if(!c)return '<div class="musician-sub chapter-line">当前章节：未激活 · 先抽命运卡牌</div>';
+  const stageNames={
+    card_drawn:'已抽到 · 可开始交流',
+    letter_sent:'已寄信 · 等待回信',
+    chatting:`通话中 · 第 ${Math.max(0,c.turns||0)}/${c.interruptAt||'?'} 轮`,
+    interrupted:'信号中断'
+  };
+  const status=stageNames[c.stage]||`通话中 · 第 ${Math.max(0,c.turns||0)}/${c.interruptAt||'?'} 轮`;
   return `<div class="musician-sub chapter-line">当前章节：${esc(c.card.year)} · ${esc(c.card.period)} · ${status}</div>`;
 }
 function refreshChapterLine(id){
@@ -1435,6 +1460,8 @@ function flipFateCard(){
   card.querySelector('.fate-card-inner').style.transform=`rotateY(${turns*360+180}deg)`;
   setTimeout(()=>{card.classList.add('flipped');document.getElementById('letter-compose')?.classList.add('open');},850);
   unlockFateCard(activeFateCard.musicianId,activeFateCard.index);
+  activateFateChapter(activeFateCard,'card_drawn');
+  renderMusicianAgents(activeFateCard.musicianId);
   playBookPageSound();
 }
 async function sendFateLetter(){
@@ -1443,8 +1470,7 @@ async function sendFateLetter(){
   if(!text){toast('先写一点内容，再寄出');return;}
   const agent=musicianAgents.find(a=>a.id===activeFateCard.musicianId)||currentAgent();
   currentMusicianId=agent.id;
-  const chapter={card:activeFateCard,stage:'letter_sent',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString()};
-  setActiveChapter(agent.id,chapter);
+  const chapter=activateFateChapter(activeFateCard,'letter_sent');
   const entry={time:new Date().toISOString(),card:activeFateCard,letter:text};
   saveFateLetter(agent.id,entry);
   musicianChats[agent.id]=musicianChats[agent.id]||[];
