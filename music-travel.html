@@ -1593,6 +1593,121 @@ body::before,body::after{opacity:.78;}
   box-shadow:inset 0 2px 4px rgba(0,0,0,.3)!important;
 }
 
+/* 质感加强：金属厚度、纸张压痕、按钮凸起 */
+.tm-note-zone .dp{
+  background:
+    linear-gradient(90deg,rgba(255,224,130,.12),transparent 14%,transparent 86%,rgba(0,0,0,.34)),
+    linear-gradient(180deg,#6a481f 0%,#4a3010 18%,#2f200d 58%,#1c1207 100%)!important;
+  border-color:#3a2810!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,240,180,.22),
+    inset 0 -3px 0 rgba(0,0,0,.34),
+    inset 3px 0 0 rgba(255,210,120,.06),
+    inset -4px 0 0 rgba(0,0,0,.24),
+    0 0 0 1px #1a0e06,
+    0 8px 24px rgba(0,0,0,.82),
+    0 18px 60px rgba(0,0,0,.42)!important;
+}
+.tm-note-zone .dp:before{
+  inset:4px!important;
+  background:
+    radial-gradient(circle at 10px 10px,#d4a52c 0 1.4px,#6a4a2a 2.6px,#2a1c0e 4.2px,transparent 5px),
+    radial-gradient(circle at calc(100% - 10px) 10px,#d4a52c 0 1.4px,#6a4a2a 2.6px,#2a1c0e 4.2px,transparent 5px),
+    radial-gradient(circle at 10px calc(100% - 10px),#d4a52c 0 1.4px,#6a4a2a 2.6px,#2a1c0e 4.2px,transparent 5px),
+    radial-gradient(circle at calc(100% - 10px) calc(100% - 10px),#d4a52c 0 1.4px,#6a4a2a 2.6px,#2a1c0e 4.2px,transparent 5px),
+    linear-gradient(180deg,rgba(255,230,160,.1),transparent 18%,transparent 82%,rgba(0,0,0,.28))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,232,150,.12),
+    inset 0 0 0 3px rgba(0,0,0,.16)!important;
+}
+.tm-note-zone .dlg-body-wrap{
+  background:
+    linear-gradient(135deg,rgba(255,240,190,.2),transparent 28%,rgba(90,55,20,.12) 76%,rgba(30,18,8,.22)),
+    radial-gradient(ellipse at 18% 18%,rgba(255,235,178,.22),transparent 26%),
+    radial-gradient(ellipse at 84% 76%,rgba(72,42,18,.2),transparent 36%),
+    radial-gradient(ellipse at 20% 80%,rgba(160,140,100,.18) 0%,transparent 50%),
+    linear-gradient(160deg,#c7b08f 0%,#b8a080 44%,#a58d6d 100%)!important;
+  box-shadow:
+    inset 0 0 34px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,246,210,.22),
+    inset 0 -2px 0 rgba(70,40,16,.14),
+    0 2px 0 rgba(255,238,190,.08),
+    0 8px 18px rgba(0,0,0,.34)!important;
+}
+.tm-note-zone .dlg-body-wrap:before{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(86deg,transparent 0 2px,rgba(85,58,24,.07) 2px 3px),
+    repeating-linear-gradient(176deg,transparent 0 11px,rgba(70,45,18,.035) 11px 12px)!important;
+  opacity:.74!important;
+}
+.tm-note-zone .dlg-body-wrap:after{
+  content:''!important;display:block!important;position:absolute!important;
+  right:-12px!important;bottom:-12px!important;width:68px!important;height:42px!important;
+  background:linear-gradient(135deg,transparent 0 48%,rgba(70,40,16,.22) 52%,rgba(255,238,190,.06) 100%)!important;
+  transform:rotate(-3deg)!important;filter:blur(.2px)!important;pointer-events:none!important;
+}
+.tm-note-zone .dt{
+  text-shadow:
+    0 .35px .75px rgba(60,40,20,.24),
+    .22px 0 0 rgba(30,20,10,.16),
+    0 -1px 0 rgba(255,240,205,.06)!important;
+  filter:drop-shadow(0 .4px 0 rgba(70,42,16,.12));
+}
+.tm-note-zone .tw-char{
+  text-shadow:inherit;
+}
+.tm-note-zone .dlg-titlebar{
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(255,226,130,.12),
+    inset 0 -1px 0 rgba(0,0,0,.42)!important;
+}
+.tm-note-zone .dir:before{
+  box-shadow:0 1px 0 rgba(255,240,190,.08),0 -1px 0 rgba(70,40,16,.16)!important;
+}
+.tm-note-zone .di{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.11),rgba(255,240,200,.025)),
+    rgba(0,0,0,.08)!important;
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.22),
+    inset 0 -1px 0 rgba(255,240,190,.06),
+    0 1px 0 rgba(255,255,255,.04)!important;
+}
+.tm-note-zone .dsb{
+  background:
+    radial-gradient(ellipse at 35% 18%,rgba(255,204,150,.16),transparent 36%),
+    linear-gradient(180deg,#6a251d 0%,#4a1712 48%,#2a0e0a 100%)!important;
+  border-color:#7a3526!important;
+  border-bottom-color:#160806!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,180,.16),
+    inset 0 -2px 0 rgba(0,0,0,.32),
+    0 2px 0 #140706,
+    0 5px 9px rgba(0,0,0,.44),
+    0 0 0 1px rgba(0,0,0,.22)!important;
+}
+.tm-note-zone .dsb:hover{
+  background:
+    radial-gradient(ellipse at 35% 18%,rgba(255,220,170,.2),transparent 36%),
+    linear-gradient(180deg,#7a2c22 0%,#511a14 48%,#2d0f0b 100%)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,180,.18),
+    inset 0 -2px 0 rgba(0,0,0,.3),
+    0 2px 0 #140706,
+    0 0 14px rgba(184,144,32,.24),
+    0 5px 9px rgba(0,0,0,.44)!important;
+}
+.tm-note-zone .dsb:active{
+  transform:translateY(2px)!important;
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.4),
+    0 1px 0 #140706,
+    0 2px 4px rgba(0,0,0,.34)!important;
+}
+
 /* === PATCH ONLY: 2. 书架框 .tm-shelf-zone === */
 .tm-shelf-zone{}
 
