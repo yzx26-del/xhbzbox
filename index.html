@@ -109,6 +109,8 @@ tbody tr:hover{background:var(--bg2)}
 .agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
 .msg{max-width:86%;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px}
 .msg.gr,.msg.musician{align-self:flex-start;background:var(--bg2);color:var(--t1);border:1px solid var(--line)}
+.msg.gr{position:relative;margin-left:46px;min-height:46px}
+.msg.gr:before{content:'';position:absolute;left:-46px;top:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);background:#111 url('/assets/gr-avatar.jpeg') center 20%/cover;filter:grayscale(1);box-shadow:0 0 0 3px #fff}
 .msg.user{align-self:flex-end;background:var(--t1);color:#fff}
 .msg-meta{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t4);margin-bottom:4px}
 .msg.user .msg-meta{color:rgba(255,255,255,.56)}
@@ -116,6 +118,8 @@ tbody tr:hover{background:var(--bg2)}
 .agent-input input{flex:1;border:1px solid var(--line);border-radius:3px;height:34px;padding:0 10px;font-family:var(--sans);font-size:12px;outline:none;color:var(--t1);background:var(--bg)}
 .agent-input input:focus{border-color:var(--t1)}
 .agent-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.agent-tools .ib{height:34px}
+.agent-lore{font-size:11px;color:var(--t3);line-height:1.8;margin-top:10px;border-left:2px solid var(--line);padding-left:10px}
 .musician-list{margin-top:18px;border-top:1px solid var(--line)}
 .musician-card{border-bottom:1px solid var(--line)}
 .musician-head{display:flex;align-items:center;gap:12px;padding:13px 0;cursor:pointer}
@@ -134,7 +138,38 @@ tbody tr:hover{background:var(--bg2)}
 .mini-input{display:flex;gap:6px;border-top:1px solid var(--line);padding:8px}
 .mini-input input{flex:1;height:30px;border:1px solid var(--line);border-radius:3px;padding:0 8px;font-size:12px;outline:none}
 .mini-input input:focus{border-color:var(--t1)}
-@media(max-width:900px){.letter-workbench{grid-template-columns:1fr}.agent-panel{min-height:auto}.agent-chat{min-height:320px}.musician-body{padding-left:0}}
+.fate-overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:520;display:none;align-items:center;justify-content:center;padding:24px}
+.fate-overlay.open{display:flex}
+.fate-panel{width:min(920px,94vw);max-height:90vh;overflow:auto;background:#fff;border:1px solid var(--t1);box-shadow:0 24px 80px rgba(0,0,0,.18);padding:22px;position:relative}
+.fate-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}
+.fate-title{font-family:var(--serif);font-size:24px;font-weight:700}
+.fate-sub{font-size:12px;color:var(--t3);line-height:1.7;margin-top:4px}
+.fate-close{border:1px solid var(--line);background:#fff;width:32px;height:32px;border-radius:3px;cursor:pointer;font-size:18px}
+.fate-close:hover{border-color:var(--t1)}
+.floating-card-wrap{min-height:360px;display:flex;align-items:center;justify-content:center;perspective:1100px;position:relative;overflow:hidden;background:linear-gradient(180deg,#fff,#f6f6f6);border:1px solid var(--line)}
+.floating-card-wrap:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 34%,rgba(0,0,0,.08),transparent 32%);pointer-events:none}
+.fate-card{width:220px;height:310px;position:relative;z-index:1;cursor:pointer;transform-style:preserve-3d;animation:fateFloat 4.8s ease-in-out infinite}
+.fate-card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.2,.8,.2,1)}
+.fate-card.flipped .fate-card-inner{transform:rotateY(180deg)}
+@keyframes fateFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+.fate-face{position:absolute;inset:0;border:1px solid #111;border-radius:10px;backface-visibility:hidden;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.22)}
+.fate-back{background:#111;color:#fff;display:flex;align-items:center;justify-content:center}
+.fate-back:before{content:'';width:142px;height:226px;border:1px solid rgba(255,255,255,.38);border-radius:72px;background:radial-gradient(circle at 50% 34%,transparent 0 30px,rgba(255,255,255,.18) 31px 32px,transparent 33px),repeating-linear-gradient(45deg,transparent 0 9px,rgba(255,255,255,.08) 9px 10px)}
+.fate-front{transform:rotateY(180deg);background:#fff;color:#111;padding:16px;display:flex;flex-direction:column}
+.fate-period{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+.fate-year{font-family:var(--serif);font-size:40px;font-weight:700;line-height:1;margin-bottom:10px}
+.fate-event{font-family:var(--serif);font-size:18px;font-weight:700;line-height:1.5;margin-bottom:10px}
+.fate-work{margin-top:auto;font-size:12px;line-height:1.7;color:var(--t2);border-top:1px solid var(--line);padding-top:10px}
+.letter-compose{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.letter-compose.open{display:block}
+.letter-compose textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:4px;padding:10px;font-family:var(--serif);font-size:13px;line-height:1.8;outline:none;resize:vertical}
+.letter-compose textarea:focus{border-color:var(--t1)}
+.card-library-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.archive-card{min-height:150px;border:1px solid var(--line);border-radius:6px;padding:12px;background:#fff}
+.archive-card.locked{background:#f7f7f7;color:var(--t4);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mono);font-size:11px}
+.archive-card .fate-year{font-size:24px}.archive-card .fate-event{font-size:13px}
+.travel-letter{font-size:13px;line-height:1.9;color:var(--t2);border:1px solid var(--line);padding:16px;border-radius:4px;background:#fff}
+@media(max-width:900px){.letter-workbench{grid-template-columns:1fr}.agent-panel{min-height:auto}.agent-chat{min-height:320px}.musician-body{padding-left:0}.card-library-grid{grid-template-columns:repeat(2,1fr)}}
 .pcgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .pc{background:var(--bg);padding:16px;cursor:pointer;transition:background .12s;position:relative}
 .pc:hover{background:var(--bg2)}
@@ -530,9 +565,11 @@ select.fi{cursor:pointer}
       </div>
       <div class="agent-tools">
         <button class="ib" onclick="quickGr('帮我选择适合做音乐旅行游戏的音乐家')">选择音乐家</button>
-        <button class="ib" onclick="quickGr('把莫扎特的故事拆成可抽卡的节点')">抽卡节点</button>
-        <button class="ib" onclick="quickGr('生成一段维也纳车厢里的旅行信札')">旅行信札</button>
+        <button class="ib solid" onclick="openFateCard()"><i class="ti ti-cards"></i>命运卡牌</button>
+        <button class="ib" onclick="openCardLibrary()"><i class="ti ti-library"></i>卡牌曲库</button>
+        <button class="ib" onclick="openTravelLetter()"><i class="ti ti-letter"></i>旅行信札</button>
       </div>
+      <div class="agent-lore">设定：玩家只能改变音乐家约 20% 的情绪路径，不能改写重要历史节点和作品真实度。Gr 小姐只负责把门推开一条缝。</div>
     </section>
 
     <section class="agent-panel">
@@ -543,6 +580,16 @@ select.fi{cursor:pointer}
       </div>
       <div class="musician-list" id="musician-agent-list"></div>
     </section>
+  </div>
+</div>
+
+<div class="fate-overlay" id="fate-overlay" onclick="closeFateOverlay(event)">
+  <div class="fate-panel" onclick="event.stopPropagation()">
+    <div class="fate-head">
+      <div><div class="fate-title" id="fate-title">命运卡牌</div><div class="fate-sub" id="fate-sub">抽取当前音乐家人生中的一个时刻。翻开后，写一封信。</div></div>
+      <button class="fate-close" onclick="closeFateOverlay()">×</button>
+    </div>
+    <div id="fate-content"></div>
   </div>
 </div>
 
@@ -1055,6 +1102,45 @@ const musicianAgents=[
 ];
 const grChatHistory=[];
 const musicianChats={};
+let currentMusicianId='mozart';
+let activeFateCard=null;
+const musicianMisses={};
+const fateDecks={
+  mozart:[
+    {period:'神童巡演',year:'1763',event:'他坐进马车，欧洲忽然变成一张乐谱。',work:'早期键盘作品 K.6-K.9',keywords:['神童','马车','巡演','父亲']},
+    {period:'萨尔茨堡时期',year:'1773',event:'他向大主教递交辞呈，被拒绝。',work:'Symphony No.25 in G minor, K.183',keywords:['萨尔茨堡','大主教','辞职','自由']},
+    {period:'巴黎之夜',year:'1778',event:'母亲死在巴黎，他把噩耗折进信里。',work:'Piano Sonata No.8 in A minor, K.310',keywords:['巴黎','母亲','k310','a小调']},
+    {period:'离开宫廷',year:'1781',event:'他终于离开萨尔茨堡，代价是失去庇护。',work:'Idomeneo, K.366',keywords:['维也纳','离开','宫廷','自由职业']},
+    {period:'婚姻与账单',year:'1782',event:'他结婚了，桌上却总有未付清的账单。',work:'Die Entführung aus dem Serail, K.384',keywords:['康斯坦采','婚姻','账单','歌剧']},
+    {period:'费加罗之门',year:'1786',event:'他让仆人唱出贵族不愿听见的话。',work:'Le nozze di Figaro, K.492',keywords:['费加罗','仆人','贵族','歌剧']},
+    {period:'布拉格回声',year:'1787',event:'布拉格懂他，比维也纳早了一步。',work:'Don Giovanni, K.527',keywords:['布拉格','唐璜','回声','剧院']},
+    {period:'最后的房间',year:'1791',event:'有人敲门订下安魂曲，他没有问太多。',work:'Requiem in D minor, K.626',keywords:['安魂曲','魔笛','1791','最后']}
+  ],
+  beethoven:[
+    {period:'海利根施塔特',year:'1802',event:'他把绝望写成遗书，却没有离开音乐。',work:'Piano Sonata No.17 Tempest',keywords:['遗书','耳聋','风暴','海利根施塔特']},
+    {period:'英雄改名',year:'1804',event:'他擦掉献词，英雄从一个人变成一种重量。',work:'Symphony No.3 Eroica',keywords:['英雄','拿破仑','改名','交响曲']}
+  ],
+  chopin:[
+    {period:'离开华沙',year:'1830',event:'他离开故乡时，还不知道回去会变成一件难事。',work:'Etude Op.10',keywords:['华沙','离开','流亡','钢琴']},
+    {period:'巴黎沙龙',year:'1835',event:'灯光很近，孤独也很近。',work:'Nocturnes Op.27',keywords:['巴黎','沙龙','夜曲','孤独']}
+  ],
+  debussy:[
+    {period:'月光之前',year:'1890',event:'他不急着解释月亮，只把光放在和声里。',work:'Suite bergamasque',keywords:['月光','和声','巴黎','光']},
+    {period:'海的草稿',year:'1905',event:'海没有主题，却有呼吸。',work:'La mer',keywords:['海','呼吸','管弦','色彩']}
+  ],
+  hisaishi:[
+    {period:'风的入口',year:'1984',event:'风先来了，旋律才知道要往哪里飞。',work:'Nausicaä of the Valley of the Wind',keywords:['风','娜乌西卡','旋律','天空']},
+    {period:'天空之城',year:'1986',event:'一段童声把废墟托了起来。',work:'Castle in the Sky',keywords:['天空之城','童声','废墟','飞行']}
+  ],
+  zimmer:[
+    {period:'梦的低频',year:'2010',event:'时间开始下沉，铜管像一扇门。',work:'Inception',keywords:['盗梦空间','低频','时间','铜管']},
+    {period:'星际时钟',year:'2014',event:'管风琴把宇宙吹成一间教堂。',work:'Interstellar',keywords:['星际穿越','管风琴','宇宙','时间']}
+  ],
+  kajiura:[
+    {period:'魔法的代价',year:'2011',event:'少女的愿望被合唱托起，也被命运按住。',work:'Puella Magi Madoka Magica',keywords:['小圆','合唱','愿望','命运']},
+    {period:'刀光与人声',year:'2019',event:'战斗不是速度，是被命运追上。',work:'Demon Slayer',keywords:['鬼灭','战斗','人声','命运']}
+  ]
+};
 function ensureMusicianChats(){
   musicianAgents.forEach(a=>{
     if(!musicianChats[a.id]){
@@ -1108,7 +1194,23 @@ function addMsg(feedId,role,text,name){
   div.innerHTML=`<span class="msg-meta">${escHtml(name||'')}</span>${escHtml(text)}`;
   feed.appendChild(div);
   feed.scrollTop=feed.scrollHeight;
+  if(role==='gr')playBookPageSound();
   return div;
+}
+function playBookPageSound(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const dur=.34;
+    const buffer=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(1-t)*(.18+.32*Math.exp(-t*10));}
+    const src=ctx.createBufferSource();src.buffer=buffer;
+    const low=ctx.createBiquadFilter();low.type='lowpass';low.frequency.value=420;low.Q.value=.6;
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.12,ctx.currentTime+.03);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+    const thud=ctx.createOscillator();const thudGain=ctx.createGain();thud.type='sine';thud.frequency.setValueAtTime(74,ctx.currentTime);thud.frequency.exponentialRampToValueAtTime(42,ctx.currentTime+.16);thudGain.gain.setValueAtTime(.06,ctx.currentTime);thudGain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.22);
+    src.connect(low).connect(gain).connect(ctx.destination);thud.connect(thudGain).connect(ctx.destination);
+    src.start();src.stop(ctx.currentTime+dur);thud.start();thud.stop(ctx.currentTime+.23);
+  }catch{}
 }
 function grReply(text){
   const lower=text.toLowerCase();
@@ -1151,6 +1253,8 @@ async function sendGrMessage(){
   const input=document.getElementById('gr-chat-input');
   const text=(input?.value||'').trim();
   if(!text)return;
+  const mentioned=musicianAgents.find(a=>text.includes(a.name));
+  if(mentioned)currentMusicianId=mentioned.id;
   input.value='';
   addMsg('gr-chat-feed','user',text,'你');
   grChatHistory.push({role:'user',text});
@@ -1164,10 +1268,12 @@ async function sendGrMessage(){
       temperature:.72
     },grReply(text));
     if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐</span>${escHtml(reply)}`;
+    playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
   }catch(e){
     const reply=grReply(text);
     if(pending)pending.innerHTML=`<span class="msg-meta">Gr 小姐 · 本地兜底</span>${escHtml(reply)}`;
+    playBookPageSound();
     grChatHistory.push({role:'assistant',text:reply});
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
@@ -1180,6 +1286,7 @@ function quickGr(text){
 function selectMusicianForGr(id){
   const a=musicianAgents.find(x=>x.id===id);
   if(!a)return;
+  currentMusicianId=id;
   toggleMusicianAgent(id);
   addMsg('gr-chat-feed','gr',`已切换到${a.name}。你可以在右侧直接和他聊，也可以让我把你的问题整理后再交给他。`,'Gr 小姐');
 }
@@ -1195,9 +1302,20 @@ async function sendMusicianMessage(id){
   const input=document.getElementById('mini-input-'+id);
   const text=(input?.value||'').trim();
   if(!agent||!text)return;
+  currentMusicianId=id;
   input.value='';
   musicianChats[id].push({role:'user',text});
   addMsg('mini-feed-'+id,'user',text,'你');
+  const unlocked=getUnlockedFateCards(id);
+  const matched=unlocked.find(c=>(c.keywords||[]).some(k=>text.toLowerCase().includes(String(k).toLowerCase())));
+  if(unlocked.length&&!matched){
+    musicianMisses[id]=(musicianMisses[id]||0)+1;
+    const hint=musicianMisses[id]>=3?'信号中断。那位音乐家像是走进了隧道。去问 Gr 小姐吧，她会告诉你该敲哪一个词。':'这封信没有碰到那张牌的关键词。试着提到地点、作品，或那一年发生的事。';
+    musicianChats[id].push({role:'musician',text:hint});
+    addMsg('mini-feed-'+id,'musician',hint,agent.name);
+    return;
+  }
+  musicianMisses[id]=0;
   const pending=addMsg('mini-feed-'+id,'musician','档案页正在展开。',agent.name);
   try{
     const reply=await callLetterAgent({
@@ -1218,11 +1336,102 @@ async function sendMusicianMessage(id){
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
 }
+function fateKey(id=currentMusicianId){return `letterFateUnlocked:${id}`;}
+function fateLettersKey(id=currentMusicianId){return `letterFateLetters:${id}`;}
+function getDeck(id=currentMusicianId){return fateDecks[id]||fateDecks.mozart;}
+function getUnlockedFateCards(id=currentMusicianId){
+  try{
+    const idx=JSON.parse(localStorage.getItem(fateKey(id))||'[]');
+    const deck=getDeck(id);
+    return idx.map(i=>deck[i]).filter(Boolean);
+  }catch{return[];}
+}
+function unlockFateCard(id,index){
+  try{
+    const key=fateKey(id);
+    const list=JSON.parse(localStorage.getItem(key)||'[]');
+    if(!list.includes(index))list.push(index);
+    localStorage.setItem(key,JSON.stringify(list));
+  }catch{}
+}
+function getFateLetters(id=currentMusicianId){
+  try{return JSON.parse(localStorage.getItem(fateLettersKey(id))||'[]');}catch{return[];}
+}
+function saveFateLetter(id,entry){
+  const list=[entry,...getFateLetters(id)].slice(0,30);
+  localStorage.setItem(fateLettersKey(id),JSON.stringify(list));
+}
+function currentAgent(){return musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];}
+function openFateCard(){
+  const agent=currentAgent();
+  const deck=getDeck(agent.id);
+  const index=Math.floor(Math.random()*deck.length);
+  activeFateCard={...deck[index],index,musicianId:agent.id,musicianName:agent.name};
+  const title=document.getElementById('fate-title'),sub=document.getElementById('fate-sub'),content=document.getElementById('fate-content'),overlay=document.getElementById('fate-overlay');
+  if(title)title.textContent=`${agent.name} · 命运卡牌`;
+  if(sub)sub.textContent='点击卡牌翻开。你会旁观一个历史时刻，然后写一封不能改变大事、只能改变心绪的信。';
+  if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back"></div><div class="fate-face fate-front"><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
+  overlay?.classList.add('open');
+  playBookPageSound();
+}
+function flipFateCard(){
+  const card=document.getElementById('active-fate-card');
+  if(!card||card.classList.contains('flipped'))return;
+  const turns=2+Math.floor(Math.random()*4);
+  card.style.animationDuration=(1.4+turns*.12)+'s';
+  card.querySelector('.fate-card-inner').style.transform=`rotateY(${turns*360+180}deg)`;
+  setTimeout(()=>{card.classList.add('flipped');document.getElementById('letter-compose')?.classList.add('open');},850);
+  unlockFateCard(activeFateCard.musicianId,activeFateCard.index);
+  playBookPageSound();
+}
+async function sendFateLetter(){
+  if(!activeFateCard)return;
+  const text=(document.getElementById('fate-letter-text')?.value||'').trim();
+  if(!text){toast('先写一点内容，再寄出');return;}
+  const agent=musicianAgents.find(a=>a.id===activeFateCard.musicianId)||currentAgent();
+  currentMusicianId=agent.id;
+  toggleMusicianAgent(agent.id);
+  const entry={time:new Date().toISOString(),card:activeFateCard,letter:text};
+  saveFateLetter(agent.id,entry);
+  musicianChats[agent.id]=musicianChats[agent.id]||[];
+  musicianChats[agent.id].push({role:'user',text:`命运卡牌来信：${text}`});
+  renderMusicianAgents(agent.id);
+  addMsg('mini-feed-'+agent.id,'user',`命运卡牌来信：${text}`,'你');
+  const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但${agent.name}在纸边停了一下。\n他回信说：我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
+  musicianChats[agent.id].push({role:'musician',text:reply});
+  addMsg('mini-feed-'+agent.id,'musician',reply,agent.name);
+  closeFateOverlay();
+}
+function openCardLibrary(){
+  const agent=currentAgent(),deck=getDeck(agent.id),unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
+  document.getElementById('fate-title').textContent=`${agent.name} · 卡牌曲库`;
+  document.getElementById('fate-sub').textContent='已抽出的卡牌显示完整信息；未抽出的卡牌保持上锁。';
+  document.getElementById('fate-content').innerHTML=`<div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card"><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked"><div><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
+  document.getElementById('fate-overlay')?.classList.add('open');
+}
+function openTravelLetter(){
+  const agent=currentAgent(),letters=getFateLetters(agent.id);
+  document.getElementById('fate-title').textContent=`${agent.name} · 旅行信札`;
+  document.getElementById('fate-sub').textContent='记录玩家和音乐家一起做过的事。结尾保留音乐家给玩家的信。';
+  const body=letters.length?letters.map(x=>`<div class="travel-letter" style="margin-bottom:10px"><strong>${esc(x.card.year)} · ${esc(x.card.period)}</strong><br>${esc(x.card.event)}<br><br>你写给他的信：${esc(x.letter)}<br><br>他的回信：历史没有改道，只是有人在边上点了一盏灯。</div>`).join(''):'<div class="travel-letter">还没有旅行信札。先抽一张命运卡牌，给音乐家写信。</div>';
+  document.getElementById('fate-content').innerHTML=body+`<div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
+  document.getElementById('fate-overlay')?.classList.add('open');
+}
+function closeFateOverlay(e){
+  const overlay=document.getElementById('fate-overlay');
+  if(!e||e.target===overlay)overlay?.classList.remove('open');
+}
 window.sendGrMessage=sendGrMessage;
 window.quickGr=quickGr;
 window.toggleMusicianAgent=toggleMusicianAgent;
 window.selectMusicianForGr=selectMusicianForGr;
 window.sendMusicianMessage=sendMusicianMessage;
+window.openFateCard=openFateCard;
+window.flipFateCard=flipFateCard;
+window.sendFateLetter=sendFateLetter;
+window.openCardLibrary=openCardLibrary;
+window.openTravelLetter=openTravelLetter;
+window.closeFateOverlay=closeFateOverlay;
 document.addEventListener('DOMContentLoaded',()=>renderMusicianAgents('mozart'));
 
 // ══ GAME MAP EDITOR ══
