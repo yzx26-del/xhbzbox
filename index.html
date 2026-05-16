@@ -1240,6 +1240,9 @@ function chapterLine(id){
   const anchorText=anchor&&!sameChapterCard(anchor,c.card)?` · 初见 ${esc(anchor.year)} · ${esc(anchor.period)}`:'';
   return `<div class="musician-sub chapter-line">当前话题：${esc(c.card.year)} · ${esc(c.card.period)} · ${status}${anchorText}</div>`;
 }
+function isSystemInterruptionText(text){
+  return /信号已经断了|火车行驶到了另一个方向|收不回回信|时光裂缝|隧道吞没|去问 Gr 小姐|去问Gr小姐/.test(String(text||''));
+}
 function refreshChapterLine(id){
   const card=document.getElementById('musician-card-'+id);
   const line=card?.querySelector('.chapter-line');
@@ -1250,7 +1253,7 @@ function renderMusicianAgents(openId='mozart'){
   const box=document.getElementById('musician-agent-list');
   if(!box)return;
   box.innerHTML=musicianAgents.map(a=>{
-    const msgs=musicianChats[a.id].map(m=>`<div class="msg ${m.role==='user'?'user':'musician'}"><span class="msg-meta">${m.role==='user'?'你':a.name}</span>${escHtml(m.text)}</div>`).join('');
+    const msgs=musicianChats[a.id].filter(m=>!(m.role!=='user'&&isSystemInterruptionText(m.text))).map(m=>`<div class="msg ${m.role==='user'?'user':'musician'}"><span class="msg-meta">${m.role==='user'?'你':a.name}</span>${escHtml(m.text)}</div>`).join('');
     return `<div class="musician-card ${a.id===openId?'open':''}" id="musician-card-${a.id}">
       <div class="musician-head" onclick="toggleMusicianAgent('${a.id}')">
         <div class="musician-avatar">${a.mark}</div>
@@ -1313,6 +1316,14 @@ function playBookPageSound(){
 }
 function grReply(text){
   const lower=text.toLowerCase();
+  const agent=musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];
+  const chapter=getActiveChapter(currentMusicianId);
+  const card=chapter?.card;
+  const anchor=chapter?.anchor||getPersonaAnchor(currentMusicianId);
+  if(card&&(text.includes('是谁')||text.includes('这张卡')||text.includes('什么意思'))){
+    const anchorLine=anchor&&!sameChapterCard(anchor,card)?`你第一次见到的是${anchor.year}年的他；这张牌只是递来${card.year}年的一页。`:'这张牌就是你们第一次相遇的那一页。';
+    return `这张牌仍然属于${agent.name}。\n${card.year}年，${card.period}：${card.event}\n${anchorLine}好了，把这张牌交还给他吧。`;
+  }
   if(text.includes('莫扎特'))return '我会先把莫扎特拆成三个调试层：人生节点、作品线索、旅行场景。你可以在右侧展开“莫扎特”，先测试他的语气。';
   if(text.includes('信札'))return '信札建议先固定格式：地点、时间、音乐家状态、一个隐秘问题。等 DeepSeek 接入后，只让 API 生成正文，结构由本地控制。';
   if(text.includes('抽卡')||text.includes('节点')||text.includes('下一张'))return '去抽一张命运卡牌。不要急着问完他的一生，只敲开这一页。';
@@ -1321,7 +1332,7 @@ function grReply(text){
   return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
 }
 function agentCacheKey(payload){
-  const raw=JSON.stringify({mode:payload.mode,musicianId:payload.musicianId||'',card:payload.card?`${payload.card.year||''}-${payload.card.period||''}`:'',turn:payload.turn||0,message:payload.message});
+  const raw=JSON.stringify({v:3,mode:payload.mode,musicianId:payload.musicianId||'',anchor:payload.anchor?`${payload.anchor.year||''}-${payload.anchor.period||''}`:'',card:payload.card?`${payload.card.year||''}-${payload.card.period||''}`:'',turn:payload.turn||0,message:payload.message});
   try{return 'letterAgentCache:'+btoa(unescape(encodeURIComponent(raw))).slice(0,160);}catch{return 'letterAgentCache:'+raw.length+':'+Date.now();}
 }
 function getAgentCache(payload){

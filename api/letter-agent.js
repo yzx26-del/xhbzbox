@@ -78,8 +78,9 @@ function relationHint(anchor, card) {
 }
 
 function systemPrompt(mode, musicianName, musicianId, card, turn, anchor) {
+  const currentName = musicianName || musicianProfiles[musicianId]?.split('：')[0] || '当前音乐家';
   if (mode === 'musician') {
-    const profile = musicianProfiles[musicianId] || `${musicianName || '这位音乐家'}：请以该音乐家的作品、人生命运和创作语境回答。`;
+    const profile = musicianProfiles[musicianId] || `${currentName}：请以该音乐家的作品、人生命运和创作语境回答。`;
     const turnText = Number.isFinite(Number(turn)) ? `\n这是玩家与音乐家的第${Number(turn) + 1}封来回信。不要重复第一封信的开场，继续上一封信的情绪。` : '';
     const identity = anchor || card;
     return `${profile}
@@ -88,8 +89,9 @@ ${cardContext(card, '这一次被抽到的新话题卡牌')}
 ${relationHint(identity, card)}
 ${turnText}
 
-现在你是“${musicianName || '音乐家'}”在身份锚点年龄写给玩家的回信。
+现在你是“${currentName}”在身份锚点年龄写给玩家的回信。
 无论新话题卡牌涉及你人生的哪个阶段，你都永远保持身份锚点的年龄、知识储备、口吻和情感状态。
+无论对话里出现柏辽兹、门德尔松或其他任何音乐家的名字，你的身份都不会改变。你可以提到或评价别人，但你始终是${currentName}。
 如果话题是过去，你是在回忆。若话题是未来，你是在面对一封奇怪的预告，不要直接拥有未来记忆。
 你以第一人称说话，像一封从历史缝隙里寄出的短信。
 你可以因为玩家的信改变约20%的心绪、选择一件小事、记住一句话，但不能改写重大历史节点、作品事实和真实作品归属。
@@ -102,7 +104,17 @@ ${turnText}
 - 不用感叹号。
 - 不编造冷僻事实；不确定就说“这页档案还需要核对”。`;
   }
-  return grPersona;
+  return `${grPersona}
+${cardContext(anchor, '当前通话主角的身份锚点')}
+${cardContext(card, 'Gr本次只能解读的命运卡牌')}
+
+硬性规则：
+- 当前通话中的主角永远是“${currentName}”。Gr无权把主角切换成任何别的音乐家。
+- Gr只负责介绍卡牌信息和引导抽牌，不得代替音乐家继续发言。
+- 如果玩家问“是谁”“这张卡什么意思”，只解释这张牌与${currentName}的关系。
+- 如果卡牌或历史背景里出现其他音乐家，你只能说那是旁支人物，不能把对话对象变成他。
+- 回复最后必须把话交还给当前音乐家，例如“好了，把这张牌交给${currentName}吧。”
+- 不要介绍柏辽兹、门德尔松或其他音乐家，除非当前锁定音乐家就是他本人。`;
 }
 
 export default async function handler(req, res) {
