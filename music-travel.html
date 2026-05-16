@@ -10,6 +10,7 @@
 :root{
   --abyss:#080c14;--tunnel:#0a0a0e;--steam:#c8c4b8;
   --lamp:#b89020;--copper:#6a4a2a;--leather:#3a1a1a;
+  --steam-bg:#0f0c08;--steam-wall:#1a1410;--steam-pipe:#6a4a2a;--steam-wood:#2a1c10;
   --archive:#9a9080;--inkblue:#1a1510;
   --D:'Cinzel',serif;--S:'IM Fell English',Georgia,serif;
   --B:'Crimson Text',Georgia,serif;--M:'Courier Prime',monospace;
@@ -930,6 +931,186 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
 /* 对话框底部导航区高度留白 */
 #gr-zone{gap:0;}
 
+/* === 视觉精修：蒸汽车厢、便签、魔法书架、功能面板 === */
+#cabin{
+  background:
+    radial-gradient(ellipse at 62% 16%,rgba(184,144,32,.1),transparent 36%),
+    linear-gradient(180deg,#1a1410 0%,#17100b 38%,#0f0c08 72%,#090807 100%)!important;
+  filter:brightness(1.15);
+}
+#cabin:before{
+  background:
+    repeating-radial-gradient(circle at 28px 28px,rgba(184,144,32,.28) 0 1.7px,transparent 2.2px 70px),
+    repeating-linear-gradient(90deg,rgba(255,220,130,.035) 0 1px,transparent 1px 118px),
+    repeating-linear-gradient(0deg,rgba(255,220,130,.02) 0 1px,transparent 1px 86px),
+    linear-gradient(90deg,rgba(0,0,0,.38),transparent 18%,transparent 82%,rgba(0,0,0,.42))!important;
+  opacity:.9;
+}
+#cabin:after{
+  top:10%;bottom:auto;height:96px!important;
+  background:
+    linear-gradient(90deg,transparent 0 7%,rgba(106,74,42,.72) 7% 8%,transparent 8% 100%),
+    linear-gradient(90deg,transparent 0 16%,rgba(126,84,38,.5) 16% 17%,transparent 17% 100%),
+    radial-gradient(circle at 8% 40%,rgba(184,144,32,.34) 0 5px,transparent 6px),
+    linear-gradient(180deg,transparent 18px,rgba(106,74,42,.72) 19px 25px,transparent 26px,transparent 58px,rgba(78,52,25,.62) 59px 63px,transparent 64px)!important;
+  opacity:.6;
+}
+#scene:before{content:'';position:absolute;left:0;top:0;bottom:0;width:16%;z-index:4;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.42),transparent),repeating-linear-gradient(0deg,transparent 0 46px,rgba(106,74,42,.34) 47px 51px,transparent 52px 92px);}
+#floor{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.54)),
+    repeating-linear-gradient(115deg,rgba(255,210,120,.04) 0 2px,transparent 2px 34px),
+    repeating-linear-gradient(28deg,#2a1c10 0 34px,#24170c 34px 68px,#312013 68px 102px)!important;
+  box-shadow:inset 0 28px 70px rgba(0,0,0,.62);
+}
+#floor:after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 18% 40%,rgba(255,230,170,.08),transparent 8%),radial-gradient(circle at 65% 66%,rgba(0,0,0,.22),transparent 12%),repeating-linear-gradient(90deg,transparent 0 88px,rgba(0,0,0,.16) 89px 91px);mix-blend-mode:overlay;}
+#window-outer{background:linear-gradient(180deg,#07101a,#090b10 62%,#050506)!important;box-shadow:inset 0 0 38px rgba(0,0,0,.75);}
+#passing-world:before{content:'';position:absolute;right:-40%;bottom:0;width:42%;height:46%;background:linear-gradient(180deg,transparent 0 22%,rgba(20,18,16,.52) 23% 100%);clip-path:polygon(0 100%,0 46%,8% 46%,8% 24%,16% 24%,16% 58%,24% 58%,24% 32%,34% 32%,34% 70%,45% 70%,45% 18%,55% 18%,55% 52%,66% 52%,66% 34%,75% 34%,75% 68%,88% 68%,88% 40%,100% 40%,100% 100%);filter:blur(2px);opacity:.6;animation:cityPass 9s linear infinite;}
+@keyframes cityPass{to{transform:translateX(-180vw)}}
+#glass-reflection:after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 12%,rgba(230,230,220,.16),transparent 4%),radial-gradient(ellipse at 72% 22%,rgba(230,230,220,.1),transparent 3%),repeating-linear-gradient(105deg,transparent 0 27px,rgba(210,220,230,.14) 28px,transparent 34px);opacity:.7;animation:rainSlide 3.2s linear infinite;}
+@keyframes rainSlide{to{transform:translate(-18px,34px)}}
+#dlg .dp,.dp{
+  background:linear-gradient(160deg,#e8d8b8 0%,#d4bf97 52%,#c8b898 100%)!important;
+  border:1px solid rgba(184,144,32,.6)!important;
+  box-shadow:0 0 24px rgba(184,144,32,.32),0 12px 48px rgba(0,0,0,.68),inset 0 1px 0 rgba(255,246,210,.36)!important;
+}
+.dlg-tname{
+  background:linear-gradient(135deg,#fff3b0,#b89020 45%,#6a4a2a)!important;
+  -webkit-background-clip:text;background-clip:text;color:transparent!important;
+  text-shadow:none!important;
+}
+.dt{color:#0e0c08!important;text-shadow:0 .4px .3px rgba(255,255,255,.16)!important;}
+.db:before,.db:after{
+  background:radial-gradient(circle at 35% 35%,#fff2a2,#b89020 45%,#5d3d13 100%)!important;
+  box-shadow:0 0 0 1px rgba(90,58,15,.55),0 0 10px rgba(184,144,32,.42),inset 0 1px 0 rgba(255,255,255,.5)!important;
+}
+.cur{width:2px!important;height:1.2em!important;background:#d7a82c!important;box-shadow:0 0 9px rgba(184,144,32,.72)!important;}
+.di{background:rgba(255,255,255,.14)!important;color:#0e0c08!important;border-color:rgba(26,20,10,.24)!important;}
+#gr-fig{
+  filter:
+    drop-shadow(0 30px 90px rgba(0,0,0,.98))
+    drop-shadow(-10px 0 28px rgba(120,160,210,.08))
+    drop-shadow(9px 0 34px rgba(232,184,72,.13))
+    contrast(1.23) saturate(.32);
+}
+#gr-fig svg{transform:translateY(2px) scale(1.02);}
+#gr-fig:before{
+  content:'';position:absolute;inset:7% 2% 1%;
+  background:radial-gradient(ellipse at 55% 38%,rgba(255,236,174,.09),transparent 42%),
+    linear-gradient(110deg,rgba(255,255,255,.04),transparent 28%,rgba(0,0,0,.18) 80%);
+  mix-blend-mode:screen;pointer-events:none;z-index:2;
+}
+.sc{
+  border-color:#6d4a1d;
+  background:
+    linear-gradient(175deg,#130b04 0%,#221406 52%,#080604 100%),
+    radial-gradient(ellipse at 50% 0,rgba(184,144,32,.14),transparent 60%);
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.98),
+    inset 0 1px 0 rgba(255,225,120,.06),
+    inset 9px 0 24px rgba(0,0,0,.62),
+    inset -9px 0 24px rgba(0,0,0,.62);
+  transform-style:preserve-3d;
+  perspective:700px;
+}
+.sc:after{content:'';position:absolute;inset:10px 12px;pointer-events:none;background:radial-gradient(circle at 12% 8%,rgba(230,210,150,.12) 0 1px,transparent 2px),radial-gradient(circle at 74% 24%,rgba(230,210,150,.09) 0 1px,transparent 2px),radial-gradient(circle at 45% 70%,rgba(230,210,150,.08) 0 1px,transparent 2px);opacity:.55;animation:dustFloat 7s ease-in-out infinite;}
+@keyframes dustFloat{50%{opacity:.25;transform:translateY(-3px)}}
+.sr{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.75) 100%),
+    repeating-linear-gradient(90deg,rgba(120,70,25,.2) 0 3px,transparent 3px 19px),
+    repeating-linear-gradient(0deg,#2b1a09 0 7px,#1c1005 8px 14px)!important;
+  border-bottom-color:#4b2d0e;
+  box-shadow:
+    inset 0 8px 24px rgba(0,0,0,.78),
+    inset 0 -3px 0 rgba(255,210,100,.045),
+    0 8px 16px rgba(0,0,0,.7);
+}
+.bk{
+  box-shadow:
+    inset 4px 0 8px rgba(255,255,255,.05),
+    inset -5px 0 10px rgba(0,0,0,.42),
+    0 5px 12px rgba(0,0,0,.64);
+  transform-style:preserve-3d;
+  transition:transform .28s cubic-bezier(.22,1,.36,1),filter .25s,box-shadow .25s;
+}
+.bk:before{width:5px;background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(255,255,255,.05));}
+.bk:after{left:auto;right:2px;width:1px;background:rgba(255,220,130,.08);}
+.bs{color:rgba(244,226,184,.78);text-shadow:0 1px 5px #000,0 0 10px rgba(184,144,32,.15);}
+.bk:hover{transform:perspective(520px) rotateY(-9deg) translateX(-10px) translateY(-10px)!important;box-shadow:0 0 20px rgba(184,144,32,.3),inset 5px 0 9px rgba(255,255,255,.07),inset -8px 0 12px rgba(0,0,0,.48),0 12px 24px rgba(0,0,0,.75)!important;}
+.btt{transform:translateX(-50%) translateY(4px);transition:opacity .24s,transform .24s;}
+.bk:hover .btt{opacity:1;transform:translateX(-50%) translateY(0);}
+.bk-leather{background-image:linear-gradient(90deg,#1d1005,#4a2d13 36%,#2b1607 62%,#120904),repeating-linear-gradient(0deg,transparent 0 7px,rgba(255,220,150,.055) 8px)!important;}
+.bk-leather:after{content:'';position:absolute;left:44%;top:5px;bottom:5px;width:2px;background:linear-gradient(180deg,transparent,#8a642d,transparent);box-shadow:4px 0 0 rgba(0,0,0,.24),-4px 0 0 rgba(0,0,0,.18);}
+.bk-velvet_r,.bk-velvet_g,.bk-velvet_b{border-left:1px solid rgba(232,184,48,.8)!important;border-right:1px solid rgba(232,184,48,.55)!important;}
+.bk-metal:after{content:'';position:absolute;left:50%;top:8px;width:4px;height:4px;border-radius:50%;background:#c8c4b8;box-shadow:0 18px 0 #8f8c82,0 36px 0 #c8c4b8,0 54px 0 #8f8c82;}
+.bk-chain:after{content:'';position:absolute;left:4px;right:4px;top:45%;height:5px;background:repeating-linear-gradient(90deg,#6a4a2a 0 5px,#221307 5px 10px);box-shadow:0 1px 4px rgba(0,0,0,.7);}
+.bk-mz{box-shadow:0 0 0 1.5px rgba(230,174,54,.74),0 0 32px rgba(184,55,36,.42),inset 0 0 18px rgba(0,0,0,.46);animation:caseGlow 3.4s ease-in-out infinite!important;}
+.bk-mz:after{content:'';position:absolute;left:3px;right:3px;top:48%;height:7px;background:linear-gradient(180deg,#f5d46d,#9b6818);border-radius:1px;box-shadow:0 0 12px rgba(184,144,32,.55);}
+#mbk{
+  opacity:1!important;
+  background:linear-gradient(180deg,#ffd86a 0%,#d5a526 45%,#8a5d12 100%)!important;
+  color:#1a1005!important;border:1px solid #ffe8a0!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow:0 0 24px rgba(213,165,38,.38),inset 0 1px 0 rgba(255,255,255,.34);
+}
+.drb,.write-btn,.dsb,.lbtn-send,.wp-send,.inc-close,.chr-close{
+  background:linear-gradient(180deg,#ffe27a 0%,#d8a72b 42%,#8c5e13 100%)!important;
+  color:#190f04!important;border:1px solid #fff0a8!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.36)!important;
+  box-shadow:0 0 22px rgba(216,167,43,.34),inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.34)!important;
+  font-weight:700;
+}
+.drb:hover,.write-btn:hover,.dsb:hover,.lbtn-send:hover,.wp-send:hover,.inc-close:hover,.chr-close:hover{
+  background:linear-gradient(180deg,#fff1a8 0%,#e7bd3d 45%,#a36e18 100%)!important;
+  box-shadow:0 0 34px rgba(232,184,48,.55),0 0 0 1px rgba(255,238,160,.34),inset 0 1px 0 rgba(255,255,255,.4)!important;
+  transform:translateY(-1px);
+}
+#write-area{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+#write-area .write-btn{min-width:96px;}
+#nav{gap:12px!important;}
+#nav{
+  position:fixed!important;
+  right:18px!important;
+  bottom:18px!important;
+  width:auto!important;
+  height:auto!important;
+  padding:10px 12px!important;
+  z-index:760!important;
+  opacity:1!important;
+  animation:none!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  background:rgba(255,255,255,.16)!important;
+  border:1px solid rgba(106,74,42,.42)!important;
+  box-shadow:0 16px 44px rgba(0,0,0,.55),0 0 20px rgba(184,144,32,.08)!important;
+}
+.nb{
+  background:#fffaf0!important;
+  border:1px solid rgba(255,255,255,.9)!important;
+  color:#0e0c08!important;
+  font-family:var(--M)!important;
+  font-size:8px!important;
+  letter-spacing:.18em!important;
+  padding:10px 15px!important;
+  text-shadow:none!important;
+  display:flex;align-items:center;gap:7px;
+  white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.nb:hover{border-color:var(--lamp)!important;box-shadow:0 0 22px rgba(184,144,32,.38),0 8px 28px rgba(0,0,0,.5)!important;color:#0e0c08!important;background:#ffffff!important;}
+#travel-panel{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(12,8,4,.82),rgba(2,2,3,.96));}
+#travel-panel.show{display:flex;}
+.tp-shell{width:min(920px,88vw);max-height:82vh;overflow:hidden;border:1px solid rgba(184,144,32,.42);background:linear-gradient(160deg,rgba(20,13,7,.96),rgba(7,7,9,.98));box-shadow:0 30px 120px rgba(0,0,0,.86),0 0 42px rgba(184,144,32,.13);}
+.tp-head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(184,144,32,.2);}
+.tp-kicker{font-family:var(--M);font-size:8px;letter-spacing:.28em;color:rgba(184,144,32,.62);}.tp-title{font-family:var(--D);font-size:22px;letter-spacing:.14em;color:#e7d6a8;margin-top:5px;}
+.tp-close{background:rgba(6,8,12,.8);border:1px solid rgba(106,74,42,.7);color:var(--archive);font-family:var(--M);font-size:8px;letter-spacing:.18em;padding:8px 14px;cursor:pointer}.tp-close:hover{border-color:var(--lamp);color:#ffe8a0;}
+.tp-back{background:#fffaf0;border:1px solid rgba(255,255,255,.9);color:#0e0c08;font-family:var(--M);font-size:8px;letter-spacing:.18em;padding:8px 12px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.34)}
+.tp-back:hover{border-color:var(--lamp);box-shadow:0 0 18px rgba(184,144,32,.36)}
+#tp-body{padding:18px;overflow:auto;max-height:calc(82vh - 76px);}
+.tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}.tp-card{border:1px solid rgba(184,144,32,.24);background:linear-gradient(160deg,#a89070,#8f7657);color:#160f08;padding:13px;min-height:150px;box-shadow:0 16px 44px rgba(0,0,0,.36)}.tp-card.locked{filter:saturate(.1);opacity:.38;background:linear-gradient(160deg,#4c463e,#2a2825);color:#b8b0a0}.tp-year{font-family:var(--D);font-size:20px}.tp-period{font-family:var(--M);font-size:8px;letter-spacing:.18em;margin:5px 0 9px}.tp-event{font-family:var(--S);font-style:italic;font-size:12px;line-height:1.65}.tp-music-group{margin-bottom:18px}.tp-music-title{font-family:var(--M);font-size:9px;letter-spacing:.24em;color:rgba(184,144,32,.7);margin-bottom:8px}.tp-track{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(184,144,32,.2);background:rgba(0,0,0,.22);padding:10px 12px;margin-bottom:7px}.tp-track strong{font-family:var(--S);font-style:italic;color:#e8d8b8}.tp-track span{font-family:var(--M);font-size:8px;color:rgba(200,196,184,.45)}.tp-play{height:24px;padding:0 9px;border:1px solid rgba(184,144,32,.45);background:rgba(6,8,12,.8);color:#e8d8b8;cursor:pointer}.tp-axis{position:relative;padding-left:20px}.tp-axis:before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--copper),transparent)}.tp-node{position:relative;border:1px solid rgba(184,144,32,.18);padding:10px 12px;margin-bottom:10px;background:rgba(0,0,0,.2);opacity:.45}.tp-node.unlocked{opacity:1;border-color:rgba(184,144,32,.55);box-shadow:0 0 18px rgba(184,144,32,.14)}.tp-node:before{content:'';position:absolute;left:-19px;top:16px;width:9px;height:9px;border-radius:50%;background:#4a4a44;border:1px solid rgba(184,144,32,.3)}.tp-node.unlocked:before{background:var(--lamp);box-shadow:0 0 14px rgba(184,144,32,.6)}
+
 </style>
 </head>
 <body>
@@ -1192,9 +1373,9 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
 </div><!-- end #scene -->
 
 <div id="nav">
-  <button class="nb" onclick="goNav('cards')">卡牌收集</button>
-  <button class="nb" onclick="goNav('music')">音乐欣赏</button>
-  <button class="nb" onclick="goNav('bio')">人生传记</button>
+  <button class="nb" onclick="openTravelPanel('cards')"><span>📚</span> CARD LIBRARY</button>
+  <button class="nb" onclick="openTravelPanel('music')"><span>🎵</span> MUSIC ARCHIVE</button>
+  <button class="nb" onclick="openTravelPanel('axis')"><span>⏳</span> TRAVEL AXIS</button>
 </div>
 
 <!-- ══ 莫扎特世界 ══ -->
@@ -1234,6 +1415,8 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
     </div>
     <div id="write-area">
       <button class="write-btn" onclick="triggerIncomingLetter(GAME.currentCard)">✉ 给莫扎特写信</button>
+      <button class="write-btn" onclick="drawNew()">继续抽取</button>
+      <button class="write-btn" onclick="closeMoz()">返回列车</button>
     </div>
   </div>
 </div>
@@ -1272,6 +1455,18 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
   </div>
 </div>
 
+
+<!-- ══ 主界面功能面板 ══ -->
+<div id="travel-panel">
+  <div class="tp-shell">
+    <div class="tp-head">
+      <button class="tp-back" onclick="closeTravelPanel()">← 返回火车</button>
+      <div><div class="tp-kicker">TIME MUSIC ARCHIVE</div><div class="tp-title" id="tp-title">档案</div></div>
+      <button class="tp-close" onclick="closeTravelPanel()">× 收起</button>
+    </div>
+    <div id="tp-body"></div>
+  </div>
+</div>
 
 
 <script>
@@ -1350,19 +1545,35 @@ const MATERIALS={
 function buildShelves(){
   Object.entries(SD).forEach(([id,bks])=>{
     const row=document.getElementById(id);
+    if(row.dataset.built==='1')return;
+    row.dataset.built='1';
     bks.forEach((b,idx)=>{
       const el=document.createElement('div');
-      el.className='bk'+(b.moz?' bk-mz':'');
+      el.className='bk bk-'+b.c+(b.moz?' bk-mz':'');
       const mat=MATERIALS[b.c]||MATERIALS.leather;
       const goldOp=b.moz?0.92:(0.48+Math.random()*0.38);
       const tilt=idx%3===1?'rotate(-1.5deg)':idx%4===0?'rotate(1deg)':'';
       el.style.cssText=`\n        width:${b.w}px;height:${b.h}px;\n        background:${mat.bg};\n        box-shadow:${mat.shadow||''};\n        ${mat.borderLeft?'border-left:'+mat.borderLeft+';':''}\n        ${tilt?'transform:'+tilt+';':''}`;
       el.innerHTML=`<div class="bs" style="color:rgba(200,196,184,${goldOp})">${b.s}</div><div class="btt">${b.f}</div>`;
-      el.onclick=b.moz?openMoz:()=>grSay(`${b.f}的档案，尚未解封。\n或许，等你准备好了再来。`);
+      if(b.moz){
+        el.dataset.mozart='1';
+        el.setAttribute('role','button');
+        el.setAttribute('tabindex','0');
+        el.title='点击进入莫扎特命运卡牌';
+      }
+      el.onclick=b.moz?function(ev){ev.stopPropagation();openMoz();}:()=>grSay(`${b.f}的档案，尚未解封。\n或许，等你准备好了再来。`);
       row.appendChild(el);
     });
   });
 }
+document.addEventListener('click',function(ev){
+  var target=ev.target.closest&&ev.target.closest('.bk-mz,[data-mozart="1"]');
+  if(target){ev.preventDefault();ev.stopPropagation();openMoz();}
+},true);
+document.addEventListener('keydown',function(ev){
+  var target=ev.target.closest&&ev.target.closest('.bk-mz,[data-mozart="1"]');
+  if(target&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();openMoz();}
+});
 
 /* ══ 窗外生成器 ══ */
 const world=document.getElementById('passing-world');
@@ -1522,19 +1733,21 @@ function flipCard(){
 /* ══ 莫扎特转场 ══ */
 function openMoz(){
   grSay("那份档案，你拿起来了。\n窗外会有一道闪光。\n不要闭眼。");
-  setTimeout(()=>{
-    worldActive=false;
-    setTimeout(()=>{
-      const flash=document.getElementById('time-flash');
-      flash.style.opacity='.88';
-      setTimeout(()=>{
-        flash.style.opacity='0';
-        document.getElementById('moz').classList.add('on');
-        buildFloatCards();drawNew();
-        setTimeout(()=>{worldActive=true;},500);
-      },600);
-    },800);
-  },2200);
+  worldActive=false;
+  const flash=document.getElementById('time-flash');
+  flash.style.opacity='.72';
+  const moz=document.getElementById('moz');
+  moz.style.display='flex';
+  moz.classList.add('on');
+  buildFloatCards();
+  drawNew();
+  setTimeout(function(){
+    moz.style.opacity='1';
+    moz.style.pointerEvents='all';
+    var card=document.getElementById('main-card-wrap');
+    if(card)card.scrollIntoView({block:'center',inline:'center'});
+  },30);
+  setTimeout(()=>{flash.style.opacity='0';worldActive=true;},520);
 }
 function closeMoz(){
   const flash=document.getElementById('time-flash');
@@ -1563,18 +1776,10 @@ async function sendLetter(){
   const rp=document.getElementById('reply-paper'),rt=document.getElementById('reply-text');
   rp.classList.add('show');
   rt.innerHTML=`<div class="rp-loading">正在等待回信<div class="dots"><span>·</span><span>·</span><span>·</span></div></div>`;
-  const KEY=DSKEY;
   const sys=`你是沃尔夫冈·阿马德乌斯·莫扎特，现在是${currentCard.year}年，"${currentCard.period}"阶段。你刚经历：${currentCard.event}。给来自未来的神秘通信者回信。用莫扎特真实性格：机智、孩子气、热爱音乐、对父亲又爱又怕。书信体，现代中文，150-250字。结尾：你忠实的 W. A. 莫扎特`;
-  try{
-    const res=await fetch('https://api.deepseek.com/v1/chat/completions',{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${KEY}`},
-      body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:text}],max_tokens:400,temperature:.88})
-    });
-    const d=await res.json();
-    typeReply(d.choices?.[0]?.message?.content||'（信件在传递途中遗失了）',rt);
-  }catch(e){
-    typeReply(`亲爱的朋友，\n\n您的信让我既惊讶又感动。\n\n您说得对。那些日子里我的确感到沉重——不过请放心，音符从未真正离开我。即便是在最难捱的夜晚，我也能听见它们在脑中流淌，就像一条地下的河，无论地表如何变化，它始终在那里。\n\n您忠实的\nW. A. 莫扎特`,rt);
-  }
+  ds([{role:'system',content:sys},{role:'user',content:text}],0.92,function(err,reply){
+    typeReply(reply||mozartFallback(currentCard,text,'direct'),rt);
+  });
 }
 function typeReply(text,el){
   el.textContent='';let i=0;
@@ -1653,6 +1858,46 @@ function saveGame(){
   localStorage.setItem('tm_collection',JSON.stringify(GAME.collectedCards));
   localStorage.setItem('tm_influences',JSON.stringify(GAME.playerInfluences));
 }
+function isUnlocked(card){
+  for(var i=0;i<GAME.collectedCards.length;i++){
+    if(GAME.collectedCards[i].year===card.year&&GAME.collectedCards[i].period===card.period)return true;
+  }
+  return false;
+}
+function openTravelPanel(type){
+  var panel=document.getElementById('travel-panel');
+  var title=document.getElementById('tp-title');
+  var body=document.getElementById('tp-body');
+  panel.classList.add('show');
+  if(type==='cards'){
+    title.textContent='卡牌库';
+    body.innerHTML='<div class="tp-grid">'+CARDS.map(function(c){
+      var unlocked=isUnlocked(c);
+      return '<div class="tp-card '+(unlocked?'':'locked')+'"><div class="tp-year">'+c.year+'</div><div class="tp-period">'+c.period+'</div><div class="tp-event">'+(unlocked?c.event:'尚未解锁。翻开命运卡牌后，这段档案会显影。')+'</div></div>';
+    }).join('')+'</div>';
+    return;
+  }
+  if(type==='music'){
+    title.textContent='音乐库';
+    var groups={};
+    CARDS.forEach(function(c){(groups[c.period]=groups[c.period]||[]).push(c);});
+    body.innerHTML=Object.keys(groups).map(function(period){
+      return '<div class="tp-music-group"><div class="tp-music-title">'+period+'</div>'+groups[period].map(function(c){
+        var cardIndex=CARDS.indexOf(c);
+        return '<div class="tp-track"><div><strong>'+c.workFull+'</strong><br><span>'+c.year+' · '+(isUnlocked(c)?'已解锁':'未解锁预览')+'</span></div><button class="tp-play" onclick="openMusicSearchByIndex('+cardIndex+')">搜索</button></div>';
+      }).join('')+'</div>';
+    }).join('');
+    return;
+  }
+  title.textContent='旅行轴';
+  body.innerHTML='<div class="tp-axis">'+CARDS.map(function(c){
+    var unlocked=isUnlocked(c);
+    return '<div class="tp-node '+(unlocked?'unlocked':'')+'"><div class="tp-year">'+c.year+'</div><div class="tp-period">'+c.period+' · '+c.workFull+'</div><div class="tp-event">'+(unlocked?c.event:'未解锁节点。')+'</div></div>';
+  }).join('')+'</div>';
+}
+function closeTravelPanel(){document.getElementById('travel-panel').classList.remove('show');}
+function openMusicSearch(q){window.open('https://music.163.com/#/search/m/?s='+q,'_blank');}
+function openMusicSearchByIndex(i){var c=CARDS[i];if(c)openMusicSearch(encodeURIComponent(c.workFull+' 莫扎特'));}
 
 /* === Toast === */
 function showToast(msg,dur){
@@ -1669,18 +1914,26 @@ function showUnlock(desc){
   setTimeout(function(){el.classList.remove('show');},4000);
 }
 
-/* === DeepSeek API === */
-var DSKEY=(function(){try{var k=localStorage.getItem('tm_apikey');if(k&&k.length>10)return k;}catch(e){}return 'YOUR_DEEPSEEK_API_KEY';})();
-window.setApiKey=function(k){if(!k||k.length<10){alert('Key过短');return;}try{localStorage.setItem('tm_apikey',k);DSKEY=k;alert('已保存');}catch(e){alert('保存失败');}};
+/* === DeepSeek API：通过本站后端代理调用，不在前端暴露 Key === */
 function ds(messages,temp,cb){
   temp=temp||0.88;
-  fetch('https://api.deepseek.com/v1/chat/completions',{
+  fetch('/api/music-travel',{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DSKEY},
-    body:JSON.stringify({model:'deepseek-chat',messages:messages,max_tokens:500,temperature:temp})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:messages,max_tokens:560,temperature:temp})
   }).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.error) return cb(new Error(d.error),'');
     cb(null,(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'');
   }).catch(function(e){cb(e,'');});
+}
+function mozartFallback(card,userText,mode){
+  var pool=[
+    '亲爱的旅客，\n\n您的话像一枚小小的火星，落进我今晚的谱纸。'+(card?('此刻我正被'+card.period+'的阴影和光照着，心里想着《'+card.workFull+'》。'):'')+'若未来仍有人听见这些音符，请告诉他们：我并不总是快乐，但我总是相信声音会替我活下去。\n\n你忠实的\nW. A. 莫扎特',
+    '亲爱的朋友，\n\n我读完您的来信后，在键盘前坐了很久。'+(userText?'您提到的那些事，我不能完全懂，却能听见其中的重量。':'')+'音乐有时比人更诚实，它会把羞怯、愤怒和孩子气一并藏进旋律。请继续写来，未来的耳朵让我又害怕又好奇。\n\n你忠实的\nW. A. 莫扎特',
+    '亲爱的旅客，\n\n若您真来自未来，那我该向您借一盏灯。'+(card?('在'+card.year+'年的我，还不知道自己会走到哪里，只知道《'+card.workFull+'》正催促我继续写下去。'):'')+'别担心我，最坏的日子里，我也还有音符可以取暖。\n\n你忠实的\nW. A. 莫扎特'
+  ];
+  var seed=((card&&Number(card.year))||0)+String(userText||mode||'').length;
+  return pool[Math.abs(seed)%pool.length];
 }
 
 /* === 打字机（通用）=== */
@@ -1712,8 +1965,8 @@ function triggerIncomingLetter(card){
   document.getElementById('wp-to').textContent='致 沃尔夫冈·阿马德乌斯·莫扎特，'+card.year+'年';
   document.getElementById('incoming-letter').classList.add('show');
 
-  var sys='你是沃尔夫冈·阿马德乌斯·莫扎特，现在是'+card.year+'年，"'+card.period+'"阶段。\n你刚刚经历了：'+card.event+'\n主动给一位来自未来的神秘旅客写信。真实莫扎特语气：机智、孩子气、热爱音乐、对父亲有隐怨。\n书信体中文，120-180字，提及'+card.workFull+'，邀请旅客谈谈他们时代对音乐的看法。\n结尾固定：你忠实的 W. A. 莫扎特';
-  var fallback='亲爱的旅客，\n\n您好——若您真的来自遥远的未来，我有太多想问您。\n此刻我正在创作《'+card.workFull+'》，这首曲子让我既兴奋又焦虑。您那个时代还有人演奏它吗？\n\n请告诉我，您那里的音乐是什么模样的？\n\n你忠实的 W. A. 莫扎特';
+  var sys='你是沃尔夫冈·阿马德乌斯·莫扎特，现在是'+card.year+'年，"'+card.period+'"阶段。\n你刚刚经历了：'+card.event+'\n主动给一位来自未来的神秘旅客写信。真实莫扎特语气：机智、孩子气、热爱音乐、对父亲有隐怨。\n必须紧扣这一年、这一事件、这部作品《'+card.workFull+'》，不要写通用模板，不要重复旧句。书信体中文，120-180字，提及作品，邀请旅客谈谈他们时代对音乐的看法。\n结尾固定：你忠实的 W. A. 莫扎特';
+  var fallback=mozartFallback(card,'请主动来信','incoming');
 
   ds([{role:'system',content:sys},{role:'user',content:'请写这封信。'}],0.88,function(err,reply){
     var text=reply||fallback;
@@ -1820,7 +2073,7 @@ function triggerMozartReply(card,inf,lastText){
   var nextCard=CARDS[nextIdx]||null;
   var nextHint=nextCard?'('+nextCard.year+'年'+nextCard.period+')':'晚年的思考';
   var sys='你是莫扎特，'+card.year+'年，刚收到旅客的信：'+inf.playerText+'\n他们聊到了"'+(inf.keyword||'音乐')+'"。\n回信：回应旅客信的具体内容；透露对下一阶段的预感'+nextHint+'；\n历史大事件不变，情绪细节10%浮动；书信体中文，150-200字。结尾：你忠实的 W. A. 莫扎特';
-  var fallback='亲爱的旅客，\n\n您的话让我思考了很久。\n\n您说得对，那首曲子里藏着我说不出口的东西。也许这就是音乐存在的理由——说那些无法言说的话。\n\n我隐约感觉，前面还有更多故事等着我。不管那是什么，我想继续写下去。\n\n你忠实的\nW. A. 莫扎特';
+  var fallback=mozartFallback(card,lastText,'reply');
   setTimeout(function(){
     ds([{role:'system',content:sys},{role:'user',content:lastText}],0.88,function(err,reply){
       var text=reply||fallback;
@@ -1882,7 +2135,10 @@ window.flipCard=function(){
       if(GAME.collectedCards[i].year===c.year&&GAME.collectedCards[i].period===c.period){already=true;break;}
     }
     if(!already){GAME.collectedCards.push(c);saveGame();showToast('已收录 · '+c.year+' · '+c.period,2000);}
-    setTimeout(function(){triggerIncomingLetter(GAME.currentCard);},1400);
+    setTimeout(function(){
+      document.getElementById('write-area').classList.add('show');
+      grSay('这张卡已经翻开。\n你可以写信，也可以继续抽取，或返回列车。');
+    },900);
   }else{
     card.classList.remove('flipped');GAME.flipped=false;
     document.getElementById('write-area').classList.remove('show');
