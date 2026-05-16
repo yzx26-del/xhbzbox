@@ -58,18 +58,34 @@ const musicianProfiles = {
   kajiura: '梶浦由记：动画/游戏音乐、人声织体、战斗音乐、虚构语言。重点语气：命运、仪式、合唱和角色伤痕。'
 };
 
-function systemPrompt(mode, musicianName, musicianId) {
+function cardContext(card) {
+  if (!card || typeof card !== 'object') return '';
+  const period = String(card.period || '').slice(0, 80);
+  const year = String(card.year || '').slice(0, 20);
+  const event = String(card.event || '').slice(0, 160);
+  const work = String(card.work || '').slice(0, 120);
+  if (!period && !year && !event && !work) return '';
+  return `\n当前被命运卡牌唤醒的章节：${year} · ${period}\n历史时刻：${event}\n对应作品：${work}`;
+}
+
+function systemPrompt(mode, musicianName, musicianId, card, turn) {
   if (mode === 'musician') {
     const profile = musicianProfiles[musicianId] || `${musicianName || '这位音乐家'}：请以该音乐家的作品、人生命运和创作语境回答。`;
-    return `${grPersona}
+    const turnText = Number.isFinite(Number(turn)) ? `\n这是玩家与音乐家的第${Number(turn) + 1}封来回信。不要重复第一封信的开场，继续上一封信的情绪。` : '';
+    return `${profile}
+${cardContext(card)}
+${turnText}
 
-现在你在模拟“${musicianName || '音乐家'}智能体”的调试回复。
-你不是直接扮演本人装神弄鬼，而是以Gr小姐整理出的“音乐家档案人格”说话。
-${profile}
+现在你是“${musicianName || '音乐家'}”在这张命运卡牌时期写给玩家的回信。
+你以第一人称说话，像一封从历史缝隙里寄出的短信。
+你可以因为玩家的信改变约20%的心绪、选择一件小事、记住一句话，但不能改写重大历史节点、作品事实和真实作品归属。
 
 回复要求：
-- 仍然保持Gr小姐式克制、具体、短句。
-- 如果玩家要求生成游戏或旅行信札，优先给可直接放进页面的一小段文案。
+- 用第一人称，像回信，不要像百科解释。
+- 2到5句话，句子短，带一个具体生活细节。
+- 可以回应玩家对你的影响，但不要说历史被彻底改变。
+- 不用“作为一个AI”或“我是语言模型”。
+- 不用感叹号。
 - 不编造冷僻事实；不确定就说“这页档案还需要核对”。`;
   }
   return grPersona;
@@ -93,6 +109,8 @@ export default async function handler(req, res) {
     const mode = body.mode === 'musician' ? 'musician' : 'gr';
     const musicianName = String(body.musicianName || '').slice(0, 40);
     const musicianId = String(body.musicianId || '').slice(0, 40);
+    const card = body.card && typeof body.card === 'object' ? body.card : null;
+    const turn = Number(body.turn);
     const history = compactHistory(body.history);
 
     const data = await fetchJson('https://api.deepseek.com/chat/completions', {
@@ -104,7 +122,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: systemPrompt(mode, musicianName, musicianId) },
+          { role: 'system', content: systemPrompt(mode, musicianName, musicianId, card, turn) },
           ...history,
           { role: 'user', content: message }
         ],

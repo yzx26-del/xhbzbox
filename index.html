@@ -1104,7 +1104,7 @@ const grChatHistory=[];
 const musicianChats={};
 let currentMusicianId='mozart';
 let activeFateCard=null;
-const musicianMisses={};
+const activeChapters={};
 const fateDecks={
   mozart:[
     {period:'神童巡演',year:'1763',event:'他坐进马车，欧洲忽然变成一张乐谱。',work:'早期键盘作品 K.6-K.9',keywords:['神童','马车','巡演','父亲']},
@@ -1148,6 +1148,30 @@ function ensureMusicianChats(){
     }
   });
 }
+function activeChapterKey(id){return `letterActiveChapter:${id}`;}
+function getActiveChapter(id=currentMusicianId){
+  if(activeChapters[id])return activeChapters[id];
+  try{
+    const saved=JSON.parse(localStorage.getItem(activeChapterKey(id))||'null');
+    if(saved&&saved.card){activeChapters[id]=saved;return saved;}
+  }catch{}
+  return null;
+}
+function setActiveChapter(id,chapter){
+  activeChapters[id]=chapter;
+  try{localStorage.setItem(activeChapterKey(id),JSON.stringify(chapter));}catch{}
+}
+function chapterLine(id){
+  const c=getActiveChapter(id);
+  if(!c)return '<div class="musician-sub chapter-line">当前章节：未激活 · 先抽命运卡牌并写信</div>';
+  const status=c.stage==='interrupted'?'信号中断':`回信中 · 第 ${Math.max(0,c.turns||0)}/${c.interruptAt||'?'} 轮`;
+  return `<div class="musician-sub chapter-line">当前章节：${esc(c.card.year)} · ${esc(c.card.period)} · ${status}</div>`;
+}
+function refreshChapterLine(id){
+  const card=document.getElementById('musician-card-'+id);
+  const line=card?.querySelector('.chapter-line');
+  if(line)line.outerHTML=chapterLine(id);
+}
 function renderMusicianAgents(openId='mozart'){
   ensureMusicianChats();
   const box=document.getElementById('musician-agent-list');
@@ -1160,6 +1184,7 @@ function renderMusicianAgents(openId='mozart'){
         <div class="musician-main">
           <div class="musician-name">${a.name}</div>
           <div class="musician-sub">${a.era} · ${a.intro}</div>
+          ${chapterLine(a.id)}
         </div>
         <div class="musician-state">${a.state}</div>
         <div class="musician-toggle">${a.id===openId?'−':'+'}</div>
@@ -1216,12 +1241,13 @@ function grReply(text){
   const lower=text.toLowerCase();
   if(text.includes('莫扎特'))return '我会先把莫扎特拆成三个调试层：人生节点、作品线索、旅行场景。你可以在右侧展开“莫扎特”，先测试他的语气。';
   if(text.includes('信札'))return '信札建议先固定格式：地点、时间、音乐家状态、一个隐秘问题。等 DeepSeek 接入后，只让 API 生成正文，结构由本地控制。';
-  if(text.includes('抽卡')||text.includes('节点'))return '抽卡节点可以按年份切开：神童巡演、萨尔茨堡冲突、维也纳自由职业、晚期歌剧。每张卡都要绑定一首作品和一句故事。';
+  if(text.includes('抽卡')||text.includes('节点')||text.includes('下一张'))return '去抽一张命运卡牌。不要急着问完他的一生，只敲开这一页。';
+  if(text.includes('中断')||text.includes('接下来'))return '火车进了隧道。先让这封信停在这里，再抽下一张牌。';
   if(lower.includes('deepseek')||text.includes('API'))return '为了省 API，建议默认本地模板回复；只有点击“调用 DeepSeek”时才请求，并把同一问题缓存 24 小时。';
   return '收到。我会把这个问题先作为智能体调试样本。下一步可以选择右侧某位音乐家，让他的聊天框单独回应。';
 }
 function agentCacheKey(payload){
-  const raw=JSON.stringify({mode:payload.mode,musicianId:payload.musicianId||'',message:payload.message});
+  const raw=JSON.stringify({mode:payload.mode,musicianId:payload.musicianId||'',card:payload.card?`${payload.card.year||''}-${payload.card.period||''}`:'',turn:payload.turn||0,message:payload.message});
   try{return 'letterAgentCache:'+btoa(unescape(encodeURIComponent(raw))).slice(0,160);}catch{return 'letterAgentCache:'+raw.length+':'+Date.now();}
 }
 function getAgentCache(payload){
@@ -1306,22 +1332,46 @@ async function sendMusicianMessage(id){
   input.value='';
   musicianChats[id].push({role:'user',text});
   addMsg('mini-feed-'+id,'user',text,'你');
-  const unlocked=getUnlockedFateCards(id);
-  const matched=unlocked.find(c=>(c.keywords||[]).some(k=>text.toLowerCase().includes(String(k).toLowerCase())));
-  if(unlocked.length&&!matched){
-    musicianMisses[id]=(musicianMisses[id]||0)+1;
-    const hint=musicianMisses[id]>=3?'信号中断。那位音乐家像是走进了隧道。去问 Gr 小姐吧，她会告诉你该敲哪一个词。':'这封信没有碰到那张牌的关键词。试着提到地点、作品，或那一年发生的事。';
+  const chapter=getActiveChapter(id);
+  if(!chapter||!chapter.card){
+    const hint='这边还没有被命运卡牌唤醒。先去抽一张牌，再给我写信。';
     musicianChats[id].push({role:'musician',text:hint});
     addMsg('mini-feed-'+id,'musician',hint,agent.name);
     return;
   }
-  musicianMisses[id]=0;
+  if(chapter.stage==='interrupted'){
+    const hint='信号已经断了。那辆火车开向了另一个方向。去问 Gr 小姐，她会告诉你下一页在哪里。';
+    musicianChats[id].push({role:'musician',text:hint});
+    addMsg('mini-feed-'+id,'musician',hint,agent.name);
+    return;
+  }
+  chapter.turns=(chapter.turns||0)+1;
+  if(chapter.turns>=chapter.interruptAt){
+    chapter.stage='interrupted';
+    setActiveChapter(id,chapter);
+    renderMusicianAgents(id);
+    const lines=[
+      '因为时光裂缝发生变化，信纸上的墨迹忽然断开了。',
+      '火车行驶到了另一个方向，这一页暂时收不回回信。',
+      '窗外的雪倒着落下。那位音乐家的声音被隧道吞没了。'
+    ];
+    const hint=lines[Math.floor(Math.random()*lines.length)]+' 去问 Gr 小姐吧，她会告诉你接下来该抽哪张牌。';
+    musicianChats[id].push({role:'musician',text:hint});
+    addMsg('mini-feed-'+id,'musician',hint,agent.name);
+    addMsg('gr-chat-feed','gr',`${agent.name}的信号断了。别追着隧道喊。回来，抽下一张命运卡牌。`,'Gr 小姐');
+    return;
+  }
+  chapter.stage='chatting';
+  setActiveChapter(id,chapter);
+  refreshChapterLine(id);
   const pending=addMsg('mini-feed-'+id,'musician','档案页正在展开。',agent.name);
   try{
     const reply=await callLetterAgent({
       mode:'musician',
       musicianId:id,
       musicianName:agent.name,
+      card:chapter.card,
+      turn:chapter.turns,
       message:text,
       history:musicianChats[id].slice(-8),
       max_tokens:420,
@@ -1365,7 +1415,10 @@ function currentAgent(){return musicianAgents.find(a=>a.id===currentMusicianId)|
 function openFateCard(){
   const agent=currentAgent();
   const deck=getDeck(agent.id);
-  const index=Math.floor(Math.random()*deck.length);
+  const unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
+  const locked=deck.map((_,i)=>i).filter(i=>!unlocked.has(i));
+  const pool=locked.length?locked:deck.map((_,i)=>i);
+  const index=pool[Math.floor(Math.random()*pool.length)];
   activeFateCard={...deck[index],index,musicianId:agent.id,musicianName:agent.name};
   const title=document.getElementById('fate-title'),sub=document.getElementById('fate-sub'),content=document.getElementById('fate-content'),overlay=document.getElementById('fate-overlay');
   if(title)title.textContent=`${agent.name} · 命运卡牌`;
@@ -1390,17 +1443,34 @@ async function sendFateLetter(){
   if(!text){toast('先写一点内容，再寄出');return;}
   const agent=musicianAgents.find(a=>a.id===activeFateCard.musicianId)||currentAgent();
   currentMusicianId=agent.id;
-  toggleMusicianAgent(agent.id);
+  const chapter={card:activeFateCard,stage:'letter_sent',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString()};
+  setActiveChapter(agent.id,chapter);
   const entry={time:new Date().toISOString(),card:activeFateCard,letter:text};
   saveFateLetter(agent.id,entry);
   musicianChats[agent.id]=musicianChats[agent.id]||[];
   musicianChats[agent.id].push({role:'user',text:`命运卡牌来信：${text}`});
   renderMusicianAgents(agent.id);
-  addMsg('mini-feed-'+agent.id,'user',`命运卡牌来信：${text}`,'你');
-  const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但${agent.name}在纸边停了一下。\n他回信说：我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
-  musicianChats[agent.id].push({role:'musician',text:reply});
-  addMsg('mini-feed-'+agent.id,'musician',reply,agent.name);
   closeFateOverlay();
+  const pending=addMsg('mini-feed-'+agent.id,'musician','信纸正在穿过隧道。',agent.name);
+  try{
+    const reply=await callLetterAgent({
+      mode:'musician',
+      musicianId:agent.id,
+      musicianName:agent.name,
+      card:activeFateCard,
+      turn:0,
+      message:`玩家在命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”后写来一封信：${text}`,
+      history:musicianChats[agent.id].slice(-6),
+      max_tokens:480,
+      temperature:.76
+    },'');
+    musicianChats[agent.id].push({role:'musician',text:reply});
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span>${escHtml(reply)}`;
+  }catch(e){
+    const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
+    musicianChats[agent.id].push({role:'musician',text:reply});
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span>${escHtml(reply)}`;
+  }
 }
 function openCardLibrary(){
   const agent=currentAgent(),deck=getDeck(agent.id),unlocked=new Set(JSON.parse(localStorage.getItem(fateKey(agent.id))||'[]'));
