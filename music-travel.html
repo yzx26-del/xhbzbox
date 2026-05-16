@@ -1915,6 +1915,181 @@ body::before,body::after{opacity:.78;}
   background:rgba(255,255,255,.18)!important;
 }
 
+/* 参考图 90% 复刻：暗金档案框、左侧装订、编号水印、雕花角与底部花饰 */
+.tm-note-zone{
+  position:relative!important;
+  width:min(760px,80vw)!important;
+}
+.tm-note-zone:before{
+  content:'AI生成'!important;
+  position:absolute!important;top:8px!important;left:8px!important;z-index:9!important;
+  padding:2px 6px!important;border-radius:2px!important;
+  font-family:var(--M)!important;font-size:9px!important;letter-spacing:.04em!important;
+  color:rgba(230,220,190,.58)!important;
+  background:rgba(20,18,14,.58)!important;
+  border:1px solid rgba(210,195,150,.24)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 6px rgba(0,0,0,.38)!important;
+  pointer-events:none!important;
+}
+.tm-note-zone:after{content:none!important;display:none!important;}
+.tm-note-zone .dp{
+  padding:10px 12px 12px 34px!important;
+  border-radius:4px!important;
+  border:2px solid #4a3b22!important;
+  background:
+    radial-gradient(circle at 18px 18px,rgba(222,176,70,.42) 0 2px,transparent 3px),
+    radial-gradient(circle at calc(100% - 18px) 18px,rgba(222,176,70,.36) 0 2px,transparent 3px),
+    radial-gradient(circle at 18px calc(100% - 18px),rgba(222,176,70,.34) 0 2px,transparent 3px),
+    radial-gradient(circle at calc(100% - 18px) calc(100% - 18px),rgba(222,176,70,.34) 0 2px,transparent 3px),
+    linear-gradient(90deg,#0f0e0b 0 28px,#2a2115 28px 32px,transparent 32px),
+    linear-gradient(180deg,#80643b 0%,#332817 9%,#12100b 48%,#221a10 91%,#6d542f 100%)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,235,165,.28),
+    inset 0 -2px 0 rgba(0,0,0,.62),
+    inset 1px 0 0 rgba(255,235,165,.1),
+    inset -1px 0 0 rgba(255,235,165,.1),
+    0 0 0 1px #080604,
+    0 10px 30px rgba(0,0,0,.88),
+    0 0 28px rgba(184,144,32,.08)!important;
+}
+.tm-note-zone .dp:before{
+  inset:5px!important;border-radius:3px!important;
+  background:
+    radial-gradient(circle at 10px 26px,#050403 0 3px,#362718 4px,#77572a 5px,transparent 6px),
+    radial-gradient(circle at 10px 50%,#050403 0 3px,#362718 4px,#77572a 5px,transparent 6px),
+    radial-gradient(circle at 10px calc(100% - 26px),#050403 0 3px,#362718 4px,#77572a 5px,transparent 6px),
+    linear-gradient(90deg,rgba(0,0,0,.72) 0 26px,rgba(184,144,32,.24) 26px 27px,transparent 27px),
+    radial-gradient(circle at 43px 29px,transparent 0 21px,rgba(184,144,32,.72) 22px,transparent 23px),
+    radial-gradient(circle at calc(100% - 24px) 24px,transparent 0 19px,rgba(184,144,32,.72) 20px,transparent 21px),
+    radial-gradient(circle at 45px calc(100% - 27px),transparent 0 23px,rgba(184,144,32,.58) 24px,transparent 25px),
+    radial-gradient(circle at calc(100% - 38px) calc(100% - 20px),transparent 0 20px,rgba(184,144,32,.44) 21px,transparent 22px),
+    linear-gradient(90deg,rgba(184,144,32,.45),transparent 9%,transparent 91%,rgba(184,144,32,.42)),
+    linear-gradient(180deg,rgba(255,235,165,.16),transparent 14%,transparent 84%,rgba(0,0,0,.42))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(209,168,82,.42),
+    inset 0 0 0 3px rgba(0,0,0,.5)!important;
+}
+.tm-note-zone .dp:after{
+  content:'❧'!important;
+  position:absolute!important;left:50%!important;bottom:0!important;top:auto!important;right:auto!important;
+  transform:translateX(-50%)!important;z-index:8!important;
+  width:auto!important;height:auto!important;
+  background:none!important;
+  font-family:Georgia,serif!important;font-size:30px!important;line-height:1!important;
+  color:rgba(184,144,32,.45)!important;
+  text-shadow:0 1px 0 #050403,0 0 8px rgba(184,144,32,.25)!important;
+  pointer-events:none!important;
+}
+.tm-note-zone .dlg-body-wrap{
+  margin:7px 6px 5px 3px!important;
+  min-height:168px!important;
+  background:
+    linear-gradient(90deg,rgba(90,56,22,.18) 0 1px,transparent 1px 98%,rgba(90,56,22,.16) 98% 100%),
+    radial-gradient(ellipse at 20% 20%,rgba(255,251,220,.42),transparent 30%),
+    radial-gradient(ellipse at 76% 78%,rgba(116,72,28,.14),transparent 36%),
+    linear-gradient(180deg,rgba(255,250,220,.22),transparent 20%,rgba(90,56,22,.08)),
+    linear-gradient(160deg,#f0dfbd 0%,#e2c99c 47%,#ceb182 100%)!important;
+  border:1px solid rgba(95,64,30,.35)!important;
+  box-shadow:
+    inset 0 0 24px rgba(92,52,20,.18),
+    inset 0 1px 0 rgba(255,255,255,.36),
+    inset 0 -2px 0 rgba(88,54,22,.18),
+    0 1px 0 rgba(255,238,190,.08),
+    0 7px 15px rgba(0,0,0,.58)!important;
+}
+.tm-note-zone .dlg-body-wrap:before{
+  background:
+    linear-gradient(180deg,rgba(138,94,40,.16) 0 1px,transparent 1px 68%,rgba(138,94,40,.22) 68% calc(68% + 1px),transparent calc(68% + 2px)),
+    linear-gradient(100deg,transparent 0 19%,rgba(120,80,30,.14) 20%,transparent 24%),
+    linear-gradient(74deg,transparent 0 24%,rgba(120,80,30,.1) 25%,transparent 29%),
+    radial-gradient(circle at 88% 8%,rgba(112,70,28,.22),transparent 8%),
+    radial-gradient(circle at 10% 78%,rgba(112,70,28,.13),transparent 11%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='190'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.68' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='190' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(4deg,transparent 0 13px,rgba(86,52,18,.035) 13px 14px)!important;
+  opacity:.72!important;
+}
+.tm-note-zone .dlg-body-wrap:after{
+  content:'OTM09H-0312 46123515 87732949        # 51152124/3 0910 00 H26\\A 63025\\A 145028\\A 192024\\A 123029\\A 132033'!important;
+  white-space:pre!important;
+  position:absolute!important;inset:10px 12px 8px 26px!important;
+  background:
+    linear-gradient(135deg,transparent 0 calc(100% - 36px),rgba(94,57,20,.16) calc(100% - 35px),rgba(255,240,195,.08) 100%)!important;
+  font-family:var(--M)!important;font-size:7px!important;line-height:1.9!important;letter-spacing:.04em!important;
+  color:rgba(130,82,28,.24)!important;text-align:right!important;
+  border-radius:inherit!important;pointer-events:none!important;
+}
+.tm-note-zone .dlg-titlebar{
+  top:-15px!important;
+  min-width:230px!important;
+  padding:4px 24px!important;
+  border-radius:2px!important;
+}
+.tm-note-zone .dlg-titlebar:before,.tm-note-zone .dlg-titlebar:after{
+  width:5px!important;height:5px!important;min-width:5px!important;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.55),0 0 0 1px rgba(184,144,32,.25)!important;
+}
+.tm-note-zone .dlg-tname{
+  font-size:8.5px!important;
+  letter-spacing:.13em!important;
+}
+.tm-note-zone .db{
+  padding:36px 34px 24px 46px!important;
+}
+.tm-note-zone .db:before,.tm-note-zone .db:after{
+  left:-25px!important;
+  width:7px!important;height:7px!important;
+  background:radial-gradient(circle at 30% 30%,#080604,#1d160e 55%,#7a5a28 85%,#c59a3e)!important;
+}
+.tm-note-zone .dt{
+  min-height:4.2em!important;
+  max-height:5.6em!important;
+  font-family:Georgia,'Songti SC','STSong',serif!important;
+  font-size:17px!important;
+  line-height:1.75!important;
+  font-weight:700!important;
+  letter-spacing:.03em!important;
+  color:#2a1b0b!important;
+  text-shadow:0 1px 0 rgba(255,245,205,.42)!important;
+}
+.tm-note-zone .tw-char,.tm-note-zone .tw-char.faint{
+  color:#2a1b0b!important;
+}
+.tm-note-zone .dir{
+  margin-top:8px!important;
+  padding-top:10px!important;
+  border-top:1px solid rgba(116,78,32,.28)!important;
+}
+.tm-note-zone .dsb{
+  min-width:82px!important;height:42px!important;
+  margin-right:24px!important;
+  border-radius:2px!important;
+  background:
+    radial-gradient(ellipse at 32% 18%,rgba(255,222,150,.18),transparent 35%),
+    linear-gradient(180deg,#6d4928 0%,#2e2116 54%,#110c07 100%)!important;
+  border:2px solid #4f351b!important;
+  border-bottom-color:#0a0704!important;
+  color:#f0d99b!important;
+  font-family:var(--D)!important;font-size:10px!important;font-weight:700!important;
+  letter-spacing:.3em!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,232,160,.18),
+    inset 0 -2px 0 rgba(0,0,0,.5),
+    0 3px 0 #080503,
+    0 8px 14px rgba(0,0,0,.5)!important;
+}
+.tm-note-zone .dsb:before,.tm-note-zone .dsb:after{
+  content:''!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;
+  width:5px!important;height:5px!important;border-radius:50%!important;
+  background:radial-gradient(circle,#b89020,#6a4a2a)!important;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.55)!important;
+}
+.tm-note-zone .dsb:before{left:7px!important;}
+.tm-note-zone .dsb:after{right:7px!important;}
+.tm-note-zone .di{
+  background:rgba(255,248,220,.24)!important;
+  border-color:rgba(95,64,30,.38)!important;
+}
+
 /* === PATCH ONLY: 2. 书架框 .tm-shelf-zone === */
 .tm-shelf-zone{}
 
