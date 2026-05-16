@@ -1510,24 +1510,6 @@ function musicianReply(agent,text){
   if(text.includes('故事')||text.includes('人生'))return `我的故事最好不要写成年表。请把它写成选择：离开、留下、写信、演奏。这样更像游戏。`;
   return `我听见了。这个问题可以转成三个字段：背景、音乐线索、可交互动作。以后接入 API 时，我会按这个结构回答。`;
 }
-function musicianQuestion(agent,card,turn){
-  const name=agent?.name||'他';
-  const topic=card?.period||'这一页';
-  const bank={
-    mozart:[`你们那个时代，还会有人为了现场演奏专门出门吗？`,`如果你知道一个人会输掉一些东西，还会劝他离开吗？`,`你听见“${topic}”这几个字时，想到的是自由，还是代价？`],
-    beethoven:[`你觉得失去一种听觉之后，人还能相信什么？`,`如果声音只剩下记忆，你会把它叫作音乐吗？`],
-    chopin:[`你离开过一个回不去的地方吗？`,`如果一首曲子只能寄给一个人，你会写给谁？`]
-  };
-  const list=bank[agent?.id]||[`你觉得${name}此刻最不愿承认的是什么？`,`如果你站在${card?.year||'这一年'}年门外，你会敲门，还是等他自己出来？`];
-  return list[Math.abs((turn||0)-1)%list.length];
-}
-function addMusicianQuestion(reply,agent,chapter){
-  const turn=chapter?.turns||0;
-  if(turn>0&&turn%3===0&&!/[？?]\s*$/.test(String(reply||''))){
-    return `${reply}\n\n${musicianQuestion(agent,chapter?.card,turn)}`;
-  }
-  return reply;
-}
 async function sendMusicianMessage(id,forcedText=''){
   ensureMusicianChats();
   const agent=musicianAgents.find(a=>a.id===id);
@@ -1585,12 +1567,12 @@ async function sendMusicianMessage(id,forcedText=''){
       max_tokens:420,
       temperature:.74
     },musicianReply(agent,text));
-    const reply=addMusicianQuestion(rawReply,agent,chapter);
+    const reply=rawReply;
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
-    const reply=addMusicianQuestion(musicianReply(agent,text),agent,chapter);
+    const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
