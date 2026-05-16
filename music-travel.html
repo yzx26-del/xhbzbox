@@ -2568,7 +2568,7 @@ function startTrainNoise(){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     var master=audioCtx.createGain();
     master.gain.setValueAtTime(0,audioCtx.currentTime);
-    master.gain.linearRampToValueAtTime(0.055,audioCtx.currentTime+3.5);
+    master.gain.linearRampToValueAtTime(0.174,audioCtx.currentTime+3.5);
     master.connect(audioCtx.destination);
 
     var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*5,audioCtx.sampleRate);
