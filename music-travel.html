@@ -1413,11 +1413,11 @@ body::before,body::after{opacity:.78;}
   opacity:1!important;mix-blend-mode:normal!important;
 }
 .tm-note-zone .dlg-titlebar{
-  position:absolute!important;top:-16px!important;left:50%!important;transform:translateX(-50%)!important;
+  position:absolute!important;top:-10px!important;left:50%!important;transform:translateX(-50%)!important;
   z-index:4!important;
   display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;
   width:auto!important;min-width:0!important;margin:0!important;
-  padding:5px 16px!important;
+  padding:5px 20px!important;
   background:linear-gradient(180deg,#2a1c0e,#1a1008)!important;
   border:1px solid rgba(184,144,32,.5)!important;
   border-radius:1px!important;
@@ -1430,8 +1430,8 @@ body::before,body::after{opacity:.78;}
   box-shadow:inset 0 1px 1px rgba(255,255,255,.16),0 0 0 1px rgba(20,10,4,.65)!important;
 }
 .tm-note-zone .dlg-tname{
-  font-family:var(--D)!important;font-size:9px!important;font-weight:600!important;
-  letter-spacing:.24em!important;white-space:nowrap!important;
+  font-family:var(--D)!important;font-size:8.5px!important;font-weight:600!important;
+  letter-spacing:.25em!important;white-space:nowrap!important;
   color:transparent!important;
   background:linear-gradient(180deg,#f0d880,#e8c860 36%,#b89020 70%,#6a4a1a)!important;
   -webkit-background-clip:text!important;background-clip:text!important;
@@ -1446,11 +1446,15 @@ body::before,body::after{opacity:.78;}
 .tm-note-zone .dlg-body-wrap{
   position:relative!important;z-index:2!important;display:block!important;overflow:hidden!important;
   background:
-    radial-gradient(ellipse 60% 50% at 35% 65%,#c8b090 0%,#b0a080 50%,#a89870 100%),
-    radial-gradient(ellipse 50% 80% at 80% 20%,rgba(140,120,100,.2) 0%,transparent 60%)!important;
+    radial-gradient(ellipse at 20% 80%,rgba(160,140,100,.15) 0%,transparent 50%),
+    radial-gradient(circle at 0 0,rgba(0,0,0,.08),transparent 30%),
+    radial-gradient(circle at 100% 0,rgba(0,0,0,.08),transparent 28%),
+    radial-gradient(circle at 0 100%,rgba(0,0,0,.08),transparent 30%),
+    radial-gradient(circle at 100% 100%,rgba(0,0,0,.08),transparent 32%),
+    linear-gradient(160deg,#c4ad8d 0%,#b8a080 46%,#a99070 100%)!important;
   border-radius:1px 2px 0 3px / 2px 1px 3px 1px!important;
   box-shadow:
-    inset 0 0 20px rgba(0,0,0,.15),
+    inset 0 0 30px rgba(0,0,0,.1),
     inset 0 0 0 1px rgba(255,245,210,.16),
     0 1px 0 rgba(255,255,255,.08)!important;
   transition:min-height .3s ease,transform .03s ease!important;
@@ -1458,20 +1462,11 @@ body::before,body::after{opacity:.78;}
 .tm-note-zone .dlg-body-wrap:before{
   content:''!important;position:absolute!important;inset:0!important;pointer-events:none!important;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E"),
-    repeating-linear-gradient(88deg,transparent,transparent 2px,rgba(150,130,110,.06) 2px,rgba(150,130,110,.06) 3px),
-    radial-gradient(circle at 0 0,rgba(0,0,0,.12),transparent 28%),
-    radial-gradient(circle at 100% 0,rgba(0,0,0,.09),transparent 24%),
-    radial-gradient(circle at 0 100%,rgba(0,0,0,.1),transparent 26%),
-    radial-gradient(circle at 100% 100%,rgba(0,0,0,.12),transparent 30%)!important;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(88deg,transparent,transparent 2px,rgba(140,120,100,.06) 2px,rgba(140,120,100,.06) 3px)!important;
   mix-blend-mode:multiply!important;opacity:.9!important;
 }
-.tm-note-zone .dlg-body-wrap:after{
-  content:'♪ 新的故事'!important;position:absolute!important;left:14px!important;bottom:7px!important;
-  font-family:var(--M)!important;font-size:6px!important;letter-spacing:.2em!important;
-  color:rgba(184,144,32,.15)!important;pointer-events:none!important;
-  text-shadow:none!important;
-}
+.tm-note-zone .dlg-body-wrap:after{content:''!important;display:none!important;}
 .tm-note-zone .db{
   position:relative!important;z-index:1!important;
   padding:40px 27px 32px 34px!important;
@@ -1502,6 +1497,9 @@ body::before,body::after{opacity:.78;}
   white-space:pre-wrap!important;max-height:7.8em!important;overflow:hidden!important;
   text-shadow:0 .3px .8px rgba(60,40,20,.15)!important;
   transition:color .5s ease,text-shadow .5s ease,transform .16s ease!important;
+}
+.tm-note-zone .dt br:nth-of-type(2)+.tw-char{
+  margin-left:18%;
 }
 .tm-note-zone .tw-char{display:inline-block;will-change:transform,color;}
 .tm-note-zone .tw-char.jitter{transform:translate(.5px,-.3px);}
@@ -1535,6 +1533,7 @@ body::before,body::after{opacity:.78;}
 }
 .tm-note-zone .dir{
   position:relative!important;display:flex!important;gap:10px!important;
+  justify-content:flex-end!important;align-items:center!important;
   margin-top:14px!important;padding-top:16px!important;
   border-top:none!important;opacity:1!important;
   transition:opacity .5s ease!important;
@@ -1555,6 +1554,12 @@ body::before,body::after{opacity:.78;}
 .tm-note-zone.tm-done .dir{
   opacity:1!important;pointer-events:auto!important;
 }
+.tm-note-zone:not(.tm-compose) .di{
+  display:none!important;
+}
+.tm-note-zone.tm-compose .di{
+  display:block!important;
+}
 .tm-note-zone .di{
   background:rgba(0,0,0,.08)!important;
   border:1px solid rgba(106,74,42,.3)!important;
@@ -1570,16 +1575,17 @@ body::before,body::after{opacity:.78;}
   box-shadow:inset 0 2px 4px rgba(0,0,0,.18),0 0 12px rgba(184,144,32,.18)!important;
 }
 .tm-note-zone .dsb{
-  width:48px!important;height:32px!important;padding:0!important;
+  min-width:56px!important;width:auto!important;height:32px!important;padding:0 13px!important;
   border-radius:2px 2px 4px 4px!important;
-  background:linear-gradient(180deg,#4a3018,#3a2810,#2a1c08)!important;
-  border:1px solid #5a3c1a!important;border-bottom:2px solid #1a0e06!important;
-  font-family:'Special Elite',var(--M)!important;font-size:10px!important;letter-spacing:.08em!important;
+  background:linear-gradient(180deg,#5a1d18,#3a1410 58%,#220c08)!important;
+  border:1px solid #6a2a1a!important;border-bottom:2px solid #1a0e06!important;
+  font-family:'Special Elite',var(--M)!important;font-size:9px!important;letter-spacing:.15em!important;
   color:#c8c4b8!important;text-shadow:none!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 4px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.2)!important;
 }
 .tm-note-zone .dsb:hover{
   border-color:#b89020!important;
+  color:#fff!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 12px rgba(184,144,32,.2),0 2px 4px rgba(0,0,0,.4)!important;
 }
 .tm-note-zone .dsb:active{
@@ -1771,14 +1777,14 @@ body::before,body::after{opacity:.78;}
   <div id="dlg" class="tm-note-zone">
     <div class="dp">
       <div class="dlg-titlebar">
-        <span class="dlg-tname">Gr.小姐为你留了便签</span>
+        <span class="dlg-tname">GR.小姐为你留了便签</span>
         <button class="dlg-tbtn" onclick="var d=document.getElementById('dlg');d.classList.toggle('dlg-mini');this.textContent=d.classList.contains('dlg-mini')?'+':'—';">—</button>
       </div>
       <div class="dlg-body-wrap"><div class="db">
         <div class="dt"><span id="tw"></span><span class="cur" id="cur"></span></div>
         <div class="dir">
           <input class="di" id="inp" type="text" placeholder="在颠簸中……" maxlength="80">
-          <button class="dsb" onclick="send()">留言</button>
+          <button class="dsb" id="note-action" onclick="noteAction()">留 言</button>
         </div>
       </div></div>
     </div>
@@ -2158,6 +2164,9 @@ function grSay(text,spd=36){
   if(tt){clearTimeout(tt);tt=null;}
   const note=document.getElementById('dlg');
   const el=document.getElementById('tw'),cur=document.getElementById('cur');
+  const btn=document.getElementById('note-action');
+  note.classList.remove('tm-compose');
+  if(btn)btn.textContent='留 言';
   note.classList.remove('tm-done');
   note.classList.add('tm-typing');
   el.innerHTML='';cur.style.display='inline-block';
@@ -2190,8 +2199,22 @@ function grSay(text,spd=36){
     }
   })();
 }
+function noteAction(){
+  const note=document.getElementById('dlg');
+  const inp=document.getElementById('inp');
+  const btn=document.getElementById('note-action');
+  if(!note.classList.contains('tm-compose')){
+    note.classList.add('tm-compose');
+    if(btn)btn.textContent='发';
+    setTimeout(function(){if(inp)inp.focus();},80);
+    return;
+  }
+  send();
+  if(btn)btn.textContent='留 言';
+  note.classList.remove('tm-compose');
+}
 const LS=[
-  "你来了。\n列车不会为任何人停下——但你刚好赶上了。",
+  "你来了。\n列车不会为任何人停下\n\n——但你刚好赶上了。",
   "那排书架固定在车厢壁上。\n每当经过隧道，你才能看清书脊上写着什么。",
   "莫扎特的档案在第二排最左边。\n皮带是解开的，说明最近有人查阅过。",
   "这趟列车没有终点。\n但有些车站，只停一次。",
