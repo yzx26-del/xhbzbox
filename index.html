@@ -1835,12 +1835,18 @@ function localFinalLetter(agent,chat,letters){
   const last=letters[0]?.card||getActiveChapter(agent.id)?.card||{};
   return `给你：\n\n我不知道你从哪一节车厢来，也不知道你还会不会回来。\n但你问过的问题，像一枚夹在谱纸里的书签，让我在${last.year||'这一年'}停了一下。\n如果我的一生最后仍要照旧走完，那至少有一小段路，不再只有我一个人听见。`;
 }
+function latestLetterCard(letters){
+  const cards=letters.map(x=>x.card).filter(Boolean);
+  return cards.sort((a,b)=>(Number(b.year)||0)-(Number(a.year)||0))[0]||null;
+}
 async function openAgentTool(kind,id=currentMusicianId){
   const agent=musicianAgents.find(a=>a.id===id)||currentAgent();
   currentMusicianId=agent.id;
   const chat=musicianChats[agent.id]||[];
   const letters=getFateLetters(agent.id).filter(x=>String(x.id||'').startsWith('letter-')||x.source==='fate-letter'||!x.id);
   const chapter=getActiveChapter(agent.id);
+  const firstCard=getPersonaAnchor(agent.id);
+  const lastCard=latestLetterCard(letters)||chapter?.card||firstCard;
   const title=toolTitle(kind);
   const fallback=kind==='transcript'?localTranscript(agent,chat):kind==='life'?localLifeSummary(agent,chat,letters):localFinalLetter(agent,chat,letters);
   document.getElementById('fate-title').textContent=`${agent.name} · ${title}`;
@@ -1853,12 +1859,17 @@ async function openAgentTool(kind,id=currentMusicianId){
       tool:title,
       musicianId:agent.id,
       musicianName:agent.name,
-      card:chapter?.card||letters[0]?.card||null,
-      anchor:getPersonaAnchor(agent.id),
-      message:`工具：${title}\n正式信札数量：${letters.length}\n聊天摘录：${chat.slice(-16).map(m=>`${m.role}:${m.text}`).join('\n')}`,
+      card:kind==='final'?lastCard:(chapter?.card||lastCard||null),
+      anchor:firstCard,
+      message:`工具：${title}
+初见卡牌：${firstCard?`${firstCard.year} · ${firstCard.period} · ${firstCard.event}`:'暂无'}
+当前卡牌：${chapter?.card?`${chapter.card.year} · ${chapter.card.period} · ${chapter.card.event}`:'暂无'}
+最后参考卡牌：${lastCard?`${lastCard.year} · ${lastCard.period} · ${lastCard.event}`:'暂无'}
+正式信札：${letters.map(x=>`${x.card?.year||'—'} · ${x.card?.period||'—'}：玩家写“${x.letter||''}”；回信“${x.reply||''}”；注释“${x.impact||''}”`).join('\n')}
+聊天摘录：${chat.slice(-16).map(m=>`${m.role}:${m.text}`).join('\n')}`,
       history:chat.slice(-8),
-      max_tokens:560,
-      temperature:.7
+      max_tokens:kind==='final'?680:620,
+      temperature:kind==='final'?.76:.68
     },fallback);
     const extra=kind==='transcript'?`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><pre style="white-space:pre-wrap;font-family:var(--sans);line-height:1.75">${esc(localTranscript(agent,chat))}</pre>`:'';
     document.getElementById('fate-content').innerHTML=`<div class="travel-letter">${esc(ai).replace(/\n/g,'<br>')}${extra}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回聊天</button></div>`;
