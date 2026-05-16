@@ -1682,6 +1682,17 @@ async function generateLetterMeta(agent,card,letter,reply){
     return {impact:parsed?.impact||fallback.impact,manuscript:parsed?.manuscript||fallback.manuscript};
   }catch{return fallback;}
 }
+function localCardPeriodReply(agent,card,letter){
+  const year=card?.year||'这一年';
+  const period=card?.period||'这页卡牌';
+  const work=card?.work||'手边的作品';
+  return `你的信落在${year}年的桌上。\n我正处在${period}里，${work}还带着未干的墨迹。\n你说的话没有改掉这一天，只让我把原本要丢开的纸又捡了回来。\n旁边的人未必知道发生了什么，只听见我把同一个音弹得轻了一点。`;
+}
+function localAnchoredChatReply(agent,card,letter,cardReply){
+  const anchor=getPersonaAnchor(agent.id);
+  const anchorText=anchor?.year?`${anchor.year}年的我`:'现在的我';
+  return `${anchorText}仍在这里。\n那封属于${card?.year||'另一页'}的回信已经夹进旅行信札，别把它当成此刻的我。\n但你写下的那句话，像从别的车厢传来的一点回声，我听见了。`;
+}
 function currentAgent(){
   currentMusicianId=openMusicianId();
   return musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];
@@ -1760,30 +1771,42 @@ async function sendFateLetter(){
   closeFateOverlay();
   const pending=addMsg('mini-feed-'+agent.id,'musician','信纸正在穿过隧道。',agent.name);
   try{
-    const reply=await callLetterAgent({
+    const cardReply=await callLetterAgent({
+      mode:'card_letter',
+      musicianId:agent.id,
+      musicianName:agent.name,
+      card:activeFateCard,
+      anchor:chapter?.anchor||getPersonaAnchor(agent.id),
+      message:`玩家写给${activeFateCard.year} · ${activeFateCard.period}时期${agent.name}的一封信：${text}`,
+      history:[],
+      max_tokens:420,
+      temperature:.72
+    },localCardPeriodReply(agent,activeFateCard,text));
+    const meta=await generateLetterMeta(agent,activeFateCard,text,cardReply);
+    saveFateLetter(agent.id,{...entry,reply:cardReply,impact:meta.impact,manuscript:meta.manuscript});
+    const chatReply=await callLetterAgent({
       mode:'musician',
       musicianId:agent.id,
       musicianName:agent.name,
       card:activeFateCard,
       anchor:chapter?.anchor||getPersonaAnchor(agent.id),
       turn:0,
-      message:`玩家在命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”后写来一封信：${text}`,
+      message:`玩家刚给命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”时期的你寄出一封信。卡牌时期的回信已写入旅行信札，不要复述那封回信。请以身份锚点年龄的你，回应玩家这次寄信后的余波。玩家信件：${text}`,
       history:musicianChats[agent.id].slice(-6),
       max_tokens:480,
       temperature:.76
-    },'');
-    musicianChats[agent.id].push({role:'musician',text:reply});
+    },localAnchoredChatReply(agent,activeFateCard,text,cardReply));
+    musicianChats[agent.id].push({role:'musician',text:chatReply});
     persistMusicianChat(agent.id);
-    const meta=await generateLetterMeta(agent,activeFateCard,text,reply);
-    saveFateLetter(agent.id,{...entry,reply,impact:meta.impact,manuscript:meta.manuscript});
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(chatReply)}</span>`;
   }catch(e){
-    const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
-    musicianChats[agent.id].push({role:'musician',text:reply});
+    const cardReply=localCardPeriodReply(agent,activeFateCard,text);
+    const chatReply=localAnchoredChatReply(agent,activeFateCard,text,cardReply);
+    musicianChats[agent.id].push({role:'musician',text:chatReply});
     persistMusicianChat(agent.id);
-    const meta=await generateLetterMeta(agent,activeFateCard,text,reply);
-    saveFateLetter(agent.id,{...entry,reply,impact:meta.impact,manuscript:meta.manuscript});
-    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
+    const meta=await generateLetterMeta(agent,activeFateCard,text,cardReply);
+    saveFateLetter(agent.id,{...entry,reply:cardReply,impact:meta.impact,manuscript:meta.manuscript});
+    if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(chatReply)}</span>`;
   }
 }
 function openCardLibrary(){

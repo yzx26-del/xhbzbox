@@ -80,6 +80,24 @@ function relationHint(anchor, card) {
 
 function systemPrompt(mode, musicianName, musicianId, card, turn, anchor, tool = '') {
   const currentName = musicianName || musicianProfiles[musicianId]?.split('：')[0] || '当前音乐家';
+  if (mode === 'card_letter') {
+    const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家所处时代和创作处境。`;
+    return `${profile}
+${cardContext(card, '这封信对应的命运卡牌')}
+
+你要写“旅行信札”里的卡牌回信。
+这封回信只属于这张命运卡牌的时期，不属于右侧聊天框里的当前锁定人格。
+你现在是${card?.year || '这张卡牌时期'}的${currentName}，只知道这一时期之前和当下能知道的事。
+如果这张卡牌早于玩家第一次遇见你的身份锚点，你不是在回忆，而是年轻时期的你直接收到一封奇怪来信。
+如果这张卡牌晚于身份锚点，你也只按这张卡牌时期的状态回信，不要搬用聊天框里的口吻。
+
+规则：
+- 用第一人称，像一封短回信，不要像聊天回复。
+- 3到6句话，带一个具体物件、地点、身体状态或现场细节。
+- 可以因为玩家的信产生20%的细微偏移，甚至影响身边人的小选择、误会、信件、演出现场，但不能改变重大历史、重要作品和真实结局。
+- 不要提“聊天框”“当前人格”“系统”。
+- 不用感叹号，不用百科口吻。`;
+  }
   if (mode === 'letter_meta') {
     const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家所处时代和创作处境。`;
     return `${profile}
@@ -210,7 +228,7 @@ export default async function handler(req, res) {
     const message = String(body.message || '').trim();
     if (!message) return send(res, 400, { error: 'Missing message' });
 
-    const allowedModes = new Set(['musician', 'gr', 'letter_meta', 'agent_tool']);
+    const allowedModes = new Set(['musician', 'gr', 'letter_meta', 'agent_tool', 'card_letter']);
     const mode = allowedModes.has(body.mode) ? body.mode : 'gr';
     const musicianName = String(body.musicianName || '').slice(0, 40);
     const musicianId = String(body.musicianId || '').slice(0, 40);
