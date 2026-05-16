@@ -1111,6 +1111,24 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
 #tp-body{padding:18px;overflow:auto;max-height:calc(82vh - 76px);}
 .tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}.tp-card{border:1px solid rgba(184,144,32,.24);background:linear-gradient(160deg,#a89070,#8f7657);color:#160f08;padding:13px;min-height:150px;box-shadow:0 16px 44px rgba(0,0,0,.36)}.tp-card.locked{filter:saturate(.1);opacity:.38;background:linear-gradient(160deg,#4c463e,#2a2825);color:#b8b0a0}.tp-year{font-family:var(--D);font-size:20px}.tp-period{font-family:var(--M);font-size:8px;letter-spacing:.18em;margin:5px 0 9px}.tp-event{font-family:var(--S);font-style:italic;font-size:12px;line-height:1.65}.tp-music-group{margin-bottom:18px}.tp-music-title{font-family:var(--M);font-size:9px;letter-spacing:.24em;color:rgba(184,144,32,.7);margin-bottom:8px}.tp-track{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(184,144,32,.2);background:rgba(0,0,0,.22);padding:10px 12px;margin-bottom:7px}.tp-track strong{font-family:var(--S);font-style:italic;color:#e8d8b8}.tp-track span{font-family:var(--M);font-size:8px;color:rgba(200,196,184,.45)}.tp-play{height:24px;padding:0 9px;border:1px solid rgba(184,144,32,.45);background:rgba(6,8,12,.8);color:#e8d8b8;cursor:pointer}.tp-axis{position:relative;padding-left:20px}.tp-axis:before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,var(--copper),transparent)}.tp-node{position:relative;border:1px solid rgba(184,144,32,.18);padding:10px 12px;margin-bottom:10px;background:rgba(0,0,0,.2);opacity:.45}.tp-node.unlocked{opacity:1;border-color:rgba(184,144,32,.55);box-shadow:0 0 18px rgba(184,144,32,.14)}.tp-node:before{content:'';position:absolute;left:-19px;top:16px;width:9px;height:9px;border-radius:50%;background:#4a4a44;border:1px solid rgba(184,144,32,.3)}.tp-node.unlocked:before{background:var(--lamp);box-shadow:0 0 14px rgba(184,144,32,.6)}
 
+/* 全局提亮：保留蒸汽时代暗调，但把可见度整体提高约 60% */
+#scene,#moz,#letter-screen,#incoming-letter,#travel-panel,#chronicle,#unlock-toast,#toast{
+  filter:brightness(1.6) saturate(1.08);
+}
+#vig{opacity:.42;}
+body::before,body::after{opacity:.52;}
+#grain{opacity:.22;}
+#ca-r,#ca-b{opacity:.08;}
+#cabin{
+  background:linear-gradient(180deg,#1c130d 0%,#24170e 30%,#15100b 70%,#100c10 100%);
+}
+#floor{
+  background:linear-gradient(180deg,#17100b 0%,#24170d 42%,#332112 100%);
+}
+#moz{
+  background:radial-gradient(ellipse at 50% 45%,#241209 0%,#130b06 100%);
+}
+
 </style>
 </head>
 <body>
@@ -1415,7 +1433,7 @@ body::after{bottom:0;height:7%;transform:scaleY(-1);}
     </div>
     <div id="write-area">
       <button class="write-btn" onclick="triggerIncomingLetter(GAME.currentCard)">✉ 给莫扎特写信</button>
-      <button class="write-btn" onclick="drawNew()">继续抽取</button>
+      <button class="write-btn" onclick="guardedDrawNew()">等待回信后继续</button>
       <button class="write-btn" onclick="closeMoz()">返回列车</button>
     </div>
   </div>
@@ -1732,6 +1750,11 @@ function flipCard(){
 
 /* ══ 莫扎特转场 ══ */
 function openMoz(){
+  if(GAME.drawLocked||GAME.awaitingGrChat||GAME.awaitingReply){
+    grSay("先别急着再抽。\n这张卡的故事还没有讲完。\n和我聊几句，等他的回信到了，再翻下一页。");
+    showToast('先和 GR. 小姐聊完这张卡',2400);
+    return;
+  }
   grSay("那份档案，你拿起来了。\n窗外会有一道闪光。\n不要闭眼。");
   worldActive=false;
   const flash=document.getElementById('time-flash');
@@ -1740,7 +1763,7 @@ function openMoz(){
   moz.style.display='flex';
   moz.classList.add('on');
   buildFloatCards();
-  drawNew();
+  drawNew(true);
   setTimeout(function(){
     moz.style.opacity='1';
     moz.style.pointerEvents='all';
@@ -1750,6 +1773,9 @@ function openMoz(){
   setTimeout(()=>{flash.style.opacity='0';worldActive=true;},520);
 }
 function closeMoz(){
+  if(GAME.drawLocked&&!GAME.awaitingGrChat&&!GAME.awaitingReply){
+    GAME.drawLocked=false;
+  }
   const flash=document.getElementById('time-flash');
   flash.style.opacity='.6';
   setTimeout(()=>{
@@ -1757,6 +1783,19 @@ function closeMoz(){
     document.getElementById('moz').classList.remove('on');
     setTimeout(()=>grSay("你回来了。\n列车还在走。\n那份档案还在架子上，还是未结案。"),600);
   },500);
+}
+
+function returnToTrainForGuidance(){
+  var flash=document.getElementById('time-flash');
+  flash.style.opacity='.45';
+  setTimeout(function(){
+    flash.style.opacity='0';
+    document.getElementById('moz').classList.remove('on');
+  },360);
+}
+
+function guardedDrawNew(){
+  drawNew(false);
 }
 function openLetter(){
   if(!currentCard)return;
@@ -1852,7 +1891,8 @@ var GAME={
   collectedCards:_safeLS('tm_collection'),
   playerInfluences:_safeLS('tm_influences'),
   grChatRound:0,grTargetRounds:0,awaitingGrChat:false,
-  pendingCard:null,origSend:null
+  pendingCard:null,origSend:null,
+  drawLocked:false,awaitingReply:false
 };
 function saveGame(){
   localStorage.setItem('tm_collection',JSON.stringify(GAME.collectedCards));
@@ -1949,6 +1989,8 @@ function typeEl(el,text,spd,done){
 
 /* === 来信面板 === */
 function triggerIncomingLetter(card){
+  if(!card)return;
+  GAME.drawLocked=true;
   GAME.pendingCard=card;
   document.getElementById('inc-from-label').textContent='来函 · W. A. MOZART · '+card.year;
   document.getElementById('inc-salute').textContent='亲爱的神秘旅客：';
@@ -2006,8 +2048,11 @@ function sendPlayerLetter(){
   GAME.playerInfluences.push(inf);saveGame();
   setTimeout(function(){
     closeIncoming();
-    showToast('信件已寄出，等待回音……',2500);
-    startGrGuidance(text,GAME.pendingCard,inf);
+    returnToTrainForGuidance();
+    showToast('信件已寄出，先和 GR. 小姐聊聊这张卡。',3000);
+    setTimeout(function(){
+      startGrGuidance(text,GAME.pendingCard,inf);
+    },850);
   },1500);
 }
 
@@ -2033,6 +2078,8 @@ var GR_KW=[
 
 function startGrGuidance(playerText,card,inf){
   GAME.awaitingGrChat=true;
+  GAME.awaitingReply=true;
+  GAME.drawLocked=true;
   GAME.grChatRound=0;
   GAME.grTargetRounds=1+Math.floor(Math.random()*5);
   var kwObj=GR_KW[Math.floor(Math.random()*GR_KW.length)];
@@ -2096,6 +2143,8 @@ function showReplyAndUnlock(card,reply,nextCard){
   closeBtn.textContent='× 珍藏此信';
   closeBtn.onclick=function(){
     closeIncoming();
+    GAME.drawLocked=false;
+    GAME.awaitingReply=false;
     if(nextCard)unlockNextCard(nextCard);
     else setTimeout(generateChronicle,1500);
   };
@@ -2109,7 +2158,9 @@ function unlockNextCard(nextCard){
     if(GAME.collectedCards[i].year===nextCard.year&&GAME.collectedCards[i].period===nextCard.period){already=true;break;}
   }
   if(!already){GAME.collectedCards.push(nextCard);saveGame();}
-  grSay('新的档案解封了。\n'+nextCard.year+'年，'+nextCard.period+'。\n他人生的下一页。');
+  GAME.drawLocked=false;
+  GAME.awaitingReply=false;
+  grSay('新的档案解封了。\n'+nextCard.year+'年，'+nextCard.period+'。\n他人生的下一页。\n现在可以再次打开档案，继续抽取。');
   showUnlock(nextCard.year+' · '+nextCard.period+'\n'+nextCard.workFull);
   setTimeout(function(){
     GAME.currentCard=nextCard;
@@ -2129,6 +2180,7 @@ window.flipCard=function(){
   var card=document.getElementById('main-card');
   if(!GAME.flipped){
     card.classList.add('flipped');GAME.flipped=true;
+    GAME.drawLocked=true;
     var c=GAME.currentCard;
     var already=false;
     for(var i=0;i<GAME.collectedCards.length;i++){
@@ -2137,15 +2189,24 @@ window.flipCard=function(){
     if(!already){GAME.collectedCards.push(c);saveGame();showToast('已收录 · '+c.year+' · '+c.period,2000);}
     setTimeout(function(){
       document.getElementById('write-area').classList.add('show');
-      grSay('这张卡已经翻开。\n你可以写信，也可以继续抽取，或返回列车。');
+      grSay('这张卡已经翻开。\n先给他写一封信。\n写完后我会带你回列车，我们聊完这张卡，再继续抽下一张。');
     },900);
   }else{
+    if(GAME.drawLocked||GAME.awaitingGrChat||GAME.awaitingReply){
+      grSay('这张卡已经翻开。\n先写信，和我聊完它。\n别把这一页合上。');
+      return;
+    }
     card.classList.remove('flipped');GAME.flipped=false;
     document.getElementById('write-area').classList.remove('show');
   }
 };
 
-window.drawNew=function(){
+window.drawNew=function(force){
+  if((GAME.drawLocked||GAME.awaitingGrChat||GAME.awaitingReply)&&!force){
+    grSay('这张卡还没有结束。\n先写信，或回到列车和我聊完它。\n等回信被珍藏后，再继续抽。');
+    showToast('先完成当前卡牌的书信与聊天',2400);
+    return;
+  }
   var card=document.getElementById('main-card');
   if(GAME.flipped){card.classList.remove('flipped');GAME.flipped=false;}
   document.getElementById('write-area').classList.remove('show');
