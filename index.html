@@ -322,6 +322,11 @@ select.fi{cursor:pointer}
     <div class="ni" onclick="go('graph',this)"><i class="ti ti-topology-star"></i>血缘图谱</div>
   </div>
   <div class="ns">
+    <div class="nl">音乐信札</div>
+    <div class="ni" onclick="go('letteragent',this)"><i class="ti ti-robot"></i>智能体</div>
+    <div class="ni" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>音乐旅行</div>
+  </div>
+  <div class="ns">
     <div class="nl">内容创作</div>
     <div class="ni" onclick="go('articles',this)"><i class="ti ti-article"></i>稿件管理<span class="nb" id="nb-articles">—</span></div>
     <div class="ni" onclick="go('editor',this)"><i class="ti ti-pencil"></i>写作台</div>
@@ -463,6 +468,37 @@ select.fi{cursor:pointer}
   <div class="ph"><div><div class="ptitle">笔记卡片库</div><div class="psub">原子化笔记·可复用模块·智能导入自动生成</div></div><div class="ph-r"><button class="ib solid" onclick="openModal('note')"><i class="ti ti-plus"></i>新建卡片</button></div></div>
   <div style="display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap" id="notes-filter"><span class="tag on" data-ntype="">全部</span><span class="tag" data-ntype="song_review">歌曲点评</span><span class="tag" data-ntype="analysis">分析观点</span><span class="tag" data-ntype="fact">史实引用</span><span class="tag" data-ntype="technique">技法记录</span><span class="tag" data-ntype="reusable_module">可复用模块</span><span class="tag" data-ntype="quote">原文摘录</span></div>
   <div id="notes-grid"><div class="loading"><div class="spinner"></div>加载中…</div></div>
+</div>
+
+<!-- 音乐信札 · 智能体 -->
+<div class="page" id="pg-letteragent">
+  <div class="ph">
+    <div><div class="ptitle">音乐信札</div><div class="psub">智能体工作台 · 音乐旅行游戏入口 · 未来接入音频与 DeepSeek</div></div>
+    <div class="ph-r"><button class="ib solid" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>打开音乐旅行</button></div>
+  </div>
+  <div class="g2">
+    <div class="sec">
+      <div class="sh"><div class="sh-t"><i class="ti ti-robot"></i>智能体</div></div>
+      <div style="padding:16px;color:var(--t2);line-height:1.8;font-size:13px">
+        <strong style="font-family:var(--serif);font-size:18px;color:var(--t1)">音乐写作与资料助理</strong>
+        <p style="margin:10px 0 0">这里先作为未来智能体入口：可以接入 DeepSeek，帮助整理音乐家资料、生成旅行信札、分析作品背景，并把结果同步到资料库和笔记卡片。</p>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px">
+          <div class="sc"><div class="sc-label">资料整理</div><div class="sc-sub">音乐家、城市、作品、年代</div></div>
+          <div class="sc"><div class="sc-label">信札生成</div><div class="sc-sub">根据地点生成故事文本</div></div>
+          <div class="sc"><div class="sc-label">音频解说</div><div class="sc-sub">未来关联曲目与播放链接</div></div>
+          <div class="sc"><div class="sc-label">卡片沉淀</div><div class="sc-sub">一键并入笔记卡片库</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh"><div class="sh-t"><i class="ti ti-map-pin"></i>音乐旅行</div><span class="sh-a" onclick="openMusicTravel()">进入 →</span></div>
+      <div style="padding:16px;color:var(--t2);line-height:1.8;font-size:13px">
+        <strong style="font-family:var(--serif);font-size:18px;color:var(--t1)">音乐家的旅行游戏网站</strong>
+        <p style="margin:10px 0 0">独立页面已预留成游戏式体验：选择音乐家，进入城市与时代地图，解锁作品、故事、音频入口和 AI 生成的旅行信札。</p>
+        <button class="ib solid" style="margin-top:14px;height:34px" onclick="openMusicTravel()"><i class="ti ti-door-enter"></i>打开 music-travel.html</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 母题对比 -->
@@ -959,6 +995,8 @@ function go(id, el) {
   if(loaders[id]) later(()=>Promise.resolve(loaders[id]()).catch(e=>toast('加载慢或失败：'+e.message)),20);
 }
 window.go=go;
+function openMusicTravel(){window.location.href='music-travel.html';}
+window.openMusicTravel=openMusicTravel;
 
 // ══ GAME MAP EDITOR ══
 let gmMode='select', gmTab='music', gmView='timeline', gmRows=[], gmSelectedId=null, gmAiDraft=null, pendingGameProjectId=null, gmEditingCards=new Set(), gmCurrentGameId=null, gmGames=[], gmGameStats={};

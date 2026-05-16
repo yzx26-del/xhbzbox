@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>音乐旅行 | 声轨档案</title>
+<style>
+:root{
+  --ink:#211b18;--muted:#766a61;--paper:#fffaf1;--line:#e8dccb;
+  --cream:#f6ead9;--gold:#b88746;--green:#758b68;--blue:#627b99;--rose:#aa6d62;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Serif SC","Songti SC",serif;background:radial-gradient(circle at 20% 0,#fff8e9 0,#f3e3cd 34%,#d9c3a5 100%);color:var(--ink);min-height:100vh}
+button,input,textarea{font:inherit}
+.top{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;border-bottom:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.72);backdrop-filter:blur(14px);position:sticky;top:0;z-index:10}
+.brand{font-size:20px;font-weight:800;letter-spacing:.06em}.brand span{font-size:10px;color:var(--muted);font-family:Menlo,monospace;margin-left:8px;text-transform:uppercase}
+.nav{display:flex;gap:8px}.btn{height:34px;border:1px solid rgba(80,58,39,.2);background:rgba(255,255,255,.45);border-radius:999px;padding:0 14px;cursor:pointer;color:var(--ink)}.btn.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:34px 24px 46px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:stretch}
+.hero h1{font-size:54px;line-height:1.08;margin:0 0 16px;letter-spacing:.03em}.hero p{font-size:16px;line-height:1.9;color:var(--muted);max-width:560px}
+.seal{border:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.58);border-radius:18px;padding:20px;box-shadow:0 22px 80px rgba(67,44,27,.16)}
+.map{min-height:320px;border-radius:16px;background:linear-gradient(135deg,#f9edd8,#d8c2a5);position:relative;overflow:hidden;border:1px solid rgba(80,58,39,.14)}
+.route{position:absolute;inset:18px;border:1px dashed rgba(65,47,31,.32);border-radius:48% 52% 44% 56%;transform:rotate(-8deg)}
+.city{position:absolute;width:104px;border:1px solid rgba(80,58,39,.18);background:rgba(255,250,241,.82);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 10px 30px rgba(70,43,20,.12)}
+.city strong{display:block;font-size:14px}.city span{font-size:11px;color:var(--muted)}
+.city.on{outline:2px solid var(--gold);background:#fff8ea}.c1{left:9%;top:18%}.c2{left:43%;top:10%}.c3{right:9%;top:26%}.c4{left:24%;bottom:12%}.c5{right:20%;bottom:13%}
+.panel{margin-top:24px;display:grid;grid-template-columns:320px 1fr;gap:18px}
+.card,.letter,.agent{border:1px solid rgba(80,58,39,.16);background:rgba(255,250,241,.76);border-radius:18px;padding:18px;box-shadow:0 18px 58px rgba(72,48,27,.12)}
+.card h2,.letter h2,.agent h2{margin:0 0 12px;font-size:22px}.list{display:flex;flex-direction:column;gap:9px}
+.composer{border:1px solid var(--line);background:rgba(255,255,255,.52);border-radius:14px;padding:12px;cursor:pointer;display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:center}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--rose));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+.composer strong{display:block}.composer span{font-size:12px;color:var(--muted)}.composer.on{border-color:var(--gold);background:#fff6e7}
+.journey{display:grid;grid-template-columns:1fr 290px;gap:16px}.letter-text{font-size:15px;line-height:2;color:#4a3a2f;min-height:174px;white-space:pre-wrap}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.tag{font-size:12px;color:#5d5148;border:1px solid var(--line);background:#fffaf4;border-radius:999px;padding:4px 9px}
+.track{border:1px solid var(--line);border-radius:14px;background:#fffaf4;padding:12px;margin-bottom:10px}.track strong{display:block;font-size:14px}.track span{font-size:12px;color:var(--muted)}
+.placeholder{height:38px;border-radius:999px;background:linear-gradient(90deg,#d8c7b1,#9d8061,#d8c7b1);margin-top:9px;position:relative;overflow:hidden}.placeholder:after{content:"";position:absolute;left:18px;right:18px;top:17px;height:4px;border-radius:99px;background:rgba(255,255,255,.55)}
+.agent-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.agent-cell{border:1px solid var(--line);background:rgba(255,255,255,.42);border-radius:14px;padding:12px}.agent-cell strong{display:block;font-size:14px}.agent-cell span{font-size:12px;color:var(--muted);line-height:1.7}
+@media(max-width:900px){.hero,.panel,.journey{grid-template-columns:1fr}.hero h1{font-size:40px}.agent-grid{grid-template-columns:1fr 1fr}.top{padding:0 14px}.wrap{padding:24px 14px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">音乐旅行<span>Music Travel</span></div>
+  <div class="nav">
+    <button class="btn" onclick="location.href='index.html'">返回 CMS</button>
+    <button class="btn solid" onclick="generateLetter()">生成信札</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1>把音乐家，放进一张会发光的旅行地图。</h1>
+      <p>第一版先用静态数据跑通体验：选择音乐家，点击城市，解锁作品、故事和旅行信札。以后这里可以接音频链接，也可以接 DeepSeek，让每一次旅行自动生成新的文本与任务。</p>
+    </div>
+    <div class="seal">
+      <div class="map" id="map">
+        <div class="route"></div>
+        <div class="city c1 on" onclick="chooseCity('leipzig',this)"><strong>莱比锡</strong><span>巴赫的工作室</span></div>
+        <div class="city c2" onclick="chooseCity('vienna',this)"><strong>维也纳</strong><span>古典时代的客厅</span></div>
+        <div class="city c3" onclick="chooseCity('paris',this)"><strong>巴黎</strong><span>印象派的雾</span></div>
+        <div class="city c4" onclick="chooseCity('tokyo',this)"><strong>东京</strong><span>电影与动画的声场</span></div>
+        <div class="city c5" onclick="chooseCity('newyork',this)"><strong>纽约</strong><span>现代声音的路口</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <aside class="card">
+      <h2>选择音乐家</h2>
+      <div class="list" id="composer-list"></div>
+    </aside>
+    <section class="journey">
+      <div class="letter">
+        <h2 id="letter-title">今日旅行信札</h2>
+        <div class="meta" id="letter-tags"></div>
+        <div class="letter-text" id="letter-text"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn solid" onclick="generateLetter()">重新生成信札</button>
+          <button class="btn" onclick="savePlan()">保存旅行草稿</button>
+        </div>
+      </div>
+      <aside class="card">
+        <h2>音频入口</h2>
+        <div id="track-list"></div>
+      </aside>
+    </section>
+  </section>
+
+  <section class="agent" style="margin-top:18px">
+    <h2>未来接口规划</h2>
+    <div class="agent-grid">
+      <div class="agent-cell"><strong>DeepSeek 信札</strong><span>未来调用 /api/music-travel-letter，按音乐家、城市、作品生成故事。</span></div>
+      <div class="agent-cell"><strong>音频链接</strong><span>先跳转网易云、Spotify、Apple Music 搜索，避免版权风险。</span></div>
+      <div class="agent-cell"><strong>旅行任务</strong><span>根据作品生成听辨、情绪、时代、场景选择题。</span></div>
+      <div class="agent-cell"><strong>资料沉淀</strong><span>把信札、作品和点评同步进 CMS 的资料库与笔记卡片。</span></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const composers=[
+  {id:'bach',name:'巴赫',years:'1685-1750',home:'leipzig',tags:['复调','宗教','键盘'],works:['G弦上的咏叹调','平均律键盘曲集']},
+  {id:'mozart',name:'莫扎特',years:'1756-1791',home:'vienna',tags:['古典','歌剧','明亮'],works:['费加罗的婚礼','第40号交响曲']},
+  {id:'debussy',name:'德彪西',years:'1862-1918',home:'paris',tags:['印象派','色彩','朦胧'],works:['月光','大海']},
+  {id:'hisaishi',name:'久石让',years:'1950-',home:'tokyo',tags:['电影','动画','旋律'],works:['天空之城','One Summer’s Day']},
+  {id:'sakamoto',name:'坂本龙一',years:'1952-2023',home:'newyork',tags:['电子','电影','极简'],works:['Merry Christmas Mr. Lawrence','Energy Flow']}
+];
+const cities={
+  leipzig:{name:'莱比锡',mood:'秩序与烛光',line:'这里适合写一封关于复调、教堂和清晨键盘声的信。'},
+  vienna:{name:'维也纳',mood:'圆舞曲与剧院',line:'这里适合写一封关于才华、社交和乐句转身的信。'},
+  paris:{name:'巴黎',mood:'雾、河岸与色彩',line:'这里适合写一封关于月光、和声雾气和现代听觉的信。'},
+  tokyo:{name:'东京',mood:'霓虹与电影胶片',line:'这里适合写一封关于动画、钢琴主题和城市孤独的信。'},
+  newyork:{name:'纽约',mood:'玻璃、噪声与远行',line:'这里适合写一封关于现代性、电子声和漂泊的信。'}
+};
+let activeComposer=composers[0],activeCity='leipzig';
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function renderComposers(){
+  document.getElementById('composer-list').innerHTML=composers.map(c=>`<div class="composer ${c.id===activeComposer.id?'on':''}" onclick="chooseComposer('${c.id}')"><div class="avatar">${esc(c.name.slice(0,1))}</div><div><strong>${esc(c.name)}</strong><span>${esc(c.years)} · ${esc(c.tags.join(' / '))}</span></div></div>`).join('');
+}
+function chooseComposer(id){activeComposer=composers.find(c=>c.id===id)||activeComposer;activeCity=activeComposer.home;syncCity();renderComposers();generateLetter();}
+function chooseCity(id,el){activeCity=id;document.querySelectorAll('.city').forEach(c=>c.classList.remove('on'));el.classList.add('on');generateLetter();}
+function syncCity(){document.querySelectorAll('.city').forEach(c=>c.classList.remove('on'));const idx=Object.keys(cities).indexOf(activeCity);document.querySelectorAll('.city')[Math.max(idx,0)]?.classList.add('on');}
+function renderTracks(){
+  document.getElementById('track-list').innerHTML=activeComposer.works.map((w,i)=>`<div class="track"><strong>${esc(w)}</strong><span>未来可接音频或外部搜索</span><div class="placeholder"></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn" onclick="openSearch(activeComposer.works[${i}])">搜索</button></div></div>`).join('');
+}
+function openSearch(q){window.open('https://music.163.com/#/search/m/?s='+encodeURIComponent(q+' '+activeComposer.name),'_blank');}
+async function fetchTravelLetter(){
+  // 未来接入 DeepSeek 时，把这里替换为 fetch('/api/music-travel-letter', { method:'POST', ... })。
+  const city=cities[activeCity];
+  return `${activeComposer.name}抵达${city.name}时，声音先变成一种${city.mood}。\n\n${city.line}\n\n请从《${activeComposer.works[0]}》开始听，把旋律里最先出现的情绪记下来。今天的任务不是判断它好不好，而是找出它为什么会在这个地方被你听见。`;
+}
+async function generateLetter(){
+  const city=cities[activeCity];
+  document.getElementById('letter-title').textContent=`${activeComposer.name} · ${city.name}`;
+  document.getElementById('letter-tags').innerHTML=[...activeComposer.tags,city.mood].map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  document.getElementById('letter-text').textContent=await fetchTravelLetter();
+  renderTracks();
+}
+function savePlan(){localStorage.setItem('musicTravelDraft',JSON.stringify({composer:activeComposer.id,city:activeCity,date:new Date().toISOString()}));alert('已保存到本机草稿');}
+renderComposers();generateLetter();
+</script>
+</body>
+</html>
