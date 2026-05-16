@@ -1708,6 +1708,88 @@ body::before,body::after{opacity:.78;}
     0 2px 4px rgba(0,0,0,.34)!important;
 }
 
+/* 清晰度优先：纸面提亮、文字浓黑、输入区边界明确 */
+.tm-note-zone .dp{
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.7))!important;
+}
+.tm-note-zone .dp:after{
+  content:''!important;position:absolute!important;top:2px!important;left:10%!important;right:10%!important;height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent)!important;
+  pointer-events:none!important;
+}
+.tm-note-zone .dlg-body-wrap{
+  background:
+    linear-gradient(135deg,rgba(255,246,210,.24),transparent 28%,rgba(90,55,20,.08) 78%),
+    radial-gradient(ellipse at 20% 80%,rgba(160,140,100,.12) 0%,transparent 50%),
+    linear-gradient(160deg,#decfb4 0%,#d4c4a8 46%,#c6b392 100%)!important;
+  box-shadow:
+    inset 0 0 18px rgba(0,0,0,.1),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -2px 0 rgba(70,40,16,.1),
+    0 8px 18px rgba(0,0,0,.34)!important;
+}
+.tm-note-zone .dlg-body-wrap:before{
+  background:
+    repeating-linear-gradient(88deg,transparent,transparent 2px,rgba(140,120,100,.04) 2px,rgba(140,120,100,.04) 3px),
+    repeating-linear-gradient(178deg,transparent,transparent 8px,rgba(130,120,100,.025) 8px,rgba(130,120,100,.025) 9px)!important;
+  opacity:.5!important;
+}
+.tm-note-zone .dt{
+  font-size:14px!important;
+  line-height:2!important;
+  color:#0a0806!important;
+  text-shadow:none!important;
+  filter:none!important;
+  max-height:8.4em!important;
+}
+.tm-note-zone .tw-char,.tm-note-zone .tw-char.faint{
+  color:#0a0806!important;
+  text-shadow:none!important;
+}
+.tm-note-zone.tm-done .dt{
+  color:#0a0806!important;
+  text-shadow:none!important;
+}
+.tm-note-zone .dir{
+  margin-top:12px!important;
+  padding-top:12px!important;
+  border-top:1px solid rgba(106,74,42,.3)!important;
+}
+.tm-note-zone .dir:before{
+  display:none!important;
+}
+.tm-note-zone .dir:after{
+  display:none!important;
+}
+.tm-note-zone .di{
+  background:rgba(255,255,255,.15)!important;
+  border:1px solid rgba(106,74,42,.4)!important;
+  border-radius:2px!important;
+  color:#0a0806!important;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.15),0 1px 0 rgba(255,255,255,.08)!important;
+}
+.tm-note-zone .di::placeholder{
+  color:rgba(26,20,10,.4)!important;
+}
+.tm-note-zone .dsb{
+  color:#f0e4d4!important;
+  background:linear-gradient(180deg,#6a261d 0%,#4a1712 45%,#2a0e0a 100%)!important;
+  border:1px solid #7a3526!important;
+  border-bottom:3px solid #1a0e06!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 2px 4px rgba(0,0,0,.45),
+    0 0 0 1px rgba(0,0,0,.22)!important;
+}
+.tm-note-zone .dsb:hover{
+  color:#fff!important;
+  border-color:#b89020!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 12px rgba(184,144,32,.2),
+    0 2px 4px rgba(0,0,0,.45)!important;
+}
+
 /* === PATCH ONLY: 2. 书架框 .tm-shelf-zone === */
 .tm-shelf-zone{}
 
@@ -2478,7 +2560,7 @@ startPhysics();
 setTimeout(()=>grSay(LS[0]),3500);
 
 
-/* === 白噪音系统 === */
+/* === 火车行驶声系统：低频、轻量、枕木节奏 === */
 var audioCtx=null,noiseStarted=false;
 function startTrainNoise(){
   if(noiseStarted)return;noiseStarted=true;
@@ -2486,31 +2568,42 @@ function startTrainNoise(){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
     var master=audioCtx.createGain();
     master.gain.setValueAtTime(0,audioCtx.currentTime);
-    master.gain.linearRampToValueAtTime(0.15,audioCtx.currentTime+3);
+    master.gain.linearRampToValueAtTime(0.055,audioCtx.currentTime+3.5);
     master.connect(audioCtx.destination);
-    var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*4,audioCtx.sampleRate);
+
+    var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*5,audioCtx.sampleRate);
     var d=buf.getChannelData(0);
-    for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.7;
+    var last=0;
+    for(var i=0;i<d.length;i++){
+      last=last*0.985+(Math.random()*2-1)*0.015;
+      d[i]=last*0.8;
+    }
     var s=audioCtx.createBufferSource();s.buffer=buf;s.loop=true;
-    var lp=audioCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=80;
-    var g=audioCtx.createGain();g.gain.value=0.5;
-    s.connect(lp);lp.connect(g);g.connect(master);s.start();
-    var buf2=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);
-    var d2=buf2.getChannelData(0);
-    for(var j=0;j<d2.length;j++)d2[j]=(Math.random()*2-1)*0.2;
-    var s2=audioCtx.createBufferSource();s2.buffer=buf2;s2.loop=true;
-    var bp=audioCtx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=700;bp.Q.value=0.5;
-    var g2=audioCtx.createGain();g2.gain.value=0.1;
-    s2.connect(bp);bp.connect(g2);g2.connect(master);s2.start();
-    (function beat(){
+    var lp=audioCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=95;lp.Q.value=0.55;
+    var rumble=audioCtx.createGain();rumble.gain.value=0.34;
+    s.connect(lp);lp.connect(rumble);rumble.connect(master);s.start();
+
+    var bodyOsc=audioCtx.createOscillator();
+    var bodyGain=audioCtx.createGain();
+    var bodyLp=audioCtx.createBiquadFilter();
+    bodyOsc.type='sine';bodyOsc.frequency.value=31;
+    bodyLp.type='lowpass';bodyLp.frequency.value=70;
+    bodyGain.gain.value=0.018;
+    bodyOsc.connect(bodyLp);bodyLp.connect(bodyGain);bodyGain.connect(master);bodyOsc.start();
+
+    (function railBeat(){
       if(!audioCtx)return;
-      var osc=audioCtx.createOscillator(),env=audioCtx.createGain();
-      osc.frequency.value=55+Math.random()*20;
-      env.gain.setValueAtTime(0.06,audioCtx.currentTime);
-      env.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.08);
-      osc.connect(env);env.connect(master);
-      osc.start();osc.stop(audioCtx.currentTime+0.1);
-      setTimeout(beat,380+Math.random()*180);
+      var t=audioCtx.currentTime;
+      var osc=audioCtx.createOscillator(),env=audioCtx.createGain(),thudLp=audioCtx.createBiquadFilter();
+      osc.type='triangle';
+      osc.frequency.setValueAtTime(58+Math.random()*8,t);
+      thudLp.type='lowpass';thudLp.frequency.value=120;
+      env.gain.setValueAtTime(0.0001,t);
+      env.gain.linearRampToValueAtTime(0.032,t+0.012);
+      env.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
+      osc.connect(thudLp);thudLp.connect(env);env.connect(master);
+      osc.start(t);osc.stop(t+0.16);
+      setTimeout(railBeat,520+Math.random()*90);
     })();
   }catch(e){}
   var _i=document.getElementById('aud-ind');if(_i)_i.style.opacity='1';
