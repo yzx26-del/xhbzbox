@@ -1155,6 +1155,17 @@ function getActiveChapter(id=currentMusicianId){
     const saved=JSON.parse(localStorage.getItem(activeChapterKey(id))||'null');
     if(saved&&saved.card){activeChapters[id]=saved;return saved;}
   }catch{}
+  try{
+    const unlocked=JSON.parse(localStorage.getItem(fateKey(id))||'[]');
+    const deck=getDeck(id);
+    const lastIndex=Array.isArray(unlocked)?unlocked[unlocked.length-1]:null;
+    const card=deck[lastIndex];
+    if(card){
+      const restored={card:{...card,index:lastIndex,musicianId:id,musicianName:(musicianAgents.find(a=>a.id===id)||{}).name||id},stage:'card_drawn',turns:0,interruptAt:3+Math.floor(Math.random()*8),startedAt:new Date().toISOString(),restored:true};
+      setActiveChapter(id,restored);
+      return restored;
+    }
+  }catch{}
   return null;
 }
 function setActiveChapter(id,chapter){
