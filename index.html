@@ -109,6 +109,7 @@ tbody tr:hover{background:var(--bg2)}
 .agent-feed::-webkit-scrollbar{width:3px}.agent-feed::-webkit-scrollbar-thumb{background:var(--line)}
 .msg{display:block;position:relative;width:auto;min-width:0;font-size:12px;line-height:1.75;border-radius:3px;padding:9px 11px;box-sizing:border-box;height:auto;min-height:0;overflow:visible;clear:both;flex:0 0 auto}
 .msg.gr,.msg.musician{align-self:stretch;margin-right:0;background:transparent;color:var(--t1);border:0;border-left:2px solid var(--line);border-radius:0;padding:7px 0 7px 12px}
+.msg.note{align-self:stretch;margin:2px 0;background:var(--bg2);color:var(--t3);border:1px dashed var(--line);border-radius:3px;padding:8px 10px}
 .msg.gr{position:relative;margin-left:46px;min-height:46px;max-width:calc(100% - 46px)}
 .msg.gr:before{content:'';position:absolute;left:-46px;top:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--t1);background:#111 url('/assets/gr-avatar.jpeg') center 20%/cover;filter:grayscale(1);box-shadow:0 0 0 3px #fff}
 .msg.user{align-self:flex-end;margin-left:auto;max-width:74%;min-width:74px;background:var(--t1);color:#fff;border:1px solid var(--t1);padding:8px 10px}
@@ -572,6 +573,7 @@ select.fi{cursor:pointer}
         <button class="ib solid" onclick="openFateCard()"><i class="ti ti-cards"></i>命运卡牌</button>
         <button class="ib" onclick="openCardLibrary()"><i class="ti ti-library"></i>卡牌曲库</button>
         <button class="ib" onclick="openTravelLetter(currentMusicianId)"><i class="ti ti-letter"></i>旅行信札</button>
+        <button class="ib" onclick="clearLetterMemory()"><i class="ti ti-eraser"></i>记忆清空</button>
       </div>
       <div class="agent-lore">设定：玩家只能改变音乐家约 20% 的情绪路径，不能改写重要历史节点和作品真实度。Gr 小姐只负责把门推开一条缝。</div>
     </section>
@@ -1342,7 +1344,11 @@ function renderMusicianAgents(openId='mozart'){
         <div class="musician-toggle">${a.id===openId?'−':'+'}</div>
       </div>
       <div class="musician-body">
-        <div class="musician-tags">${a.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="musician-tags">
+          <button class="ib" onclick="openAgentTool('transcript','${a.id}')">滴答回溯</button>
+          <button class="ib" onclick="openAgentTool('life','${a.id}')">人生大事</button>
+          <button class="ib" onclick="openAgentTool('final','${a.id}')">最后的来信</button>
+        </div>
         <div class="mini-chat">
           <div class="mini-feed" id="mini-feed-${a.id}">${msgs}</div>
           <div class="mini-input">
@@ -1403,6 +1409,8 @@ function grReply(text){
   }
   if(text.includes('莫扎特'))return '我会先把莫扎特拆成三个调试层：人生节点、作品线索、旅行场景。你可以在右侧展开“莫扎特”，先测试他的语气。';
   if(text.includes('信札'))return '信札建议先固定格式：地点、时间、音乐家状态、一个隐秘问题。等 DeepSeek 接入后，只让 API 生成正文，结构由本地控制。';
+  if(text.includes('怎么问')||text.includes('说什么')||text.includes('提示'))return `我看不到你们刚才聊了什么，只能从你的问题里猜。你可以别急着问结局，先问${agent.name}：“这件事发生时，你最想藏起来的是什么？”`;
+  if(text.includes('为什么')||text.includes('怎么办'))return `先把问题问小。不要问${agent.name}一生如何，只问他当下手边的一件东西：一封信、一张账单，或者一段没有写完的小节。`;
   if(text.includes('抽卡')||text.includes('节点')||text.includes('下一张')){
     if(chapter&&chapter.stage!=='interrupted'&&chapter.stage!=='completed'){
       const left=Math.max(1,(chapter.interruptAt||3)-(chapter.turns||0));
@@ -1556,8 +1564,8 @@ async function sendMusicianMessage(id,forcedText=''){
       '火车行驶到了另一个方向，这一页暂时收不回回信。',
       '窗外的雪倒着落下。那位音乐家的声音被隧道吞没了。'
     ];
-    const hint=lines[Math.floor(Math.random()*lines.length)]+' 去问 Gr 小姐吧，她会告诉你接下来该抽哪张牌。';
-    addMsg('gr-chat-feed','gr',hint,'Gr 小姐');
+    const hint=lines[Math.floor(Math.random()*lines.length)]+' 这条注释已经夹进本章页边。你可以去问 Gr 小姐，也可以直接抽下一张牌。';
+    addMsg('mini-feed-'+id,'note',hint,'系统注释');
     return;
   }
   chapter.stage='chatting';
@@ -1651,10 +1659,42 @@ function letterImpactNote(agent,card,letter,reply){
   return base[n%base.length];
 }
 function manuscriptLine(agent,card,letter,reply){
-  const text=String(reply||letter||'').replace(/\s+/g,' ').trim();
-  const parts=text.split(/[。！？?]/).map(s=>s.trim()).filter(Boolean);
-  const picked=parts.find(s=>s.length>=8&&s.length<=34)||parts[0]||`${agent.name}在${card?.year||'这一页'}年停了一下。`;
-  return `页边手稿：${picked.replace(/^（[^）]*）/,'').slice(0,42)}。`;
+  const period=card?.period||'这一时期';
+  const year=card?.year||'这一年';
+  const bank={
+    mozart:[`页边手稿：${year}年前后，旁人夸他机敏，也嫌他太不肯低头。`,`页边手稿：维也纳人爱听他的锋芒，却未必愿意替他的锋芒付账。`],
+    beethoven:[`页边手稿：旁人说他粗鲁，却又不得不承认那粗鲁里有火。`],
+    chopin:[`页边手稿：巴黎人说他像客人，坐下弹琴时却像把整间屋子带走。`]
+  };
+  const list=bank[agent?.id]||[`页边手稿：在${period}里，旁人记住了${agent.name}的才气，也记住了他的棱角。`];
+  const seed=String(year)+String(period)+String(letter||'');
+  const n=[...seed].reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
+  return list[n%list.length];
+}
+function parseMetaJson(text){
+  try{
+    const clean=String(text||'').replace(/```json|```/g,'').trim();
+    const start=clean.indexOf('{'),end=clean.lastIndexOf('}');
+    if(start>=0&&end>start)return JSON.parse(clean.slice(start,end+1));
+  }catch{}
+  return null;
+}
+async function generateLetterMeta(agent,card,letter,reply){
+  const fallback={impact:letterImpactNote(agent,card,letter,reply),manuscript:manuscriptLine(agent,card,letter,reply)};
+  try{
+    const raw=await callLetterAgent({
+      mode:'letter_meta',
+      musicianId:agent.id,
+      musicianName:agent.name,
+      card,
+      message:`玩家来信：${letter}\n音乐家回信：${reply}`,
+      history:[],
+      max_tokens:220,
+      temperature:.68
+    },JSON.stringify(fallback));
+    const parsed=parseMetaJson(raw);
+    return {impact:parsed?.impact||fallback.impact,manuscript:parsed?.manuscript||fallback.manuscript};
+  }catch{return fallback;}
 }
 function currentAgent(){
   currentMusicianId=openMusicianId();
@@ -1748,13 +1788,15 @@ async function sendFateLetter(){
     },'');
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply),manuscript:manuscriptLine(agent,activeFateCard,text,reply)});
+    const meta=await generateLetterMeta(agent,activeFateCard,text,reply);
+    saveFateLetter(agent.id,{...entry,reply,impact:meta.impact,manuscript:meta.manuscript});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
   }catch(e){
     const reply=`你的信到了。\n${activeFateCard.year}年的那一页没有被改写，但我在纸边停了一下。\n我会记得你提到的“${(activeFateCard.keywords||['那件事'])[0]}”。`;
     musicianChats[agent.id].push({role:'musician',text:reply});
     persistMusicianChat(agent.id);
-    saveFateLetter(agent.id,{...entry,reply,impact:letterImpactNote(agent,activeFateCard,text,reply),manuscript:manuscriptLine(agent,activeFateCard,text,reply)});
+    const meta=await generateLetterMeta(agent,activeFateCard,text,reply);
+    saveFateLetter(agent.id,{...entry,reply,impact:meta.impact,manuscript:meta.manuscript});
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
   }
 }
@@ -1776,6 +1818,65 @@ function openTravelLetter(id){
   document.getElementById('fate-content').innerHTML=body+`<div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
+function toolTitle(kind){
+  return kind==='transcript'?'滴答回溯':kind==='life'?'人生大事':'最后的来信';
+}
+function localTranscript(agent,chat){
+  if(!chat.length)return '还没有聊天记录。';
+  return chat.map(m=>`${m.role==='user'?'你':agent.name}：${m.text}`).join('\n\n');
+}
+function localLifeSummary(agent,chat,letters){
+  const years=[...new Set(letters.map(x=>x.card?.year).filter(Boolean))];
+  const first=years[years.length-1]||'初见那年';
+  const latest=years[0]||'现在';
+  return `1. ${first} · 你们第一次把一张命运卡牌变成通信。\n2. ${latest} · ${agent.name}开始把你的问题当作一种旁听的声音。\n3. 这条时间线里，历史没有改写，但一些小事被留了下来：信纸、账单、停顿和没说出口的话。`;
+}
+function localFinalLetter(agent,chat,letters){
+  const last=letters[0]?.card||getActiveChapter(agent.id)?.card||{};
+  return `给你：\n\n我不知道你从哪一节车厢来，也不知道你还会不会回来。\n但你问过的问题，像一枚夹在谱纸里的书签，让我在${last.year||'这一年'}停了一下。\n如果我的一生最后仍要照旧走完，那至少有一小段路，不再只有我一个人听见。`;
+}
+async function openAgentTool(kind,id=currentMusicianId){
+  const agent=musicianAgents.find(a=>a.id===id)||currentAgent();
+  currentMusicianId=agent.id;
+  const chat=musicianChats[agent.id]||[];
+  const letters=getFateLetters(agent.id).filter(x=>String(x.id||'').startsWith('letter-')||x.source==='fate-letter'||!x.id);
+  const chapter=getActiveChapter(agent.id);
+  const title=toolTitle(kind);
+  const fallback=kind==='transcript'?localTranscript(agent,chat):kind==='life'?localLifeSummary(agent,chat,letters):localFinalLetter(agent,chat,letters);
+  document.getElementById('fate-title').textContent=`${agent.name} · ${title}`;
+  document.getElementById('fate-sub').textContent=kind==='transcript'?'导出你和音乐家的全部聊天记录。':kind==='life'?'根据聊天与卡牌，总结你们共同经历过的人生节点。':'以音乐家最后一张卡牌的口吻，写给你最后的回信。';
+  document.getElementById('fate-content').innerHTML=`<div class="travel-letter">正在请 DeepSeek 整理。若接口不可用，会自动使用本地版本。</div>`;
+  document.getElementById('fate-overlay')?.classList.add('open');
+  try{
+    const ai=await callLetterAgent({
+      mode:'agent_tool',
+      tool:title,
+      musicianId:agent.id,
+      musicianName:agent.name,
+      card:chapter?.card||letters[0]?.card||null,
+      anchor:getPersonaAnchor(agent.id),
+      message:`工具：${title}\n正式信札数量：${letters.length}\n聊天摘录：${chat.slice(-16).map(m=>`${m.role}:${m.text}`).join('\n')}`,
+      history:chat.slice(-8),
+      max_tokens:560,
+      temperature:.7
+    },fallback);
+    const extra=kind==='transcript'?`<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><pre style="white-space:pre-wrap;font-family:var(--sans);line-height:1.75">${esc(localTranscript(agent,chat))}</pre>`:'';
+    document.getElementById('fate-content').innerHTML=`<div class="travel-letter">${esc(ai).replace(/\n/g,'<br>')}${extra}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回聊天</button></div>`;
+  }catch{
+    document.getElementById('fate-content').innerHTML=`<div class="travel-letter">${esc(fallback).replace(/\n/g,'<br>')}</div><div style="margin-top:14px"><button class="ib" onclick="closeFateOverlay()">返回聊天</button></div>`;
+  }
+}
+function clearLetterMemory(){
+  Object.keys(localStorage).filter(k=>k.startsWith('letter')).forEach(k=>localStorage.removeItem(k));
+  grChatHistory=[];
+  musicianChats={};
+  activeChapters={};
+  currentMusicianId='mozart';
+  const feed=document.getElementById('gr-chat-feed');
+  if(feed)feed.innerHTML='<div class="msg gr"><span class="msg-meta">Gr 小姐</span><span class="msg-text">记忆已经清空。列车还在原处，只是窗上的雾重新结了一层。</span></div>';
+  renderMusicianAgents('mozart');
+  toast('记忆已清空');
+}
 function closeFateOverlay(e){
   const overlay=document.getElementById('fate-overlay');
   if(!e||e.target===overlay)overlay?.classList.remove('open');
@@ -1790,6 +1891,8 @@ window.flipFateCard=flipFateCard;
 window.sendFateLetter=sendFateLetter;
 window.openCardLibrary=openCardLibrary;
 window.openTravelLetter=openTravelLetter;
+window.openAgentTool=openAgentTool;
+window.clearLetterMemory=clearLetterMemory;
 window.closeFateOverlay=closeFateOverlay;
 window.resetMusicianTimeline=resetMusicianTimeline;
 document.addEventListener('DOMContentLoaded',()=>{restoreGrChatHistory();restoreAllMusicianChats();renderMusicianAgents(currentMusicianId||'mozart');});

@@ -78,8 +78,38 @@ function relationHint(anchor, card) {
   return '\n这张话题卡牌就是你与玩家初见的年龄。请保持此刻的口吻。';
 }
 
-function systemPrompt(mode, musicianName, musicianId, card, turn, anchor) {
+function systemPrompt(mode, musicianName, musicianId, card, turn, anchor, tool = '') {
   const currentName = musicianName || musicianProfiles[musicianId]?.split('：')[0] || '当前音乐家';
+  if (mode === 'letter_meta') {
+    const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家所处时代和创作处境。`;
+    return `${profile}
+${cardContext(card, '这封信对应的命运卡牌')}
+
+你要为旅行信札生成两个字段，且只输出严格 JSON，不要 Markdown。
+
+字段：
+- impact：一件因为玩家寄信而在音乐家身边发生的具体小事。只能改变20%的生活细节，不能改写历史事实、重要作品、真实结局。必须像旁观镜头，比如“他把账单翻到背面写下一行音符”“他少和某人争了一句”。60字以内。
+- manuscript：页边手稿。站在旁观者视角，交代这张卡牌代表的时期里，当时的人如何评价${currentName}。必须带时代眼光和一点偏见，不要总结玩家。50字以内。
+
+输出格式：
+{"impact":"...","manuscript":"..."}`;
+  }
+  if (mode === 'agent_tool') {
+    const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家的作品、人生命运和创作语境。`;
+    return `${profile}
+${cardContext(anchor, '玩家与音乐家初见身份锚点')}
+${cardContext(card, '当前激活章节')}
+
+你正在为“音乐信札”的工具按钮生成内容。
+工具类型：${tool || '未指定'}
+
+规则：
+- 如果工具是“滴答回溯”，请先给一段100字以内的回溯前言，说明这段对话里反复出现的时间、情绪和作品线索。
+- 如果工具是“人生大事”，请把玩家与${currentName}相识这一条时间线总结成3到5个节点，每个节点包含年份、发生了什么、玩家造成的20%微小影响。
+- 如果工具是“最后的来信”，请以${currentName}的第一人称写最后一封信，口吻要贴近身份锚点或最后一张卡牌，不要百科，不要改变历史。
+- 默认节省文字，300字以内。
+- 不用“作为一个AI”。不用感叹号。`;
+  }
   if (mode === 'musician') {
     const profile = musicianProfiles[musicianId] || `${currentName}：请以该音乐家的作品、人生命运和创作语境回答。`;
     const turnText = Number.isFinite(Number(turn)) ? `\n这是玩家与音乐家的第${Number(turn) + 1}封来回信。不要重复第一封信的开场，继续上一封信的情绪。` : '';
@@ -112,7 +142,10 @@ ${cardContext(card, 'Gr本次只能解读的命运卡牌')}
 
 硬性规则：
 - 当前通话中的主角永远是“${currentName}”。Gr无权把主角切换成任何别的音乐家。
-- Gr只负责介绍卡牌信息和引导抽牌，不得代替音乐家继续发言。
+- Gr看不到玩家和音乐家的完整私聊，只能根据玩家问你的这句话、当前卡牌和身份锚点猜测发生了什么。
+- Gr要像热爱音乐的优雅朋友一样，给玩家一个可继续追问的方向，或建议一句可以对音乐家说的话。
+- Gr有自己的喜好，可以温柔地偏袒某些音乐家，但不能替玩家做选择。
+- Gr只负责介绍卡牌信息、解释历史处境、提示聊天方向和引导抽牌，不得代替音乐家继续发言。
 - 如果玩家问“是谁”“这张卡什么意思”，只解释这张牌与${currentName}的关系。
 - 如果卡牌或历史背景里出现其他音乐家，你只能说那是旁支人物，不能把对话对象变成他。
 - 回复最后必须把话交还给当前音乐家，例如“好了，把这张牌交给${currentName}吧。”
@@ -134,9 +167,11 @@ export default async function handler(req, res) {
     const message = String(body.message || '').trim();
     if (!message) return send(res, 400, { error: 'Missing message' });
 
-    const mode = body.mode === 'musician' ? 'musician' : 'gr';
+    const allowedModes = new Set(['musician', 'gr', 'letter_meta', 'agent_tool']);
+    const mode = allowedModes.has(body.mode) ? body.mode : 'gr';
     const musicianName = String(body.musicianName || '').slice(0, 40);
     const musicianId = String(body.musicianId || '').slice(0, 40);
+    const tool = String(body.tool || '').slice(0, 40);
     const card = body.card && typeof body.card === 'object' ? body.card : null;
     const anchor = body.anchor && typeof body.anchor === 'object' ? body.anchor : null;
     const turn = Number(body.turn);
@@ -151,7 +186,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: systemPrompt(mode, musicianName, musicianId, card, turn, anchor) },
+          { role: 'system', content: systemPrompt(mode, musicianName, musicianId, card, turn, anchor, tool) },
           ...history,
           { role: 'user', content: message }
         ],
