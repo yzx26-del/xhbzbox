@@ -178,9 +178,9 @@ tbody tr:hover{background:var(--bg2)}
 .fate-face{position:absolute;inset:0;border:1px solid #111;border-radius:10px;backface-visibility:hidden;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.22)}
 .fate-back{background:#111;color:#fff;display:flex;align-items:center;justify-content:center}
 .fate-back:before{content:'';width:142px;height:226px;border:1px solid rgba(255,255,255,.38);border-radius:72px;background:radial-gradient(circle at 50% 34%,transparent 0 30px,rgba(255,255,255,.18) 31px 32px,transparent 33px),repeating-linear-gradient(45deg,transparent 0 9px,rgba(255,255,255,.08) 9px 10px)}
-.fate-back.mozart-back{background:#050505 url('/assets/mozart-avatar.png') center 28%/cover no-repeat}
-.fate-back.mozart-back:before{content:'';position:absolute;inset:0;width:auto;height:auto;border:0;border-radius:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.42)),radial-gradient(circle at 50% 36%,transparent 0 42%,rgba(0,0,0,.55) 78%)}
-.fate-back.mozart-back:after{content:'MOZART';position:absolute;left:16px;right:16px;bottom:14px;height:28px;border:1px solid rgba(255,255,255,.36);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:.28em;color:rgba(255,255,255,.82);background:rgba(0,0,0,.42)}
+.fate-back.avatar-back{background:#050505 var(--fate-avatar) center 28%/cover no-repeat}
+.fate-back.avatar-back:before{content:'';position:absolute;inset:0;width:auto;height:auto;border:0;border-radius:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.42)),radial-gradient(circle at 50% 36%,transparent 0 42%,rgba(0,0,0,.55) 78%)}
+.fate-back.avatar-back:after{content:attr(data-card-name);position:absolute;left:16px;right:16px;bottom:14px;height:28px;border:1px solid rgba(255,255,255,.36);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:rgba(255,255,255,.82);background:rgba(0,0,0,.42)}
 .fate-front{transform:rotateY(180deg);background:#fff;color:#111;padding:16px;display:flex;flex-direction:column}
 .fate-period{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
 .fate-year{font-family:var(--serif);font-size:40px;font-weight:700;line-height:1;margin-bottom:10px}
@@ -195,6 +195,9 @@ tbody tr:hover{background:var(--bg2)}
 .archive-card.main-card{border-left:4px solid #111}
 .archive-card.rift-card{border-left:4px solid #9a9a9a;background:#fbfbfb}
 .archive-card.locked{background:#f7f7f7;color:var(--t4);display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mono);font-size:11px}
+.archive-card.locked.avatar-locked{position:relative;overflow:hidden;background:#050505 var(--fate-avatar) center 28%/cover no-repeat;color:rgba(255,255,255,.82);border-color:#111}
+.archive-card.locked.avatar-locked:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.62)),radial-gradient(circle at 50% 35%,transparent 0 38%,rgba(0,0,0,.58) 82%)}
+.archive-card.locked.avatar-locked>div{position:relative;z-index:1;padding:10px 12px;border:1px solid rgba(255,255,255,.26);background:rgba(0,0,0,.42);border-radius:4px;min-width:96px}
 .archive-card .fate-year{font-size:24px}.archive-card .fate-event{font-size:13px}
 .card-kind{display:inline-flex;align-items:center;height:20px;padding:0 7px;border:1px solid var(--line);border-radius:999px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;margin-bottom:8px}
 .card-kind.main{background:#111;color:#fff;border-color:#111}
@@ -1904,8 +1907,10 @@ function openFateCard(){
   const title=document.getElementById('fate-title'),sub=document.getElementById('fate-sub'),content=document.getElementById('fate-content'),overlay=document.getElementById('fate-overlay');
   if(title)title.textContent=`${agent.name} · 命运卡牌`;
   if(sub)sub.textContent=cardKind(activeFateCard)==='rift'?'主线已经走完，支线卡开始浮现。它们补完裂缝，不影响人物结局。':'先抽满主线卡。主线完成后，人物结局解锁，支线卡才会浮现。';
-  const backClass=agent.id==='mozart'?' mozart-back':'';
-  if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back${backClass}"></div><div class="fate-face fate-front"><span class="card-kind ${cardKindClass(activeFateCard)}">${cardKindLabel(activeFateCard)}</span><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
+  const avatarBack=agent.avatar?` avatar-back`:'';
+  const avatarStyle=agent.avatar?` style="--fate-avatar:url('${esc(agent.avatar)}')"`:'';
+  const avatarName=agent.avatar?` data-card-name="${esc(agent.name)}"`:'';
+  if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back${avatarBack}"${avatarStyle}${avatarName}></div><div class="fate-face fate-front"><span class="card-kind ${cardKindClass(activeFateCard)}">${cardKindLabel(activeFateCard)}</span><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
   overlay?.classList.add('open');
   playBookPageSound();
 }
@@ -1982,7 +1987,9 @@ function openCardLibrary(){
   const left=Math.max(0,mainTotal-mainDone);
   document.getElementById('fate-title').textContent=`${agent.name} · 卡牌曲库`;
   document.getElementById('fate-sub').textContent='主线卡走完人生；支线卡补完裂缝。人物结局只要求主线完成。';
-  document.getElementById('fate-content').innerHTML=`<div class="card-progress"><span>主线 ${mainDone}/${mainTotal}</span>${riftTotal?`<span>支线 ${riftDone}/${riftTotal}</span>`:''}</div><div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card ${cardKind(c)}-card"><span class="card-kind ${cardKindClass(c)}">${cardKindLabel(c)}</span><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked ${cardKind(c)}-card"><div><span class="card-kind ${cardKindClass(c)}">${cardKindLabel(c)}</span><br><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px;display:flex;gap:10px;justify-content:space-between;align-items:center"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button><button class="ib ${mainComplete?'solid':''}" onclick="${mainComplete?`openAgentTool('ending','${agent.id}')`:`toast('还差 ${left} 张主线卡，才能查看人物结局')`}">${mainComplete?'人物结局':`人物结局 · 主线还差 ${left} 张`}</button></div>`;
+  const lockedAvatarClass=agent.avatar?' avatar-locked':'';
+  const lockedAvatarStyle=agent.avatar?` style="--fate-avatar:url('${esc(agent.avatar)}')"`:'';
+  document.getElementById('fate-content').innerHTML=`<div class="card-progress"><span>主线 ${mainDone}/${mainTotal}</span>${riftTotal?`<span>支线 ${riftDone}/${riftTotal}</span>`:''}</div><div class="card-library-grid">${deck.map((c,i)=>unlocked.has(i)?`<div class="archive-card ${cardKind(c)}-card"><span class="card-kind ${cardKindClass(c)}">${cardKindLabel(c)}</span><div class="fate-period">${esc(c.period)}</div><div class="fate-year">${esc(c.year)}</div><div class="fate-event">${esc(c.event)}</div><div class="fate-work">${esc(c.work)}</div></div>`:`<div class="archive-card locked ${cardKind(c)}-card${lockedAvatarClass}"${lockedAvatarStyle}><div><span class="card-kind ${cardKindClass(c)}">${cardKindLabel(c)}</span><br><i class="ti ti-lock"></i><br>第 ${i+1} 张<br>尚未抽出</div></div>`).join('')}</div><div style="margin-top:14px;display:flex;gap:10px;justify-content:space-between;align-items:center"><button class="ib" onclick="closeFateOverlay()">返回 Gr 小姐聊天</button><button class="ib ${mainComplete?'solid':''}" onclick="${mainComplete?`openAgentTool('ending','${agent.id}')`:`toast('还差 ${left} 张主线卡，才能查看人物结局')`}">${mainComplete?'人物结局':`人物结局 · 主线还差 ${left} 张`}</button></div>`;
   document.getElementById('fate-overlay')?.classList.add('open');
 }
 function openTravelLetter(id){
