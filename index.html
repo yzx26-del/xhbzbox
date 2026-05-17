@@ -561,15 +561,15 @@ select.fi{cursor:pointer}
     <section class="agent-panel">
       <div>
         <div class="agent-kicker">GR. MISS · CONTROL DESK</div>
-        <div class="agent-title">和 Gr 小姐调试音乐家智能体</div>
-        <div class="agent-desc">左侧是主控聊天入口。现在已接入 DeepSeek，回复会按 Gr 小姐的人设生成；同一问题会缓存 24 小时，减少 API 消耗。</div>
+        <div class="agent-title">Gr小姐的留言簿</div>
+        <div class="agent-desc">你正坐在时光穿梭的火车上，窗外忽明忽暗</div>
       </div>
       <div class="agent-chat">
         <div class="agent-feed" id="gr-chat-feed">
-          <div class="msg gr"><span class="msg-meta">Gr 小姐</span><span class="msg-text">你来了。先选一位音乐家，或者直接告诉我：你想调试作品背景、人生节点、旅行信札，还是游戏剧情里的音乐线索？</span></div>
+          <div class="msg gr"><span class="msg-meta">Gr 小姐</span><span class="msg-text">问题的答案就是问题本身，命运卡牌握在你的手中</span></div>
         </div>
         <div class="agent-input">
-          <input id="gr-chat-input" placeholder="问 Gr 小姐：帮我调试莫扎特的旅行信札…" onkeydown="if(event.key==='Enter')sendGrMessage()">
+          <input id="gr-chat-input" placeholder="说过的话无法更改" onkeydown="if(event.key==='Enter')sendGrMessage()">
           <button class="ib solid" onclick="sendGrMessage()">发送</button>
         </div>
       </div>
@@ -580,7 +580,7 @@ select.fi{cursor:pointer}
         <button class="ib" onclick="openTravelLetter(currentMusicianId)"><i class="ti ti-letter"></i>旅行信札</button>
         <button class="ib" onclick="clearLetterMemory()"><i class="ti ti-eraser"></i>记忆清空</button>
       </div>
-      <div class="agent-lore">设定：玩家只能改变音乐家约 20% 的情绪路径，不能改写重要历史节点和作品真实度。Gr 小姐只负责把门推开一条缝。</div>
+      <div class="agent-lore">历史擦肩而过，门被推开了一条缝</div>
     </section>
 
     <section class="agent-panel">
@@ -1227,10 +1227,11 @@ function saveGrChatHistory(){try{localStorage.setItem(grChatKey(),JSON.stringify
 function restoreGrChatHistory(){
   const saved=readStoredJson(grChatKey(),[]);
   if(!Array.isArray(saved)||!saved.length)return;
-  grChatHistory.splice(0,grChatHistory.length,...saved);
+  const normalized=saved.map(m=>m.role==='gr'&&/你来了。先选一位音乐家|想调试作品背景/.test(m.text||'')?{...m,text:'问题的答案就是问题本身，命运卡牌握在你的手中'}:m);
+  grChatHistory.splice(0,grChatHistory.length,...normalized);
   const feed=document.getElementById('gr-chat-feed');
   if(!feed)return;
-  feed.innerHTML=saved.map(m=>`<div class="msg ${m.role==='user'?'user':'gr'}"><span class="msg-meta">${m.role==='user'?'你':'Gr 小姐'}</span><span class="msg-text">${escHtml(m.text)}</span></div>`).join('');
+  feed.innerHTML=normalized.map(m=>`<div class="msg ${m.role==='user'?'user':'gr'}"><span class="msg-meta">${m.role==='user'?'你':'Gr 小姐'}</span><span class="msg-text">${escHtml(m.text)}</span></div>`).join('');
   feed.scrollTop=feed.scrollHeight;
 }
 function getPersonaAnchor(id=currentMusicianId){
