@@ -1103,13 +1103,13 @@ window.openMusicTravel=openMusicTravel;
 
 // ══ MUSIC LETTER AGENTS ══
 const musicianAgents=[
-  {id:'mozart',name:'莫扎特',mark:'M',avatar:'/assets/mozart-avatar.png',era:'古典主义 · 维也纳',state:'调试中',intro:'适合调试旅行信札、神童时期、维也纳时期与作品故事。',tags:['作品背景','人生节点','旅行信札']},
-  {id:'beethoven',name:'贝多芬',mark:'B',era:'古典主义到浪漫主义 · 波恩/维也纳',state:'待接入',intro:'适合调试命运主题、听觉危机、英雄叙事与交响曲分析。',tags:['命运主题','交响曲','人物冲突']},
-  {id:'chopin',name:'肖邦',mark:'C',era:'浪漫主义 · 华沙/巴黎',state:'待接入',intro:'适合调试钢琴小品、流亡情绪、沙龙文化与私人信件语气。',tags:['钢琴','流亡','沙龙']},
-  {id:'debussy',name:'德彪西',mark:'D',era:'印象主义 · 巴黎',state:'待接入',intro:'适合调试色彩和声、象征主义文本、城市夜色与水的意象。',tags:['印象主义','和声色彩','文学意象']},
-  {id:'hisaishi',name:'久石让',mark:'H',era:'电影音乐 · 日本',state:'待接入',intro:'适合调试旋律动机、动画场景、童话感和极简主义织体。',tags:['动画','旋律动机','极简']},
-  {id:'zimmer',name:'汉斯·季默',mark:'Z',era:'电影音乐 · 好莱坞',state:'待接入',intro:'适合调试科幻史诗、合成器音色、低频推进和大片叙事。',tags:['电影配乐','合成器','史诗']},
-  {id:'kajiura',name:'梶浦由记',mark:'K',era:'动画/游戏音乐 · 日本',state:'待接入',intro:'适合调试虚构语言、人声织体、战斗音乐和角色命运线。',tags:['人声织体','战斗音乐','角色命运']}
+  {id:'mozart',name:'莫扎特',mark:'M',avatar:'/assets/mozart-avatar.png',era:'古典主义 · 维也纳',state:'调试中',intro:'旅行信札、神童时期、维也纳时期与作品故事。',tags:['作品背景','人生节点','旅行信札']},
+  {id:'beethoven',name:'贝多芬',mark:'B',era:'古典主义到浪漫主义 · 波恩/维也纳',state:'待接入',intro:'命运主题、听觉危机、英雄叙事与交响曲分析。',tags:['命运主题','交响曲','人物冲突']},
+  {id:'chopin',name:'肖邦',mark:'C',era:'浪漫主义 · 华沙/巴黎',state:'待接入',intro:'钢琴小品、流亡情绪、沙龙文化与私人信件语气。',tags:['钢琴','流亡','沙龙']},
+  {id:'debussy',name:'德彪西',mark:'D',era:'印象主义 · 巴黎',state:'待接入',intro:'色彩和声、象征主义文本、城市夜色与水的意象。',tags:['印象主义','和声色彩','文学意象']},
+  {id:'hisaishi',name:'久石让',mark:'H',era:'电影音乐 · 日本',state:'待接入',intro:'旋律动机、动画场景、童话感和极简主义织体。',tags:['动画','旋律动机','极简']},
+  {id:'zimmer',name:'汉斯·季默',mark:'Z',era:'电影音乐 · 好莱坞',state:'待接入',intro:'科幻史诗、合成器音色、低频推进和大片叙事。',tags:['电影配乐','合成器','史诗']},
+  {id:'kajiura',name:'梶浦由记',mark:'K',era:'动画/游戏音乐 · 日本',state:'待接入',intro:'虚构语言、人声织体、战斗音乐和角色命运线。',tags:['人声织体','战斗音乐','角色命运']}
 ];
 const grChatHistory=[];
 const musicianChats={};
@@ -1152,20 +1152,21 @@ const fateDecks={
     {period:'刀光与人声',year:'2019',event:'战斗不是速度，是被命运追上。',work:'Demon Slayer',keywords:['鬼灭','战斗','人声','命运']}
   ]
 };
-function defaultMusicianChat(a){return [{role:'musician',text:`我是${a.name}。现在先用本地调试模式，你可以问我作品、城市、年代，或让我生成一段旅行信札。`}];}
+function defaultMusicianChat(a){return [{role:'musician',text:`我是${a.name}`}];}
 function ensureMusicianChats(){
   musicianAgents.forEach(a=>{
     if(!musicianChats[a.id]){
       const state=getGameState(a.id);
       musicianChats[a.id]=Array.isArray(state.chatHistory)&&state.chatHistory.length?state.chatHistory:defaultMusicianChat(a);
     }
+    musicianChats[a.id]=musicianChats[a.id].map(m=>m.role==='musician'&&/本地调试模式/.test(m.text||'')?{...m,text:`我是${a.name}`}:m);
   });
 }
 function restoreAllMusicianChats(){
   musicianAgents.forEach(a=>{
     const state=getGameState(a.id);
     if(Array.isArray(state.chatHistory)&&state.chatHistory.length){
-      musicianChats[a.id]=state.chatHistory;
+      musicianChats[a.id]=state.chatHistory.map(m=>m.role==='musician'&&/本地调试模式/.test(m.text||'')?{...m,text:`我是${a.name}`}:m);
     }
   });
 }
