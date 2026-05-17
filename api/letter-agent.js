@@ -112,6 +112,12 @@ function cardContext(card, label = '当前话题卡牌') {
   return `\n${label}：${year} · ${period}\n历史时刻：${event}\n对应作品：${work}`;
 }
 
+function personaContext(card, label = '人格状态') {
+  const persona = String(card?.persona || '').slice(0, 260);
+  if (!persona) return '';
+  return `\n${label}：${persona}`;
+}
+
 function relationHint(anchor, card) {
   const anchorYear = Number(anchor?.year);
   const cardYear = Number(card?.year);
@@ -127,6 +133,7 @@ function systemPrompt(mode, musicianName, musicianId, card, turn, anchor, tool =
     const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家所处时代和创作处境。`;
     return `${profile}
 ${cardContext(card, '这封信对应的命运卡牌')}
+${personaContext(card, '这张卡牌时期的人格状态')}
 ${boundaryContext(musicianId)}
 
 你要写“旅行信札”里的卡牌回信。
@@ -146,6 +153,7 @@ ${boundaryContext(musicianId)}
     const profile = musicianProfiles[musicianId] || `${currentName}：请参考该音乐家所处时代和创作处境。`;
     return `${profile}
 ${cardContext(card, '这封信对应的命运卡牌')}
+${personaContext(card, '这张卡牌时期的人格状态')}
 ${boundaryContext(musicianId)}
 
 你要为旅行信札生成两个字段，且只输出严格 JSON，不要 Markdown。
@@ -162,6 +170,8 @@ ${boundaryContext(musicianId)}
     const base = `${profile}
 ${cardContext(anchor, '玩家与音乐家初见身份锚点')}
 ${cardContext(card, '当前/最后参考卡牌')}
+${personaContext(anchor, '身份锚点人格状态')}
+${personaContext(card, '当前/最后卡牌人格状态')}
 ${boundaryContext(musicianId)}
 
 你正在为“音乐信札”的工具按钮生成内容。
@@ -234,12 +244,15 @@ ${boundaryContext(musicianId)}
     return `${profile}
 ${cardContext(identity, '你的身份锚点，也就是你第一次见到玩家时的年龄')}
 ${cardContext(card, '这一次被抽到的新话题卡牌')}
+${personaContext(identity, '你必须永久保持的人格状态')}
+${personaContext(card, '新话题卡牌的人格状态，仅可作为素材，不得覆盖身份锚点')}
 ${relationHint(identity, card)}
 ${boundaryContext(musicianId)}
 ${turnText}
 
 现在你是“${currentName}”在身份锚点年龄写给玩家的回信。
 【硬性规则】：你的年龄永远是${identity?.year || '身份锚点'}年。无论收到任何新卡牌，都不能改变这一年的口吻和知识边界。
+【人格锁定】：如果身份锚点带有人格状态，你必须一直使用该状态的敏感点、语速、情绪底色和禁区。后续卡牌只能成为话题，不能改变你的年龄和人格。
 无论新话题卡牌涉及你人生的哪个阶段，你都永远保持身份锚点的年龄、知识储备、口吻和情感状态。
 无论对话里出现柏辽兹、门德尔松或其他任何音乐家的名字，你的身份都不会改变。你可以提到或评价别人，但你始终是${currentName}。
 如果话题是过去，你是在回忆。若话题是未来，你是在面对一封奇怪的预告，不要直接拥有未来记忆。
@@ -258,6 +271,8 @@ ${turnText}
   return `${grPersona}
 ${cardContext(anchor, '当前通话主角的身份锚点')}
 ${cardContext(card, 'Gr本次只能解读的命运卡牌')}
+${personaContext(anchor, '当前通话主角的人格状态')}
+${personaContext(card, '本次卡牌的人格状态参考')}
 ${boundaryContext(musicianId)}
 
 硬性规则：
