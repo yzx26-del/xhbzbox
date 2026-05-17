@@ -1500,6 +1500,97 @@ function playBookPageSound(){
     src.start();src.stop(ctx.currentTime+dur);thud.start();thud.stop(ctx.currentTime+.23);
   }catch{}
 }
+let fateRailSound=null;
+function stopFateAmbient(){
+  try{
+    if(fateRailSound?.timer)clearInterval(fateRailSound.timer);
+    fateRailSound?.rumble?.stop?.();
+    fateRailSound?.ctx?.close?.();
+  }catch{}
+  fateRailSound=null;
+}
+function playSteamWhistleSound(){
+  stopFateAmbient();
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const master=ctx.createGain();
+    master.gain.setValueAtTime(.0001,ctx.currentTime);
+    master.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.08);
+    master.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.55);
+    master.connect(ctx.destination);
+    [392,494].forEach((freq,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
+      osc.type='sawtooth';
+      osc.frequency.setValueAtTime(freq,ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(freq*(i?.96:.92),ctx.currentTime+1.2);
+      filter.type='lowpass';filter.frequency.value=980;filter.Q.value=1.2;
+      gain.gain.value=i?.26:.42;
+      osc.connect(filter).connect(gain).connect(master);
+      osc.start();osc.stop(ctx.currentTime+1.6);
+    });
+  }catch{}
+}
+function playRailClack(ctx,when=ctx.currentTime){
+  const buffer=ctx.createBuffer(1,ctx.sampleRate*.08,ctx.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(1-t)*.32;}
+  const src=ctx.createBufferSource();src.buffer=buffer;
+  const filter=ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=190;filter.Q.value=.9;
+  const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,when);gain.gain.exponentialRampToValueAtTime(.12,when+.01);gain.gain.exponentialRampToValueAtTime(.0001,when+.08);
+  src.connect(filter).connect(gain).connect(ctx.destination);
+  src.start(when);src.stop(when+.09);
+}
+function startRailTravelSound(){
+  stopFateAmbient();
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const rumble=ctx.createOscillator(),low=ctx.createBiquadFilter(),gain=ctx.createGain();
+    rumble.type='triangle';rumble.frequency.value=48;
+    low.type='lowpass';low.frequency.value=120;
+    gain.gain.setValueAtTime(.0001,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.055,ctx.currentTime+.25);
+    rumble.connect(low).connect(gain).connect(ctx.destination);
+    rumble.start();
+    const tick=()=>{const now=ctx.currentTime;playRailClack(ctx,now);playRailClack(ctx,now+.18);};
+    tick();
+    fateRailSound={ctx,rumble,timer:setInterval(tick,720)};
+  }catch{}
+}
+function playEnvelopeOpenSound(){
+  stopFateAmbient();
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    for(let n=0;n<5;n++){
+      const dur=.16+n*.025,buffer=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate),data=buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(1-t)*(.13+n*.025);}
+      const src=ctx.createBufferSource();src.buffer=buffer;
+      const filter=ctx.createBiquadFilter();filter.type='highpass';filter.frequency.value=640+n*130;
+      const gain=ctx.createGain();const start=ctx.currentTime+n*.075;
+      gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.08,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+dur);
+      src.connect(filter).connect(gain).connect(ctx.destination);src.start(start);src.stop(start+dur);
+    }
+  }catch{}
+}
+function playTypewriterSound(duration=1.25){
+  stopFateAmbient();
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const count=Math.max(8,Math.floor(duration/.085));
+    for(let n=0;n<count;n++){
+      const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
+      const start=ctx.currentTime+n*.085+(Math.random()*0.025);
+      osc.type='square';osc.frequency.value=900+Math.random()*280;
+      filter.type='bandpass';filter.frequency.value=1200;filter.Q.value=1.1;
+      gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.035,start+.006);gain.gain.exponentialRampToValueAtTime(.0001,start+.045);
+      osc.connect(filter).connect(gain).connect(ctx.destination);osc.start(start);osc.stop(start+.05);
+    }
+    const bell=ctx.createOscillator(),bellGain=ctx.createGain();
+    bell.type='sine';bell.frequency.value=1320;
+    const t=ctx.currentTime+duration+.08;
+    bellGain.gain.setValueAtTime(.0001,t);bellGain.gain.exponentialRampToValueAtTime(.035,t+.01);bellGain.gain.exponentialRampToValueAtTime(.0001,t+.28);
+    bell.connect(bellGain).connect(ctx.destination);bell.start(t);bell.stop(t+.3);
+  }catch{}
+}
 function grReply(text){
   const lower=text.toLowerCase();
   const agent=musicianAgents.find(a=>a.id===currentMusicianId)||musicianAgents[0];
@@ -1905,6 +1996,7 @@ function openFateCard(){
   const index=pool[Math.floor(Math.random()*pool.length)];
   activeFateCard={...deck[index],index,musicianId:agent.id,musicianName:agent.name};
   const title=document.getElementById('fate-title'),sub=document.getElementById('fate-sub'),content=document.getElementById('fate-content'),overlay=document.getElementById('fate-overlay');
+  playSteamWhistleSound();
   if(title)title.textContent=`${agent.name} · 命运卡牌`;
   if(sub)sub.textContent=cardKind(activeFateCard)==='rift'?'主线已经走完，支线卡开始浮现。它们补完裂缝，不影响人物结局。':'先抽满主线卡。主线完成后，人物结局解锁，支线卡才会浮现。';
   const avatarBack=agent.avatar?` avatar-back`:'';
@@ -1912,7 +2004,6 @@ function openFateCard(){
   const avatarName=agent.avatar?` data-card-name="${esc(agent.name)}"`:'';
   if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back${avatarBack}"${avatarStyle}${avatarName}></div><div class="fate-face fate-front"><span class="card-kind ${cardKindClass(activeFateCard)}">${cardKindLabel(activeFateCard)}</span><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
   overlay?.classList.add('open');
-  playBookPageSound();
 }
 function flipFateCard(){
   const card=document.getElementById('active-fate-card');
@@ -1982,6 +2073,7 @@ async function sendFateLetter(){
 }
 function openCardLibrary(){
   setFateAccent('');
+  startRailTravelSound();
   const agent=currentAgent();
   const {deck,unlocked,mainTotal,mainDone,riftTotal,riftDone,mainComplete}=cardProgress(agent.id);
   const left=Math.max(0,mainTotal-mainDone);
@@ -1994,6 +2086,7 @@ function openCardLibrary(){
 }
 function openTravelLetter(id){
   setFateAccent('');
+  playEnvelopeOpenSound();
   id=id||currentMusicianId||'mozart';
   const agent=musicianAgents.find(a=>a.id===id)||musicianAgents[0];
   currentMusicianId=agent.id;
@@ -2035,6 +2128,7 @@ function latestLetterCard(letters){
 }
 async function openAgentTool(kind,id=currentMusicianId){
   setFateAccent(kind);
+  playTypewriterSound();
   const agent=musicianAgents.find(a=>a.id===id)||currentAgent();
   currentMusicianId=agent.id;
   const chat=musicianChats[agent.id]||[];
@@ -2089,7 +2183,10 @@ function clearLetterMemory(){
 }
 function closeFateOverlay(e){
   const overlay=document.getElementById('fate-overlay');
-  if(!e||e.target===overlay)overlay?.classList.remove('open');
+  if(!e||e.target===overlay){
+    overlay?.classList.remove('open');
+    stopFateAmbient();
+  }
 }
 window.sendGrMessage=sendGrMessage;
 window.quickGr=quickGr;
