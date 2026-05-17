@@ -137,6 +137,10 @@ tbody tr:hover{background:var(--bg2)}
 .musician-card.open .musician-body{display:block}
 .musician-card.open .musician-toggle{color:var(--t1)}
 .musician-tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tool-primary{border-color:#2f6df6!important;color:#174fc7!important;background:#eef4ff!important}
+.tool-yellow{border-color:#e2b100!important;color:#7a5a00!important;background:#fff6cc!important}
+.tool-red{border-color:#e23b3b!important;color:#b01212!important;background:#fff0f0!important}
+.tool-primary:hover,.tool-yellow:hover,.tool-red:hover{filter:saturate(1.08);box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .mini-chat{border:1px solid var(--line);border-radius:4px;background:var(--bg)}
 .mini-feed{padding:10px;display:flex;flex-direction:column;gap:8px;max-height:210px;overflow:auto}
 .mini-feed .msg.gr,.mini-feed .msg.musician{align-self:stretch;margin-left:0;max-width:100%}
@@ -1346,9 +1350,9 @@ function renderMusicianAgents(openId='mozart'){
       </div>
       <div class="musician-body">
         <div class="musician-tags">
-          <button class="ib" onclick="openAgentTool('transcript','${a.id}')">滴答回溯</button>
-          <button class="ib" onclick="openAgentTool('life','${a.id}')">人生大事</button>
-          <button class="ib" onclick="openAgentTool('final','${a.id}')">最后的来信</button>
+          <button class="ib tool-primary" onclick="openAgentTool('transcript','${a.id}')">滴答回溯</button>
+          <button class="ib tool-yellow" onclick="openAgentTool('life','${a.id}')">人生大事</button>
+          <button class="ib tool-red" onclick="openAgentTool('final','${a.id}')">最后的来信</button>
         </div>
         <div class="mini-chat">
           <div class="mini-feed" id="mini-feed-${a.id}">${msgs}</div>
