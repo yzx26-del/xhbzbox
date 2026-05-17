@@ -1112,6 +1112,42 @@ const musicianAgents=[
   {id:'zimmer',name:'汉斯·季默',mark:'Z',era:'电影音乐 · 好莱坞',state:'待接入',intro:'科幻史诗、合成器音色、低频推进和大片叙事。',tags:['电影配乐','合成器','史诗']},
   {id:'kajiura',name:'梶浦由记',mark:'K',era:'动画/游戏音乐 · 日本',state:'待接入',intro:'虚构语言、人声织体、战斗音乐和角色命运线。',tags:['人声织体','战斗音乐','角色命运']}
 ];
+const musicianBoundaries={
+  mozart:{
+    immutable:[
+      '1756年生于萨尔茨堡，1791年卒于维也纳，寿命不可改。',
+      '巴黎之行中母亲去世，K.310与这一时期的阴影不可抹除。',
+      '离开萨尔茨堡宫廷后成为维也纳自由职业音乐家，这条人生转向不可改。',
+      '《费加罗的婚礼》《唐璜》《魔笛》《安魂曲》等重要作品必须存在，创作事实不可改。'
+    ],
+    mutable:[
+      '可以改变某封信的措辞、某次争吵的停顿、某个账单或旁人的误会。',
+      '可以让某位听众、抄谱员、剧院旁人因玩家来信产生一件小变化。',
+      '不能让他避开死亡、取消重要作品，或彻底摆脱债务和时代处境。'
+    ]
+  },
+  beethoven:{
+    immutable:[
+      '1770年生于波恩，1827年卒于维也纳，寿命不可改。',
+      '进行性耳聋从1798年前后开始，1818年完全失聪，生理命运不可改。',
+      '《第九交响曲》必须存在且必须加入合唱，艺术史里程碑不可改。',
+      '拿破仑称帝导致《英雄交响曲》献词被撕毁，历史事件不可改。',
+      '一生只完成一部歌剧《费德里奥》，创作事实不可改。',
+      '葬礼有上万人出席，历史评价不可改。'
+    ],
+    mutable:[
+      '可以改变某封信是否更温和、某次争吵是否少一句伤人的话。',
+      '可以影响卡尔、朋友、出版商、学生、贵族赞助人等身边人的边缘选择。',
+      '可以改变某个草稿边角、一次演出现场的小误会、旁人对他的短暂评价。',
+      '不能让他恢复听力、延长寿命、取消第九、保留英雄献词，或多写一部歌剧。'
+    ]
+  }
+};
+function boundaryText(id){
+  const b=musicianBoundaries[id];
+  if(!b)return '历史不会被改写，但人的心可以被轻轻推偏。';
+  return `不可改事实：${b.immutable.join(' ')}\n20%可变范围：${b.mutable.join(' ')}`;
+}
 const grChatHistory=[];
 const musicianChats={};
 let currentMusicianId='mozart';
@@ -1717,7 +1753,7 @@ async function generateLetterMeta(agent,card,letter,reply){
       musicianId:agent.id,
       musicianName:agent.name,
       card,
-      message:`玩家来信：${letter}\n音乐家回信：${reply}`,
+      message:`历史边界：${boundaryText(agent.id)}\n玩家来信：${letter}\n音乐家回信：${reply}`,
       history:[],
       max_tokens:220,
       temperature:.68
@@ -1823,7 +1859,7 @@ async function sendFateLetter(){
       musicianName:agent.name,
       card:activeFateCard,
       anchor:chapter?.anchor||getPersonaAnchor(agent.id),
-      message:`玩家写给${activeFateCard.year} · ${activeFateCard.period}时期${agent.name}的一封信：${text}`,
+      message:`历史边界：${boundaryText(agent.id)}\n玩家写给${activeFateCard.year} · ${activeFateCard.period}时期${agent.name}的一封信：${text}`,
       history:[],
       max_tokens:420,
       temperature:.72
@@ -1837,7 +1873,7 @@ async function sendFateLetter(){
       card:activeFateCard,
       anchor:chapter?.anchor||getPersonaAnchor(agent.id),
       turn:0,
-      message:`玩家刚给命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”时期的你寄出一封信。卡牌时期的回信已写入旅行信札，不要复述那封回信。请以身份锚点年龄的你，回应玩家这次寄信后的余波。玩家信件：${text}`,
+      message:`历史边界：${boundaryText(agent.id)}\n玩家刚给命运卡牌“${activeFateCard.year} · ${activeFateCard.period}”时期的你寄出一封信。卡牌时期的回信已写入旅行信札，不要复述那封回信。请以身份锚点年龄的你，回应玩家这次寄信后的余波。玩家信件：${text}`,
       history:musicianChats[agent.id].slice(-6),
       max_tokens:480,
       temperature:.76
@@ -1897,7 +1933,8 @@ function localCharacterEnding(agent,letters,firstCard,lastCard){
   const impacts=letters.map(x=>x.impact).filter(Boolean).slice(0,4);
   const first=firstCard||letters[letters.length-1]?.card||{};
   const last=lastCard||letters[0]?.card||{};
-  return `玩家第一次遇到${agent.name}，记录在${first.year||'某一年'}的${first.period||'一张未命名卡牌'}。那不是历史的起点，只是这条时间线第一次被看见的地方。\n\n已确认的变数没有改写作品和结局，只扩大到边缘：${impacts.length?impacts.join('；'):'一封信被多读了一遍，一个旁人少说了一句闲话，一张草稿没有被揉掉。'}\n\n你究竟是在安慰他，还是在借他安慰自己？\n\n本轮档案到此封存。下一次相遇，将发生在另一个时空。`;
+  const immutable=(musicianBoundaries[agent.id]?.immutable||[]).slice(0,2).join(' ');
+  return `玩家第一次遇到${agent.name}，记录在${first.year||'某一年'}的${first.period||'一张未命名卡牌'}。${immutable||'那不是历史的起点，只是这条时间线第一次被看见的地方。'}\n\n已确认的变数没有改写作品和结局，只扩大到边缘：${impacts.length?impacts.join('；'):'一封信被多读了一遍，一个旁人少说了一句闲话，一张草稿没有被揉掉。'}\n\n你究竟是在安慰他，还是在借他安慰自己？\n\n本轮档案到此封存。下一次相遇，将发生在另一个时空。`;
 }
 function latestLetterCard(letters){
   const cards=letters.map(x=>x.card).filter(Boolean);
@@ -1930,6 +1967,7 @@ async function openAgentTool(kind,id=currentMusicianId){
 初见卡牌：${firstCard?`${firstCard.year} · ${firstCard.period} · ${firstCard.event}`:'暂无'}
 当前卡牌：${chapter?.card?`${chapter.card.year} · ${chapter.card.period} · ${chapter.card.event}`:'暂无'}
 最后参考卡牌：${lastCard?`${lastCard.year} · ${lastCard.period} · ${lastCard.event}`:'暂无'}
+历史边界：${boundaryText(agent.id)}
 正式信札材料：${formalMaterial}
 已解锁卡牌：${getUnlockedFateCards(agent.id).map(x=>`${x.year} · ${x.period} · ${x.event}`).join('\n')}
 注意：不要引用普通聊天框里的旧回复。只根据上面的正式信札材料重新生成全新内容。`,
