@@ -1613,6 +1613,18 @@ function musicianReply(agent,text){
   if(text.includes('故事')||text.includes('人生'))return `我的故事最好不要写成年表。请把它写成选择：离开、留下、写信、演奏。这样更像游戏。`;
   return `我听见了。这个问题可以转成三个字段：背景、音乐线索、可交互动作。以后接入 API 时，我会按这个结构回答。`;
 }
+function finishChapterWithNote(id,chapter){
+  chapter.stage='interrupted';
+  setActiveChapter(id,chapter);
+  refreshChapterLine(id);
+  const lines=[
+    '因为时光裂缝发生变化，信纸上的墨迹忽然断开了。',
+    '火车行驶到了另一个方向，这一页暂时收不回回信。',
+    '窗外的雪倒着落下。那位音乐家的声音被隧道吞没了。'
+  ];
+  const hint=lines[Math.floor(Math.random()*lines.length)]+' 这条注释已经夹进本章页边。你可以去问 Gr 小姐，也可以直接抽下一张牌。';
+  addMsg('mini-feed-'+id,'note',hint,'系统注释');
+}
 async function sendMusicianMessage(id,forcedText=''){
   ensureMusicianChats();
   const agent=musicianAgents.find(a=>a.id===id);
@@ -1640,19 +1652,7 @@ async function sendMusicianMessage(id,forcedText=''){
     return;
   }
   chapter.turns=(chapter.turns||0)+1;
-  if(chapter.turns>=chapter.interruptAt){
-    chapter.stage='interrupted';
-    setActiveChapter(id,chapter);
-    renderMusicianAgents(id);
-    const lines=[
-      '因为时光裂缝发生变化，信纸上的墨迹忽然断开了。',
-      '火车行驶到了另一个方向，这一页暂时收不回回信。',
-      '窗外的雪倒着落下。那位音乐家的声音被隧道吞没了。'
-    ];
-    const hint=lines[Math.floor(Math.random()*lines.length)]+' 这条注释已经夹进本章页边。你可以去问 Gr 小姐，也可以直接抽下一张牌。';
-    addMsg('mini-feed-'+id,'note',hint,'系统注释');
-    return;
-  }
+  const shouldInterrupt=chapter.turns>=chapter.interruptAt;
   chapter.stage='chatting';
   setActiveChapter(id,chapter);
   refreshChapterLine(id);
@@ -1674,11 +1674,13 @@ async function sendMusicianMessage(id,forcedText=''){
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)}</span><span class="msg-text">${escHtml(reply)}</span>`;
+    if(shouldInterrupt)finishChapterWithNote(id,chapter);
   }catch(e){
     const reply=musicianReply(agent,text);
     musicianChats[id].push({role:'musician',text:reply});
     persistMusicianChat(id);
     if(pending)pending.innerHTML=`<span class="msg-meta">${escHtml(agent.name)} · 本地兜底</span><span class="msg-text">${escHtml(reply)}</span>`;
+    if(shouldInterrupt)finishChapterWithNote(id,chapter);
     toast('DeepSeek 暂时不可用，已用本地回复');
   }
 }
