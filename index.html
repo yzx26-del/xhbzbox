@@ -424,13 +424,11 @@ select.fi{cursor:pointer}
     <div class="nl">知识网络</div>
     <div class="ni" onclick="go('knowledge',this)"><i class="ti ti-brain"></i>知识实体<span class="nb" id="nb-entities">—</span></div>
     <div class="ni" onclick="go('notes',this)"><i class="ti ti-cards"></i>笔记卡片<span class="nb" id="nb-notes">—</span></div>
-    <div class="ni" onclick="go('motif',this)"><i class="ti ti-music"></i>母题对比</div>
     <div class="ni" onclick="go('graph',this)"><i class="ti ti-topology-star"></i>血缘图谱</div>
   </div>
   <div class="ns">
     <div class="nl">音乐信札</div>
     <div class="ni" onclick="go('letteragent',this)"><i class="ti ti-robot"></i>智能体</div>
-    <div class="ni" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>音乐旅行</div>
   </div>
   <div class="ns">
     <div class="nl">内容创作</div>
@@ -579,8 +577,8 @@ select.fi{cursor:pointer}
 <!-- 音乐信札 · 智能体 -->
 <div class="page" id="pg-letteragent">
   <div class="ph">
-    <div><div class="ptitle">音乐信札</div><div class="psub">智能体工作台 · 音乐旅行游戏入口 · 未来接入音频与 DeepSeek</div></div>
-    <div class="ph-r"><button class="ib" onclick="openClassicGame()"><i class="ti ti-device-gamepad-2"></i>经典小游戏</button><button class="ib solid" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>打开音乐旅行</button></div>
+    <div><div class="ptitle">音乐信札</div><div class="psub">智能体工作台 · 未来接入音频与 DeepSeek</div></div>
+    <div class="ph-r"><button class="ib" onclick="openClassicGame()"><i class="ti ti-device-gamepad-2"></i>经典小游戏</button></div>
   </div>
   <div class="letter-workbench">
     <section class="agent-panel">
@@ -630,12 +628,6 @@ select.fi{cursor:pointer}
     </div>
     <div id="fate-content"></div>
   </div>
-</div>
-
-<!-- 母题对比 -->
-<div class="page" id="pg-motif">
-  <div class="ph"><div><div class="ptitle">母题对比</div><div class="psub">同一主题在不同版本/项目中的并列分析</div></div></div>
-  <div style="padding:48px;text-align:center;color:var(--t4);font-family:var(--mono);font-size:12px;border:1px dashed var(--line);border-radius:4px">母题对比播放器·即将上线<br><span style="font-size:10px;margin-top:8px;display:block">已在数据库建立 motifs / motif_clips 表，等待前端音频播放器接入</span></div>
 </div>
 
 <!-- 血缘图谱 -->
