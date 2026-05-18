@@ -580,7 +580,7 @@ select.fi{cursor:pointer}
 <div class="page" id="pg-letteragent">
   <div class="ph">
     <div><div class="ptitle">音乐信札</div><div class="psub">智能体工作台 · 音乐旅行游戏入口 · 未来接入音频与 DeepSeek</div></div>
-    <div class="ph-r"><button class="ib solid" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>打开音乐旅行</button></div>
+    <div class="ph-r"><button class="ib" onclick="openClassicGame()"><i class="ti ti-device-gamepad-2"></i>经典小游戏</button><button class="ib solid" onclick="openMusicTravel()"><i class="ti ti-map-pin"></i>打开音乐旅行</button></div>
   </div>
   <div class="letter-workbench">
     <section class="agent-panel">
@@ -1126,6 +1126,8 @@ function go(id, el) {
   if(loaders[id]) later(()=>Promise.resolve(loaders[id]()).catch(e=>toast('加载慢或失败：'+e.message)),20);
 }
 window.go=go;
+function openClassicGame(){window.location.href='classic-game.html';}
+window.openClassicGame=openClassicGame;
 function openMusicTravel(){window.location.href='music-travel.html';}
 window.openMusicTravel=openMusicTravel;
 
@@ -1509,86 +1511,57 @@ function stopFateAmbient(){
   }catch{}
   fateRailSound=null;
 }
-function playSteamWhistleSound(){
+function playClockTick(ctx,when=ctx.currentTime,heavy=false){
+  const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
+  osc.type='square';
+  osc.frequency.setValueAtTime(heavy?780:1180,when);
+  filter.type='bandpass';filter.frequency.value=heavy?900:1450;filter.Q.value=8;
+  gain.gain.setValueAtTime(.0001,when);
+  gain.gain.exponentialRampToValueAtTime(heavy?.09:.055,when+.006);
+  gain.gain.exponentialRampToValueAtTime(.0001,when+(heavy?.075:.045));
+  osc.connect(filter).connect(gain).connect(ctx.destination);
+  osc.start(when);osc.stop(when+.08);
+}
+function startClockTickSound(){
   stopFateAmbient();
   try{
     const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    const master=ctx.createGain();
-    master.gain.setValueAtTime(.0001,ctx.currentTime);
-    master.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.08);
-    master.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.55);
-    master.connect(ctx.destination);
-    [392,494].forEach((freq,i)=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
-      osc.type='sawtooth';
-      osc.frequency.setValueAtTime(freq,ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(freq*(i?.96:.92),ctx.currentTime+1.2);
-      filter.type='lowpass';filter.frequency.value=980;filter.Q.value=1.2;
-      gain.gain.value=i?.26:.42;
-      osc.connect(filter).connect(gain).connect(master);
-      osc.start();osc.stop(ctx.currentTime+1.6);
-    });
-  }catch{}
-}
-function playRailClack(ctx,when=ctx.currentTime){
-  const buffer=ctx.createBuffer(1,ctx.sampleRate*.08,ctx.sampleRate);
-  const data=buffer.getChannelData(0);
-  for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(1-t)*.32;}
-  const src=ctx.createBufferSource();src.buffer=buffer;
-  const filter=ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=190;filter.Q.value=.9;
-  const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,when);gain.gain.exponentialRampToValueAtTime(.12,when+.01);gain.gain.exponentialRampToValueAtTime(.0001,when+.08);
-  src.connect(filter).connect(gain).connect(ctx.destination);
-  src.start(when);src.stop(when+.09);
-}
-function startRailTravelSound(){
-  stopFateAmbient();
-  try{
-    const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    const rumble=ctx.createOscillator(),low=ctx.createBiquadFilter(),gain=ctx.createGain();
-    rumble.type='triangle';rumble.frequency.value=48;
-    low.type='lowpass';low.frequency.value=120;
-    gain.gain.setValueAtTime(.0001,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(.055,ctx.currentTime+.25);
-    rumble.connect(low).connect(gain).connect(ctx.destination);
-    rumble.start();
-    const tick=()=>{const now=ctx.currentTime;playRailClack(ctx,now);playRailClack(ctx,now+.18);};
+    const tick=()=>{const now=ctx.currentTime;playClockTick(ctx,now,true);playClockTick(ctx,now+.5,false);};
     tick();
-    fateRailSound={ctx,rumble,timer:setInterval(tick,720)};
+    fateRailSound={ctx,timer:setInterval(tick,1000)};
   }catch{}
 }
-function playEnvelopeOpenSound(){
+function playHeavyWoodDoorSound(){
   stopFateAmbient();
   try{
     const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    for(let n=0;n<5;n++){
-      const dur=.16+n*.025,buffer=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate),data=buffer.getChannelData(0);
-      for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(1-t)*(.13+n*.025);}
-      const src=ctx.createBufferSource();src.buffer=buffer;
-      const filter=ctx.createBiquadFilter();filter.type='highpass';filter.frequency.value=640+n*130;
-      const gain=ctx.createGain();const start=ctx.currentTime+n*.075;
-      gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.08,start+.015);gain.gain.exponentialRampToValueAtTime(.0001,start+dur);
-      src.connect(filter).connect(gain).connect(ctx.destination);src.start(start);src.stop(start+dur);
-    }
+    const dur=1.65,buffer=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate),data=buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){const t=i/data.length;data[i]=(Math.random()*2-1)*(.18*(1-t)+.025)*Math.sin(t*Math.PI);}
+    const src=ctx.createBufferSource();src.buffer=buffer;
+    const low=ctx.createBiquadFilter();low.type='lowpass';low.frequency.setValueAtTime(210,ctx.currentTime);low.frequency.linearRampToValueAtTime(360,ctx.currentTime+dur);
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.18);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+    src.connect(low).connect(gain).connect(ctx.destination);
+    src.start();src.stop(ctx.currentTime+dur);
+    const groan=ctx.createOscillator(),groanGain=ctx.createGain();
+    groan.type='sawtooth';groan.frequency.setValueAtTime(58,ctx.currentTime);groan.frequency.linearRampToValueAtTime(42,ctx.currentTime+dur);
+    groanGain.gain.setValueAtTime(.0001,ctx.currentTime);groanGain.gain.exponentialRampToValueAtTime(.055,ctx.currentTime+.22);groanGain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+    groan.connect(groanGain).connect(ctx.destination);groan.start();groan.stop(ctx.currentTime+dur);
   }catch{}
 }
-function playTypewriterSound(duration=1.25){
+function playNewspaperTearSound(duration=1.6){
   stopFateAmbient();
   try{
     const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    const count=Math.max(8,Math.floor(duration/.085));
-    for(let n=0;n<count;n++){
-      const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
-      const start=ctx.currentTime+n*.085+(Math.random()*0.025);
-      osc.type='square';osc.frequency.value=900+Math.random()*280;
-      filter.type='bandpass';filter.frequency.value=1200;filter.Q.value=1.1;
-      gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.035,start+.006);gain.gain.exponentialRampToValueAtTime(.0001,start+.045);
-      osc.connect(filter).connect(gain).connect(ctx.destination);osc.start(start);osc.stop(start+.05);
+    const buffer=ctx.createBuffer(1,ctx.sampleRate*duration,ctx.sampleRate),data=buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      const t=i/data.length;
+      const grain=.35+.45*Math.sin(t*Math.PI);
+      data[i]=(Math.random()*2-1)*grain*(.45-.18*t);
     }
-    const bell=ctx.createOscillator(),bellGain=ctx.createGain();
-    bell.type='sine';bell.frequency.value=1320;
-    const t=ctx.currentTime+duration+.08;
-    bellGain.gain.setValueAtTime(.0001,t);bellGain.gain.exponentialRampToValueAtTime(.035,t+.01);bellGain.gain.exponentialRampToValueAtTime(.0001,t+.28);
-    bell.connect(bellGain).connect(ctx.destination);bell.start(t);bell.stop(t+.3);
+    const src=ctx.createBufferSource();src.buffer=buffer;
+    const filter=ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.setValueAtTime(1650,ctx.currentTime);filter.frequency.linearRampToValueAtTime(920,ctx.currentTime+duration);filter.Q.value=.55;
+    const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.13,ctx.currentTime+.08);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);
+    src.connect(filter).connect(gain).connect(ctx.destination);src.start();src.stop(ctx.currentTime+duration);
   }catch{}
 }
 function grReply(text){
@@ -1996,7 +1969,6 @@ function openFateCard(){
   const index=pool[Math.floor(Math.random()*pool.length)];
   activeFateCard={...deck[index],index,musicianId:agent.id,musicianName:agent.name};
   const title=document.getElementById('fate-title'),sub=document.getElementById('fate-sub'),content=document.getElementById('fate-content'),overlay=document.getElementById('fate-overlay');
-  playSteamWhistleSound();
   if(title)title.textContent=`${agent.name} · 命运卡牌`;
   if(sub)sub.textContent=cardKind(activeFateCard)==='rift'?'主线已经走完，支线卡开始浮现。它们补完裂缝，不影响人物结局。':'先抽满主线卡。主线完成后，人物结局解锁，支线卡才会浮现。';
   const avatarBack=agent.avatar?` avatar-back`:'';
@@ -2073,7 +2045,7 @@ async function sendFateLetter(){
 }
 function openCardLibrary(){
   setFateAccent('');
-  startRailTravelSound();
+  startClockTickSound();
   const agent=currentAgent();
   const {deck,unlocked,mainTotal,mainDone,riftTotal,riftDone,mainComplete}=cardProgress(agent.id);
   const left=Math.max(0,mainTotal-mainDone);
@@ -2086,7 +2058,7 @@ function openCardLibrary(){
 }
 function openTravelLetter(id){
   setFateAccent('');
-  playEnvelopeOpenSound();
+  playHeavyWoodDoorSound();
   id=id||currentMusicianId||'mozart';
   const agent=musicianAgents.find(a=>a.id===id)||musicianAgents[0];
   currentMusicianId=agent.id;
@@ -2128,7 +2100,7 @@ function latestLetterCard(letters){
 }
 async function openAgentTool(kind,id=currentMusicianId){
   setFateAccent(kind);
-  playTypewriterSound();
+  playNewspaperTearSound();
   const agent=musicianAgents.find(a=>a.id===id)||currentAgent();
   currentMusicianId=agent.id;
   const chat=musicianChats[agent.id]||[];
