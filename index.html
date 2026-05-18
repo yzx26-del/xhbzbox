@@ -188,6 +188,10 @@ tbody tr:hover{background:var(--bg2)}
 .fate-work{margin-top:auto;font-size:12px;line-height:1.7;color:var(--t2);border-top:1px solid var(--line);padding-top:10px}
 .letter-compose{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
 .letter-compose.open{display:block}
+.gr-card-note{margin-bottom:12px;border:1px solid var(--line);border-left:3px solid #12a052;background:#fbfbfb;padding:12px 14px 12px 16px;border-radius:4px;color:var(--t2)}
+.gr-card-note-title{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--t3);margin-bottom:8px}
+.gr-card-note p{margin:0 0 7px;font-size:13px;line-height:1.85}
+.gr-card-note p:last-child{margin-bottom:0}
 .letter-compose textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:4px;padding:10px;font-family:var(--serif);font-size:13px;line-height:1.8;outline:none;resize:vertical}
 .letter-compose textarea:focus{border-color:var(--t1)}
 .card-library-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -1934,6 +1938,84 @@ function resetMusicianTimeline(id=currentMusicianId){
   renderMusicianAgents(id);
   toast('已开启新的时间轴');
 }
+function musicianAge(agent,card){
+  const born={mozart:1756,beethoven:1770,chopin:1810,debussy:1862,hisaishi:1950,zimmer:1957,kajiura:1965}[agent?.id];
+  const year=parseInt(card?.year,10);
+  return Number.isFinite(born)&&Number.isFinite(year)?Math.max(0,year-born):null;
+}
+function grCardNote(agent,card){
+  const age=musicianAge(agent,card);
+  const ageText=age!==null?`${age}岁`:'这一年';
+  const work=card?.work||'手边的作品';
+  const generic=[
+    `这一页里，${agent.name}${ageText}，正站在“${card?.period||'人生转角'}”这一段。`,
+    `发生的事是：${card?.event||'某个时刻把他推向下一段路'}。如果不懂音乐，也可以把它看作一个人被生活逼到门口，仍然要决定怎样开口。作品《${work}》只是这段处境留下的声音。`,
+    `我觉得，这张牌不急着要求你懂旋律。你只要先看见：一个人手里还握着什么，才会知道该怎样给他写信。`
+  ];
+  const notes={
+    mozart:{
+      '1763':[
+        `这一页里，莫扎特7岁，坐在父亲安排的马车上，欧洲像一张被摊开的地图。`,
+        `他还只是孩子，却已经被当作奇迹展示。掌声是真的，疲惫也是真的；每一次演出都像把童年换成路费和名声。`,
+        `我觉得，这张牌明亮得有些残忍。你可以写给那个被众人围观的孩子，也可以写给那个还不知道自己会被记住的人。`
+      ],
+      '1773':[
+        `这一页里，莫扎特17岁，仍被萨尔茨堡的宫廷和父亲牵住。`,
+        `他向大主教递交辞呈，却被拒绝。换成普通人的处境，就是一个年轻人第一次发现：才华不能自动换来自由。`,
+        `我觉得，这张牌的刺在于门明明就在眼前，钥匙却不在他手里。`
+      ],
+      '1778':[
+        `这一页里，莫扎特22岁，人在巴黎，离家很远。`,
+        `母亲在那里去世，他还要把噩耗写成一封给父亲看的信。那不是一段乐史知识，而是一个年轻人第一次学会把崩溃折进纸里。`,
+        `我觉得，最难的不是悲伤。最难的是你还得把悲伤写成别人能读懂的句子。`
+      ],
+      '1781':[
+        `这一页里，莫扎特25岁，终于离开萨尔茨堡宫廷。`,
+        `这听上去像自由，其实也是失去庇护。稳定的薪水、体面的身份、别人替他安排好的路，都在这一刻松手。`,
+        `我觉得，这张牌不是“自由”的开始，而是他第一次真正付账。`
+      ],
+      '1782':[
+        `这一页里，莫扎特26岁，结婚、写歌剧，也开始认真面对账单。`,
+        `他爱康斯坦采，也需要钱；他想过日子，却总被生活追问下一枚硬币在哪里。音乐在这里不是浪漫背景，而是他们维持生活的方式。`,
+        `我觉得，爱情不是把生活变轻，而是两个人一起看见生活有多重。`
+      ],
+      '1786':[
+        `这一页里，莫扎特30岁，把《费加罗的婚礼》推上舞台。`,
+        `他让仆人唱出贵族不愿听见的话。对不熟悉歌剧的人来说，这像是一个聪明人借喜剧说真话，笑声越轻，锋芒越深。`,
+        `我觉得，他把笑声写得太聪明，聪明到权力听了也不舒服。`
+      ],
+      '1787':[
+        `这一页里，莫扎特31岁，布拉格比维也纳更早听懂他。`,
+        `《唐璜》在那座城市响起，掌声像迟来的回信。一个人被某个地方理解，未必会更轻松，有时反而会更清楚自己在哪里不被理解。`,
+        `我觉得，被一座城市听懂，有时比被一个人爱更危险。`
+      ],
+      '1791':[
+        `这一页里，莫扎特35岁，站在最后的房间里。`,
+        `有人来订《安魂曲》，他没有问太多；身体已经不好，工作却还在继续。你不必先想到死亡，可以先想到一个人累到极处，仍然把纸铺开。`,
+        `我觉得，这张牌最重的地方，是他还在工作，而不是他快要死去。`
+      ]
+    },
+    beethoven:{
+      '1778':[
+        `这一页里，贝多芬8岁，还在波恩的琴凳前。`,
+        `父亲把他推向键盘，掌声尚远，训斥先到。若把它从音乐史里拿出来看，这是一种过早被要求证明自己的童年。`,
+        `我觉得，他后来的倔强不是凭空长出来的。那是一个孩子先学会了咬紧牙关。`
+      ],
+      '1802':[
+        `这一页里，贝多芬32岁，听觉正在把世界从他身边撤走。`,
+        `他写下《海利根施塔特遗书》，却没有真的离开。对旁人来说这是悲剧，对他来说更像一次站在悬崖边的自我审判。`,
+        `我觉得，这张牌不要急着安慰。你可以先承认：有些痛苦不会因为被理解就变小。`
+      ],
+      '1824':[
+        `这一页里，贝多芬54岁，站在《第九交响曲》的回声里。`,
+        `合唱已经响起，他却听不见掌声，只看见人们转身向他鼓掌。那一刻胜利和残酷并不矛盾，它们同时站在舞台上。`,
+        `我觉得，他不是战胜了命运。他只是让命运也不得不站起来听。`
+      ]
+    }
+  };
+  const picked=notes[agent?.id]?.[String(card?.year)];
+  return picked||generic;
+}
 function openFateCard(){
   setFateAccent('');
   const agent=currentAgent();
@@ -1964,7 +2046,8 @@ function openFateCard(){
   const avatarBack=agent.avatar?` avatar-back`:'';
   const avatarStyle=agent.avatar?` style="--fate-avatar:url('${esc(agent.avatar)}')"`:'';
   const avatarName=agent.avatar?` data-card-name="${esc(agent.name)}"`:'';
-  if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back${avatarBack}"${avatarStyle}${avatarName}></div><div class="fate-face fate-front"><span class="card-kind ${cardKindClass(activeFateCard)}">${cardKindLabel(activeFateCard)}</span><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
+  const grNote=grCardNote(agent,activeFateCard).map(line=>`<p>${esc(line)}</p>`).join('');
+  if(content)content.innerHTML=`<div class="floating-card-wrap"><div class="fate-card" id="active-fate-card" onclick="flipFateCard()"><div class="fate-card-inner"><div class="fate-face fate-back${avatarBack}"${avatarStyle}${avatarName}></div><div class="fate-face fate-front"><span class="card-kind ${cardKindClass(activeFateCard)}">${cardKindLabel(activeFateCard)}</span><div class="fate-period">${esc(activeFateCard.period)}</div><div class="fate-year">${esc(activeFateCard.year)}</div><div class="fate-event">${esc(activeFateCard.event)}</div><div class="fate-work">对应作品<br><strong>${esc(activeFateCard.work)}</strong></div></div></div></div></div><div class="letter-compose" id="letter-compose"><div class="gr-card-note"><div class="gr-card-note-title">Gr小姐的留言</div>${grNote}</div><textarea id="fate-letter-text" placeholder="给${esc(agent.name)}写一封信。不要试图改写历史，只写你看见了什么。"></textarea><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="ib" onclick="closeFateOverlay()">回到聊天</button><button class="ib solid" onclick="sendFateLetter()">寄出这封信</button></div></div>`;
   overlay?.classList.add('open');
 }
 function flipFateCard(){
